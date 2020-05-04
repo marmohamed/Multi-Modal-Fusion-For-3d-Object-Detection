@@ -1,0 +1,11 @@
+.vscode/*
+__pycache__/*
+*.pyc 
+models/*
+src/tmp/*
+src/__pycache__/*
+src/old_training_files/*
+src/.ipynb_checkpoints/*
+src/prediction_files/*
+src/training_files/*
+src/Notebooks/.ipynb_checkpoints/*
