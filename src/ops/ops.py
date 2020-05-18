@@ -75,6 +75,12 @@ def zeropad(x, padding, scope='zeropad_0'):
         x = tf.keras.layers.ZeroPadding2D(padding=padding)(x)
         return x
 
+def crop(x, cropping, scope='crop_0'):
+    with tf.variable_scope(scope):
+        x = tf.keras.layers.Cropping2D(cropping=cropping)(x)
+        return x
+        
+
 def fully_conneted(x, units, use_bias=True, scope='fully_0'):
     with tf.variable_scope(scope):
         x = flatten(x)

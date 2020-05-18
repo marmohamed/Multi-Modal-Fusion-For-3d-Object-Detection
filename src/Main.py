@@ -6,7 +6,7 @@ def main(args):
     print('Building the model')
 
     params = {
-        'fusion': False
+        'fusion': True
     }
     model = Model(graph=None, **params)
 
@@ -45,17 +45,21 @@ def main(args):
         'segmentation_kitti': args.segmentation_kitti,
         'segmentation_cityscapes': args.segmentation_cityscapes,
         'num_summary_images': int(args.num_summary_images),
-        'start_epoch': int(args.start_epoch)
+        'start_epoch': int(args.start_epoch),
     }
-    
+    if args.train_images_seg in ['True', 'true']:
+        print('Train Segmentation')
+        trainer.train_images_seg(**params)
+
     if args.train_bev in ['True', 'true']:
+        print('Train Detection')
         trainer.train_bev(**params)
 
-    elif args.train_fusion in ['True', 'true']:
+    if args.train_fusion in ['True', 'true']:
+        print('Train Fusion')
         trainer.train_fusion(**params)
 
-    elif args.train_images_seg in ['True', 'true']:
-        trainer.train_images_seg(**params)
+   
 
 
 if __name__ == '__main__':

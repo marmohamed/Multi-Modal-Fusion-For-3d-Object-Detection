@@ -155,7 +155,7 @@ class DetectionTrainer(Trainer):
 
                                 feed_dict[self.model.learning_rate_placeholder] = min_lr
                                 
-
+                                # print('here')
                                 loss, _, classification_loss, regression_loss, loc_loss, dim_loss, theta_loss, dir_loss, summary = sess.run([self.model.model_loss, 
                                                                                                     self.branch_params['opt'], 
                                                                                                     self.model.classification_loss, 
@@ -167,9 +167,9 @@ class DetectionTrainer(Trainer):
                                                                                                     self.model.merged], 
                                                                                                     feed_dict=feed_dict)
 
-
+                                # print('here1')
                                 self.model.train_writer.add_summary(summary, counter)
-
+                                # print('here2')
                                 epoch_loss.append(loss)
                                 epoch_cls_loss.append(classification_loss)
                                 epoch_reg_loss.append(regression_loss)
@@ -180,10 +180,10 @@ class DetectionTrainer(Trainer):
 
                                 counter += 1
                                 
-                                if counter % 100 == 0:
-                                    save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                                # if counter % 100 == 0:
+                                #     save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
                            
-                                    print("Model saved in path: %s" % save_path)
+                                #     print("Model saved in path: %s" % save_path)
                         except (tf.errors.OutOfRangeError, StopIteration):
                             pass
 

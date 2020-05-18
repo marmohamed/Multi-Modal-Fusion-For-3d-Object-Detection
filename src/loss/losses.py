@@ -37,37 +37,13 @@ class LossCalculator(object):
         precision = 0
         recall = 0
 
-        for i in range(2):
+        # for i in range(2):
 
-            # pred_sigmoid = tf.math.sigmoid(predictions[:, :, :, i, -1])
-            # pred_sigmoid_x_true = pred_sigmoid * truth[:, :, :, i, -1]
-            # pred_sigmoid_x_not_true = pred_sigmoid * (1-truth[:, :, :, i, -1])
-
-
-            # zeros = array_ops.zeros_like(pred_sigmoid, dtype=pred_sigmoid.dtype)
-            # ones = array_ops.ones_like(pred_sigmoid, dtype=pred_sigmoid.dtype)
-
-            # pred_sigmoid_x_true2 = pred_sigmoid_x_true - 0
-            # pred_sigmoid_x_true2_prob = array_ops.where(pred_sigmoid_x_true2 > zeros, pred_sigmoid, zeros) 
-            # pred_sigmoid_x_true2_prob2 = array_ops.where(pred_sigmoid_x_true2 > zeros, tf.sign(pred_sigmoid), zeros) 
-            # tp = tf.reduce_sum(pred_sigmoid_x_true2_prob2)
-            # tp2 = tf.reduce_sum(pred_sigmoid_x_true2_prob)
-
-
-            # pred_sigmoid_x_not_true2 = pred_sigmoid_x_not_true - 0.
-            # pred_sigmoid_x_not_true2_ = array_ops.where(pred_sigmoid_x_not_true2 > zeros, pred_sigmoid, zeros)
-            # fp = tf.reduce_sum(pred_sigmoid_x_not_true2_)
-            
-            # pred_sigmoid_x_true3 = pred_sigmoid_x_true * truth[:, :, :, i, -1]
-            # pred_sigmoid_x_true3_1 = 1. - pred_sigmoid_x_true3
-            # pred_sigmoid_x_true3_2 = array_ops.where(pred_sigmoid_x_true3_1 < ones, pred_sigmoid_x_true3_1, zeros)
-            # fn = tf.reduce_sum(pred_sigmoid_x_true3_2)
-
-            # precision += tp2 / (tp + fp + 1e-8)
-            # recall += tp2  / (tp + fn + 1e-8)
-            precision_, recall_ = self.get_precision_recall(truth, predictions, i)
-            precision += precision_
-            recall += recall_
+        #     precision_, recall_ = self.get_precision_recall(truth, predictions, i)
+        #     precision += precision_
+        #     recall += recall_
+        precision = 0
+        recall = 0
 
         # Classification
         c1 = cls_loss(truth[:, :, :, 0, 8], predictions[:, :, :, 0, 8], **params)

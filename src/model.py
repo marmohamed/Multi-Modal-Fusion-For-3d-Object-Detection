@@ -127,20 +127,18 @@ class Model(object):
                                 x_new = relu(x_new)
                                 self.debug_layers['attention_module_output'] = x_new
                         else:
+                            kernels_lidar = [9, 5, 5]
+                            strides_lidar = [5, 3, 3]
+                            kernels_rgb = [7, 5, 5]
+                            strides_rgb = [4, 3, 3]
                             for i in range(3):
                                 print('-----------------------------------')
                                 print('START ', str(i))
-                                att_lidar, att_rgb = AttentionFusionLayerFunc2(self.cnn.res_groups[i], None, None, self.cnn_lidar.res_groups[i], 'attention_fusion_'+str(i), self.batch_size, k_lidar=200, k_rgb=200)
+                                att_lidar, att_rgb = AttentionFusionLayerFunc3(self.cnn.res_groups[i], None, None, self.cnn_lidar.res_groups[i], 'attention_fusion_'+str(i), kernel_lidar=kernels_lidar[i], kernel_rgb=kernels_rgb[i], stride_lidar=strides_lidar[i], stride_rgb=strides_rgb[i])
                                 self.cnn.res_groups[i] = att_rgb
                                 self.cnn_lidar.res_groups[i] = att_lidar
                                 self.debug_layers['attention_output_rgb_'+str(i)] = att_rgb
                                 self.debug_layers['attention_output_lidar_'+str(i)] = att_lidar
-                                # x_new = tf.concat([att, x_temp], axis=-1)
-                                # with tf.variable_scope('post_fusion_conv_'):
-                                #     x_new = conv(x_new, 256, kernel=1, stride=1, scope='atention_fusion_3_post_conv', reuse=False)
-                                #     x_new = batch_norm(x_new, is_training=self.is_training)
-                                #     x_new = relu(x_new)
-                                #     self.debug_layers['attention_module_output'] = x_new
 
                 with tf.variable_scope("image_branch"):
                    
@@ -192,7 +190,7 @@ class Model(object):
                  
                     self.debug_layers['fpn_lidar_output'] = fpn_lidar
 
-                    num_conv_blocks=4
+                    num_conv_blocks=1
                     for i in range(num_conv_blocks):
                         fpn_lidar = conv(fpn_lidar, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_'+str(i))
                         fpn_lidar = batch_norm(fpn_lidar, scope='bn_post_fpn_' + str(i))
@@ -269,20 +267,20 @@ class Model(object):
                         # if self.params['train_reg']:
                         #     self.model_loss += self.regression_loss
 
-                        # self.regression_loss = 100 * self.loc_reg_loss + 50 * self.dim_reg_loss + 500 * self.theta_reg_loss + 10*self.dir_reg_loss
-                        # self.model_loss = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss += self.classification_loss
-                        # if self.params['train_reg']:
-                        #     self.model_loss += self.regression_loss
-
-                        self.regression_loss = (1-self.iou_loc)*(1-self.iou) + (1-self.iou_dim)*(1-self.iou) + 500*self.theta_weight
+                        self.regression_loss = 100 * self.loc_reg_loss + 50 * self.dim_reg_loss + 500 * self.theta_reg_loss + 10*self.dir_reg_loss
                         self.model_loss = 0
                         if self.params['train_cls']:
-                            # self.model_loss +=  -101*((self.precision * self.recall)/ (self.precision + 100 * self.recall + 1e-8))
-                            self.model_loss +=  4 + (-self.precision - self.recall)
+                            self.model_loss += self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss += self.regression_loss
+
+                        # self.regression_loss = (1-self.iou_loc)*(1-self.iou) + (1-self.iou_dim)*(1-self.iou) + 500*self.theta_weight
+                        # self.model_loss = 0
+                        # if self.params['train_cls']:
+                        #     # self.model_loss +=  -101*((self.precision * self.recall)/ (self.precision + 100 * self.recall + 1e-8))
+                        #     self.model_loss +=  4 + (-self.precision - self.recall)
+                        # if self.params['train_reg']:
+                        #     self.model_loss += self.regression_loss
                      
                 self.global_step = tf.Variable(0, name='global_step', trainable=False)
 
