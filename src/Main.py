@@ -6,7 +6,11 @@ def main(args):
     print('Building the model')
 
     params = {
-        'fusion': True
+        'fusion': False,
+        # 'train_loc': 1,
+        # 'train_dim': 0,
+        # 'train_theta': 0,
+        # 'train_dir': 0
     }
     model = Model(graph=None, **params)
 
@@ -20,6 +24,11 @@ def main(args):
         args.restore = True
     else:
         args.restore = False
+
+    if args.augment in ['True', 'true']:
+        args.augment = True
+    else:
+        args.augment = False
 
     if args.segmentation_kitti in ['True', 'true']:
         args.segmentation_kitti = True
@@ -46,6 +55,7 @@ def main(args):
         'segmentation_cityscapes': args.segmentation_cityscapes,
         'num_summary_images': int(args.num_summary_images),
         'start_epoch': int(args.start_epoch),
+        'augment': args.augment
     }
     if args.train_images_seg in ['True', 'true']:
         print('Train Segmentation')
@@ -55,9 +65,96 @@ def main(args):
         print('Train Detection')
         trainer.train_bev(**params)
 
+        # params = {
+        #     'fusion': False,
+        #     'train_loc': 0,
+        #     'train_dim': 1,
+        #     'train_theta': 0,
+        #     'train_dir': 0
+        # }
+        # model = Model(graph=None, **params)
+        # params = {
+        # 'batch_size': int(args.batch_size), 
+        # 'epochs': int(args.epochs), 
+        # 'random_seed': int(args.random_seed),
+        # 'num_samples': args.num_samples,
+        # 'save_steps': int(args.save_steps),
+        # 'restore': args.restore,
+        # 'training_per': float(args.training_per),
+        # 'training': True,
+        # 'epochs_img_head': int(args.epochs_img_head),
+        # 'epochs_img_all': int(args.epochs_img_all),
+        # 'segmentation_kitti': args.segmentation_kitti,
+        # 'segmentation_cityscapes': args.segmentation_cityscapes,
+        # 'num_summary_images': int(args.num_summary_images),
+        # 'start_epoch': int(args.start_epoch),
+        # 'augment': args.augment
+        # }
+        # trainer.train_bev(**params)
+
+
+        # params = {
+        #     'fusion': False,
+        #     'train_loc': 0,
+        #     'train_dim': 0,
+        #     'train_theta': 1,
+        #     'train_dir': 0
+        # }
+        # model = Model(graph=None, **params)
+        # params = {
+        # 'batch_size': int(args.batch_size), 
+        # 'epochs': int(args.epochs), 
+        # 'random_seed': int(args.random_seed),
+        # 'num_samples': args.num_samples,
+        # 'save_steps': int(args.save_steps),
+        # 'restore': args.restore,
+        # 'training_per': float(args.training_per),
+        # 'training': True,
+        # 'epochs_img_head': int(args.epochs_img_head),
+        # 'epochs_img_all': int(args.epochs_img_all),
+        # 'segmentation_kitti': args.segmentation_kitti,
+        # 'segmentation_cityscapes': args.segmentation_cityscapes,
+        # 'num_summary_images': int(args.num_summary_images),
+        # 'start_epoch': int(args.start_epoch),
+        # 'augment': args.augment
+        # }
+        # trainer.train_bev(**params)
+
+
+        # params = {
+        #     'fusion': False,
+        #     'train_loc': 0,
+        #     'train_dim': 0,
+        #     'train_theta': 0,
+        #     'train_dir': 1
+        # }
+        # model = Model(graph=None, **params)
+        # params = {
+        # 'batch_size': int(args.batch_size), 
+        # 'epochs': int(args.epochs), 
+        # 'random_seed': int(args.random_seed),
+        # 'num_samples': args.num_samples,
+        # 'save_steps': int(args.save_steps),
+        # 'restore': args.restore,
+        # 'training_per': float(args.training_per),
+        # 'training': True,
+        # 'epochs_img_head': int(args.epochs_img_head),
+        # 'epochs_img_all': int(args.epochs_img_all),
+        # 'segmentation_kitti': args.segmentation_kitti,
+        # 'segmentation_cityscapes': args.segmentation_cityscapes,
+        # 'num_summary_images': int(args.num_summary_images),
+        # 'start_epoch': int(args.start_epoch),
+        # 'augment': args.augment
+        # }
+        # trainer.train_bev(**params)
+
     if args.train_fusion in ['True', 'true']:
         print('Train Fusion')
         trainer.train_fusion(**params)
+
+    if args.train_end_to_end in ['True', 'true']:
+        print('Train end to end')
+        trainer.train_end_to_end(**params)
 
    
 
@@ -75,6 +172,9 @@ if __name__ == '__main__':
     parser.add_argument('--training_per', default=0.5)
     parser.add_argument('--num_summary_images', default=4)
     parser.add_argument('--start_epoch', default=0)
+    parser.add_argument('--augment', default=True)
+    
+    parser.add_argument('--train_end_to_end', default=False)
 
     parser.add_argument('--segmentation_kitti', default=False)
     parser.add_argument('--segmentation_cityscapes', default=True)

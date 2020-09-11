@@ -10,7 +10,8 @@ import numpy as np
 
 # weight_init = tf_contrib.layers.variance_scaling_initializer()
 weight_init = tf.contrib.layers.xavier_initializer()
-weight_regularizer = tf_contrib.layers.l2_regularizer(0.0005)
+# weight_regularizer = tf_contrib.layers.l2_regularizer(0.0005)
+weight_regularizer = tf_contrib.layers.l2_regularizer(0.005)
 
 
 ##################################################################################
@@ -88,9 +89,9 @@ def fully_conneted(x, units, use_bias=True, scope='fully_0'):
 
         return x
 
-def dropout(x, rate=0.5, scope='dropout'):
+def dropout(x, rate=0.5, scope='dropout', training=True):
     with tf.variable_scope(scope):
-        return tf.nn.dropout(x, rate)
+        return tf.keras.layers.Dropout(rate)(x, training=training)
 
 # def resblock(x_init, channels, is_training=True, use_bias=True, downsample=False, scope='resblock') :
 #     with tf.variable_scope(scope) :
@@ -213,10 +214,30 @@ def leaky_relu(x):
 ##################################################################################
 
 def batch_norm(x, is_training=True, scope='batch_norm'):
+    
     return tf_contrib.layers.batch_norm(x,
                                         decay=0.9, epsilon=1e-05,
                                         center=True, scale=True, updates_collections=None,
                                         is_training=is_training, scope=scope)
+    # return group_norm(x, G=32, eps=1e-5, scope=scope)
+
+def group_norm(x, G=32, eps=1e-5, scope='group_norm') :
+    with tf.variable_scope(scope) :
+        N, H, W, C = x.get_shape().as_list()
+        # print(N, H, W, C)
+        G = min(G, C)
+
+        x = tf.reshape(x, [-1, H, W, G, C // G])
+        mean, var = tf.nn.moments(x, [1, 2, 4], keep_dims=True)
+        x = (x - mean) / tf.sqrt(var + eps)
+
+        gamma = tf.get_variable('gamma', [1, 1, 1, C], initializer=tf.constant_initializer(1.0))
+        beta = tf.get_variable('beta', [1, 1, 1, C], initializer=tf.constant_initializer(0.0))
+
+
+        x = tf.reshape(x, [-1, H, W, C]) * gamma + beta
+
+    return x
 
 ##################################################################################
 # Loss function

@@ -16,7 +16,7 @@ from data.data_utils.fv_utils import *
 ########IMAGES##############
 ############################
 
-def __read_camera(image_path, image_size):
+def __read_camera(image_path, image_size, fliplr=False):
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     h, w, _ = image.shape
@@ -50,19 +50,21 @@ def __read_camera(image_path, image_size):
     mid_w = w2 // 2
     # print(mid_h-(image_size[0]//2), mid_h+(image_size[0]//2), mid_w-(image_size[1]//2), mid_w+(image_size[1]//2))
     image = image[mid_h-(image_size[0]//2):mid_h+(image_size[0]//2), mid_w-(image_size[1]//2):mid_w+(image_size[1]//2)]
+    if fliplr:
+        image = np.fliplr(image)
     return image[:, :, :], h-image_size[0], w-image_size[1]
 
-def read_camera(image_path, image_size):
-    return __read_camera(image_path, image_size)
+def read_camera(image_path, image_size, fliplr=False):
+    return __read_camera(image_path, image_size, fliplr=fliplr)
 
 
 ############################
 ########LIDAR###############
 ############################
 
-def read_lidar(lidar_path, calib_path, lidar_size, img_width=1224, img_height=370, translate_x=0, translate_y=0, translate_z=0, ang=0):
+def read_lidar(lidar_path, calib_path, lidar_size, img_width=1224, img_height=370, translate_x=0, translate_y=0, translate_z=0, ang=0, fliplr=False):
     image = velo_points_bev(lidar_path, calib_path, size=lidar_size, img_width=img_width, img_height=img_height,
-                     translate_x=translate_x, translate_y=translate_y, translate_z=translate_z, ang=ang)
+                     translate_x=translate_x, translate_y=translate_y, translate_z=translate_z, ang=ang, fliplr=fliplr)
     
     return image
 
@@ -134,7 +136,7 @@ def project_rect_to_velo(pts_3d_rect, RO, Tr_velo_to_cam):
     
 
 def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_range=(-40, 40), z_range=(-3.0, 1), 
-                    size=(512, 448, 40), get_actual_dims=False, from_file=True, translate_x=0, translate_y=0, translate_z=0, ang=0, get_neg=False):
+                    size=(512, 448, 40), get_actual_dims=False, from_file=True, translate_x=0, translate_y=0, translate_z=0, ang=0, get_neg=False, fliplr=False):
 
     """
     the file format is as follows: 
@@ -152,11 +154,13 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
     lines = list(map(lambda x: x.split(), lines))
     if len(lines) > 0:
         if get_neg:
-            lines = list(filter(lambda x: len(x) > 0 and ( x[0] not in ['Car', 'Van', 'Truck', 'Tram', 'DontCare']), lines))
+            # lines = list(filter(lambda x: len(x) > 0 and ( x[0] not in ['Car', 'Van', 'Truck', 'Tram', 'DontCare']), lines))
+            lines = list(filter(lambda x: len(x) > 0 and ( x[0] not in ['Car']), lines))
             if len(lines) > 0:
                 lines = lines[:1]
         else:
-            lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car', 'Van', 'Truck', 'Tram']), lines))
+            # lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car', 'Van', 'Truck', 'Tram']), lines))
+             lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car']), lines))
     
     def get_parameter(index):
         return list(map(lambda x: x[index], lines))
@@ -258,6 +262,11 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
                 dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
                 for i in range(len(locations))]
     # import math
+    if fliplr:
+        for i in range(len(locations)):
+            h = size[1]
+            output[i][1] = h - output[i][1]
+
     if ang != 0:
         for i in range(len(locations)):
             w = size[0]

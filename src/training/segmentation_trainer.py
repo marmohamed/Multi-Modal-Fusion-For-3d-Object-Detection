@@ -47,7 +47,7 @@ class SegmentationTrainer(Trainer):
 
             with tf.Session(config=config) as sess:
                 if restore:
-                    self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp/'))
+                    self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp_best2/'))
                 else:
                     sess.run(tf.global_variables_initializer())
 
@@ -75,7 +75,7 @@ class SegmentationTrainer(Trainer):
                     loss, _, acc = sess.run([self.model.model_loss_img, opt, self.model.accuracy], 
                                                     feed_dict={self.model.train_inputs_rgb: images, self.model.y_true_img: labels,
                                                      self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)),
-                                                     self.model.is_training: True})
+                                                     self.model.is_training: True, self.model.train_fusion_rgb: False})
                                 
                     losses.append(loss)
                     accs.append(acc)
@@ -88,7 +88,7 @@ class SegmentationTrainer(Trainer):
                 pass
 
             finally:
-                save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                save_path = self.model.saver.save(sess, "./training_files/tmp_best2/model.ckpt", global_step=self.model.global_step)
                 print("Model saved in path: %s" % save_path)
                 print('Loss:', np.mean(losses), ', Acc:', np.mean(accs))
                 self.__save_summary(sess, losses, accs, epoch, True)
@@ -107,7 +107,8 @@ class SegmentationTrainer(Trainer):
 
                 loss, acc = sess.run([self.model.model_loss_img, self.model.accuracy], 
                                                     feed_dict={self.model.train_inputs_rgb: images, self.model.y_true_img: labels,
-                                                    self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)), self.model.is_training: False})
+                                                    self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)),\
+                                                     self.model.is_training: False, self.model.train_fusion_rgb: False})
                                 
                 losses.append(loss)
                 accs.append(acc)
@@ -125,7 +126,7 @@ class SegmentationTrainer(Trainer):
         for i in range(kwargs['num_summary_images']):
             images, _ = self.eval_dataset.get_next()
             output = sess.run(self.model.detection_layer, feed_dict={self.model.train_inputs_rgb: images, 
-                            self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)), self.model.is_training: False})
+                            self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)), self.model.is_training: False, self.model.train_fusion_rgb: False})
             output = output[0]
 
             images_cars.append(output[:, :, 0])

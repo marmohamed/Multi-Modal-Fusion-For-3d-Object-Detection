@@ -5,12 +5,13 @@ class DatasetLoader(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, base_path, num_samples=None, training_per=0.5, random_seed=0, training=True, **kwargs):
+    def __init__(self, base_path, num_samples=None, training_per=0.5, random_seed=0, training=True, augment=False, **kwargs):
         self.base_path = base_path
         self.num_samples = num_samples
         self.training_per = training_per
         self.random_seed = random_seed
         self.training = training
+        self.augment=augment
 
         self.params = self._defaults(**kwargs)
         self.generator = self._init_generator()

@@ -40,7 +40,7 @@ class DetectionTrainer(Trainer):
         super(DetectionTrainer, self).__init__(model, data_base_path, dataset)
         self._set_params()
         self.count_not_best = 0
-        self.base_lr = 0.001
+        self.base_lr = 0.0001
         
 
     @abstractmethod
@@ -48,41 +48,17 @@ class DetectionTrainer(Trainer):
         pass
 
 
-    def __prepare_dataset_feed_dict(self, dataset, train_fusion_rgb, train_fusion_fv_lidar, use_nms, anchors, is_training=True, batch_size=1):
+    def __prepare_dataset_feed_dict(self, dataset, train_fusion_rgb, is_training=True, batch_size=1):
 
         data = dataset.get_next(batch_size=batch_size)
-
-        # for i in range(len(data)):
-        #     data[i] = np.expand_dims(data[i], axis=0)
-        if self.model.params['use_fv']:
-            camera_tensor, lidar_tensor, label_tensor, Tr_velo_to_cam, R0_rect, P3, shift_h, shift_w = data
-            d = {self.model.train_inputs_rgb: camera_tensor,
-                    self.model.train_inputs_lidar: lidar_tensor,
-                    self.model.y_true: label_tensor,
-                    self.model.Tr_velo_to_cam: Tr_velo_to_cam,
-                    self.model.R0_rect: R0_rect,
-                    self.model.P3: P3,
-                    self.model.shift_h: shift_h,
-                    self.model.shift_w: shift_w,
-                    self.model.use_nms: use_nms,
-                    self.model.train_fusion_rgb: train_fusion_rgb,
-                    self.model.train_fusion_fv_lidar: train_fusion_fv_lidar,
-                    self.model.is_training: is_training,
-                    self.model.anchors: anchors}
-        else:
-            camera_tensor, lidar_tensor, label_tensor, Tr_velo_to_cam, R0_rect, P3, shift_h, shift_w = data
-            d = {self.model.train_inputs_rgb: camera_tensor,
-                    self.model.train_inputs_lidar: lidar_tensor,
-                    self.model.y_true: label_tensor,                   
-                    self.model.Tr_velo_to_cam: Tr_velo_to_cam,
-                    self.model.R0_rect: R0_rect,
-                    self.model.P3: P3,
-                    self.model.shift_h: shift_h,
-                    self.model.shift_w: shift_w,
-                    self.model.use_nms: use_nms,
-                    self.model.train_fusion_rgb: train_fusion_rgb,
-                    self.model.is_training: is_training,
-                    self.model.anchors: anchors}
+       
+        camera_tensor, lidar_tensor, label_tensor, Tr_velo_to_cam, R0_rect, P3, shift_h, shift_w = data
+        d = {self.model.train_inputs_rgb: camera_tensor,
+                self.model.train_inputs_lidar: lidar_tensor,
+                self.model.y_true: label_tensor,                   
+                self.model.train_fusion_rgb: train_fusion_rgb,
+                self.model.is_training: is_training
+                }
         return d
 
 
@@ -96,42 +72,50 @@ class DetectionTrainer(Trainer):
                     batch_size=1, 
                     save_steps=100,
                     start_epoch=0,
+                    augment=True,
                     **kwargs):
 
         if self.dataset is None:
-            self.dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, training)
+            self.dataset = DetectionDatasetLoader(self.data_base_path, 20, training_per, random_seed, training, augment)
 
-        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, False)
+        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, False, False)
+        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, 20, training_per, random_seed, training, False)
+
 
         losses = []
         self.count_not_best = 0
-        self.base_lr = 0.001
+        self.base_lr = self.branch_params['lr']
         self.last_loss = float('inf')
-        self.anchors = prepare_anchors()
-        self.anchors = np.repeat(self.anchors, batch_size, axis=0)
+        # self.anchors = prepare_anchors()
+        # self.anchors = np.repeat(self.anchors, batch_size, axis=0)
         with self.model.graph.as_default():
                 
                 config = tf.ConfigProto()
                 config.gpu_options.allow_growth = True
 
+                np.random.seed(random_seed)
+                tf.set_random_seed(random_seed)
+
                 with tf.Session(config=config) as sess:
                     if restore:
+                        # if not self.branch_params['train_fusion_rgb']:
+                        #     self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp/'))
+                        # else:
                         self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp/'))
+                        # self.model.saver.restore(sess, './training_files/tmp_best2/model.ckpt-583440')
                     else:
                         sess.run(tf.global_variables_initializer())
 
                     counter = 0
-
+                    # min_lr = 1e-6
                     for e in range(start_epoch, start_epoch+epochs, 1):
                         
                         self.dataset.reset_generator()
                         min_lr = self.get_lr(e-start_epoch)
+                        # if e-start_epoch == 0:
+                        #     min_lr = 1e-8
                         print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
-                        # if e - start_epoch < 10:
-                        #     cls_weight = 10000
-                        # else:
-                        #     cls_weight = 1000
-                            
+                      
                         try:
                             epoch_loss = []
                             epoch_cls_loss = []
@@ -143,20 +127,24 @@ class DetectionTrainer(Trainer):
                             
                             s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
                             self.model.train_writer.add_summary(s1, e)
-
+                            # min_lr = 1e-6
+                            # s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                            # self.model.train_writer.add_summary(s1, counter//100)
                             while True:
 
                                 feed_dict = self.__prepare_dataset_feed_dict(self.dataset, 
                                                                             self.branch_params['train_fusion_rgb'], 
-                                                                            self.branch_params['train_fusion_fv_lidar'], 
-                                                                            self.branch_params['use_nms'],
-                                                                            self.anchors,
                                                                             batch_size=batch_size)
-
-                                feed_dict[self.model.learning_rate_placeholder] = min_lr
                                 
-                                # print('here')
-                                loss, _, classification_loss, regression_loss, loc_loss, dim_loss, theta_loss, dir_loss, summary = sess.run([self.model.model_loss, 
+                                feed_dict[self.model.learning_rate_placeholder] = min_lr
+                                # if e-start_epoch % 2 == 0:
+                                #     feed_dict[self.model.reg_training] = True
+                                #     feed_dict[self.model.cls_training] = False
+                                # else:
+                                #     feed_dict[self.model.reg_training] = False
+                                #     feed_dict[self.model.cls_training] = True
+                                
+                                loss, _, classification_loss, regression_loss, loc_loss, dim_loss, theta_loss, dir_loss, summary, theta_accuracy = sess.run([self.model.model_loss, 
                                                                                                     self.branch_params['opt'], 
                                                                                                     self.model.classification_loss, 
                                                                                                     self.model.regression_loss, 
@@ -164,12 +152,12 @@ class DetectionTrainer(Trainer):
                                                                                                     self.model.dim_reg_loss,
                                                                                                     self.model.theta_reg_loss,
                                                                                                     self.model.dir_reg_loss,
-                                                                                                    self.model.merged], 
+                                                                                                    self.model.merged,
+                                                                                                    self.model.theta_accuracy], 
                                                                                                     feed_dict=feed_dict)
 
-                                # print('here1')
                                 self.model.train_writer.add_summary(summary, counter)
-                                # print('here2')
+
                                 epoch_loss.append(loss)
                                 epoch_cls_loss.append(classification_loss)
                                 epoch_reg_loss.append(regression_loss)
@@ -178,23 +166,56 @@ class DetectionTrainer(Trainer):
                                 epoch_loc_loss.append(loc_loss)
                                 epoch_dim_loss.append(dim_loss)
 
+                                # if e - start_epoch >= 5 and theta_accuracy >= 5:
+                                #     loss, _, classification_loss, regression_loss, loc_loss, dim_loss, theta_loss, dir_loss, summary, theta_accuracy = sess.run([self.model.model_loss, 
+                                #                                                                     self.branch_params['opt'], 
+                                #                                                                     self.model.classification_loss, 
+                                #                                                                     self.model.regression_loss, 
+                                #                                                                     self.model.loc_reg_loss,
+                                #                                                                     self.model.dim_reg_loss,
+                                #                                                                     self.model.theta_reg_loss,
+                                #                                                                     self.model.dir_reg_loss,
+                                #                                                                     self.model.merged,
+                                #                                                                     self.model.theta_accuracy], 
+                                #                                                                     feed_dict=feed_dict)
+                                #     counter += 1
+                                #     self.model.train_writer.add_summary(summary, counter)
+
+                                #     epoch_loss.append(loss)
+                                #     epoch_cls_loss.append(classification_loss)
+                                #     epoch_reg_loss.append(regression_loss)
+                                #     epoch_theta_loss.append(theta_loss)
+                                #     epoch_dir_loss.append(dir_loss)
+                                #     epoch_loc_loss.append(loc_loss)
+                                #     epoch_dim_loss.append(dim_loss)
+
+
+                                
+
                                 counter += 1
                                 
-                                # if counter % 100 == 0:
-                                #     save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                                # if counter % 50 == 0:
+                                #     # save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
                            
-                                #     print("Model saved in path: %s" % save_path)
+                                #     # print("Model saved in path: %s" % save_path)
+
+                                #     s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                                #     self.model.train_writer.add_summary(s1, counter//50)
+
+                                #     min_lr *= 2.5
+                                #     self.base_lr = min_lr
+                                #     min_lr = min(self.base_lr, min_lr)
                         except (tf.errors.OutOfRangeError, StopIteration):
                             pass
 
                         finally:
-                            save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                            pass
+                    #         save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
                            
-                            print("Model saved in path: %s" % save_path)
+                    #         print("Model saved in path: %s" % save_path)
 
                             self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch_dir_loss, e, True)
                             
-                            # losses.append(epoch_loss)
                             print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e, np.mean(np.array(epoch_loss).flatten()), np.mean(np.array(epoch_cls_loss).flatten()), np.mean(np.array(epoch_reg_loss).flatten())))
 
                             eval_batch_size=batch_size
@@ -203,29 +224,26 @@ class DetectionTrainer(Trainer):
                                 'random_seed': random_seed,
                                 'training_per': training_per,
                                 'num_samples': num_samples,
-                                'anchors': self.anchors}
+                                }
                             self.eval(sess, e, eval_batch_size, **d)
                             
-                            # try:
-                            #     cls_weight = 10**(-1*len(str(np.mean(np.array(epoch_reg_loss).flatten())/np.mean(np.array(epoch_cls_loss).flatten())).split('.')[0]))
-                            # except:
-                            #     cls_weight = 1000
+                            
 
                     save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
                  
                     print("Model saved in path: %s" % save_path)
                     
-                # return losses
 
     def get_lr(self, epoch):
-        # if self.count_not_best > 10:
-        #     self.base_lr *= 10
-        #     self.count_not_best = 0
-        if self.count_not_best % 5 == 0 and self.count_not_best > 0:
-            self.base_lr *= 0.1
+     
+        if self.count_not_best % 4 == 0 and self.count_not_best > 0:
+            self.base_lr *= 0.5
+        # if epoch == 35 or epoch == 50:
+        #     self.base_lr *= 0.1
 
-        lr = max(self.base_lr, 1e-6)
-        lr = min(self.base_lr, 1e-3)
+        lr = max(self.base_lr, 1.e-9)
+        lr = min(self.base_lr, 1.e-3)
+        # lr /= 4
         return lr
 
         
@@ -243,12 +261,16 @@ class DetectionTrainer(Trainer):
             while True:
                 
                 feed_dict = self.__prepare_dataset_feed_dict(self.eval_dataset, 
-                                                            self.branch_params['train_fusion_rgb'], 
-                                                            self.branch_params['train_fusion_fv_lidar'], 
-                                                            self.branch_params['use_nms'],
-                                                            kwargs['anchors'],
+                                                            self.branch_params['train_fusion_rgb'],
                                                             is_training=False,
                                                             batch_size=batch_size)
+
+                # if epoch % 2 == 0:
+                #     feed_dict[self.model.reg_training] = True
+                #     feed_dict[self.model.cls_training] = False
+                # else:
+                #     feed_dict[self.model.reg_training] = False
+                #     feed_dict[self.model.cls_training] = True
                 
                 all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_, dir_loss_ = sess.run([self.model.model_loss, 
                                                                         self.model.classification_loss,
@@ -290,14 +312,11 @@ class DetectionTrainer(Trainer):
             final_sample = kwargs['num_samples']
 
         list_files= list_files[ln:final_sample]
-        eval_anchors = prepare_anchors()
+        # eval_anchors = prepare_anchors()
         for i in range(1, kwargs['num_summary_images']+1, 1):
                 
             feed_dict = self.__prepare_dataset_feed_dict(self.eval_dataset, 
-                                                                self.branch_params['train_fusion_rgb'], 
-                                                                self.branch_params['train_fusion_fv_lidar'], 
-                                                                self.branch_params['use_nms'],
-                                                                eval_anchors,
+                                                                self.branch_params['train_fusion_rgb'],
                                                                 is_training=False)
             
             final_output = sess.run(self.model.final_output, feed_dict=feed_dict)
@@ -369,9 +388,8 @@ class BEVDetectionTrainer(DetectionTrainer):
     def _set_params(self):
         self.branch_params = {
             'opt': self.model.train_op_lidar,
-            'train_fusion_rgb': False, 
-            'train_fusion_fv_lidar': False,
-            'use_nms': False
+            'train_fusion_rgb': False,
+            'lr': 5e-4
         }
 
         
@@ -380,9 +398,18 @@ class FusionDetectionTrainer(DetectionTrainer):
     def _set_params(self):
         self.branch_params = {
             'opt': self.model.train_op_fusion,
-            'train_fusion_rgb': True, 
-            'train_fusion_fv_lidar': False,
-            'use_nms': False
+            'train_fusion_rgb': True,
+            'lr': 1e-5
+        }
+
+
+class EndToEndDetectionTrainer(DetectionTrainer):
+    
+    def _set_params(self):
+        self.branch_params = {
+            'opt': self.model.train_op,
+            'train_fusion_rgb': True,
+            'lr': 1e-5
         }
 
 
