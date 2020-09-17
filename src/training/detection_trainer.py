@@ -76,10 +76,10 @@ class DetectionTrainer(Trainer):
                     **kwargs):
 
         if self.dataset is None:
-            self.dataset = DetectionDatasetLoader(self.data_base_path, 20, training_per, random_seed, training, augment)
+            self.dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, training, augment)
 
-        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, False, False)
-        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, 20, training_per, random_seed, training, False)
+        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, True, False)
+        # self.eval_dataset = DetectionDatasetLoader(self.data_base_path, 20, training_per, random_seed, training, False)
 
 
         losses = []
@@ -209,10 +209,10 @@ class DetectionTrainer(Trainer):
                             pass
 
                         finally:
-                            pass
-                    #         save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                            # pass
+                            save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
                            
-                    #         print("Model saved in path: %s" % save_path)
+                            print("Model saved in path: %s" % save_path)
 
                             self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch_dir_loss, e, True)
                             
@@ -297,47 +297,47 @@ class DetectionTrainer(Trainer):
             print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch, np.mean(np.array(loss).flatten()), np.mean(np.array(cls_loss).flatten()), np.mean(np.array(reg_loss).flatten())))
             
             
-        self.eval_dataset.reset_generator()
-        th=0.5
-        images = []
-        list_files = list(map(lambda x: x.split('.')[0], os.listdir(self.data_base_path+'/data_object_image_3/training/image_3')))
-        random.seed(kwargs['random_seed'])
-        random.shuffle(list_files)
+        # self.eval_dataset.reset_generator()
+        # th=0.5
+        # images = []
+        # list_files = list(map(lambda x: x.split('.')[0], os.listdir(self.data_base_path+'/data_object_image_3/training/image_3')))
+        # random.seed(kwargs['random_seed'])
+        # random.shuffle(list_files)
 
-        if kwargs['num_samples'] is None:
-            ln = int(len(list_files) * kwargs['training_per'])
-            final_sample = len(list_files)
-        else:
-            ln = int(kwargs['num_samples'] * kwargs['training_per'])
-            final_sample = kwargs['num_samples']
+        # if kwargs['num_samples'] is None:
+        #     ln = int(len(list_files) * kwargs['training_per'])
+        #     final_sample = len(list_files)
+        # else:
+        #     ln = int(kwargs['num_samples'] * kwargs['training_per'])
+        #     final_sample = kwargs['num_samples']
 
-        list_files= list_files[ln:final_sample]
-        # eval_anchors = prepare_anchors()
-        for i in range(1, kwargs['num_summary_images']+1, 1):
+        # list_files= list_files[ln:final_sample]
+        # # eval_anchors = prepare_anchors()
+        # for i in range(1, kwargs['num_summary_images']+1, 1):
                 
-            feed_dict = self.__prepare_dataset_feed_dict(self.eval_dataset, 
-                                                                self.branch_params['train_fusion_rgb'],
-                                                                is_training=False)
+        #     feed_dict = self.__prepare_dataset_feed_dict(self.eval_dataset, 
+        #                                                         self.branch_params['train_fusion_rgb'],
+        #                                                         is_training=False)
             
-            final_output = sess.run(self.model.final_output, feed_dict=feed_dict)
+        #     final_output = sess.run(self.model.final_output, feed_dict=feed_dict)
 
-            current_file = list_files[i]
-            converted_points = convert_prediction_into_real_values(final_output[0, :, :, :, :], th=th)
-            points = get_points(converted_points, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt', th=th)
-            res = '\n'.join([' '.join([str(l) for l in points[i]]) for i in range(len(points))])
-            _, labels, _, _, _, _ = read_label(res, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt', 0, 0, get_actual_dims=True, from_file=False)
+        #     current_file = list_files[i]
+        #     converted_points = convert_prediction_into_real_values(final_output[0, :, :, :, :], th=th)
+        #     points = get_points(converted_points, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt', th=th)
+        #     res = '\n'.join([' '.join([str(l) for l in points[i]]) for i in range(len(points))])
+        #     _, labels, _, _, _, _ = read_label(res, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt', 0, 0, get_actual_dims=True, from_file=False)
 
-            img = np.clip(np.mean(feed_dict[self.model.train_inputs_lidar][0][:, :, 10:], 2), 0, 1)                
-            plot_img_np = get_image(img, labels)
-            images.append(plot_img_np)
+        #     img = np.clip(np.mean(feed_dict[self.model.train_inputs_lidar][0][:, :, 10:40], 2), 0, 1)                
+        #     plot_img_np = get_image(img, labels)
+        #     images.append(plot_img_np)
 
-        images = np.array(images)
-        if self.branch_params['train_fusion_rgb']:
-            s = sess.run(self.model.images_summary_fusion, feed_dict={self.model.images_summary_fusion_placeholder: images})
-            self.model.validation_writer.add_summary(s, epoch)
-        else:
-            s = sess.run(self.model.images_summary, feed_dict={self.model.images_summary_placeholder: images})
-            self.model.validation_writer.add_summary(s, epoch)
+        # images = np.array(images)
+        # if self.branch_params['train_fusion_rgb']:
+        #     s = sess.run(self.model.images_summary_fusion, feed_dict={self.model.images_summary_fusion_placeholder: images})
+        #     self.model.validation_writer.add_summary(s, epoch)
+        # else:
+        #     s = sess.run(self.model.images_summary, feed_dict={self.model.images_summary_placeholder: images})
+        #     self.model.validation_writer.add_summary(s, epoch)
         
 
         
@@ -409,7 +409,7 @@ class EndToEndDetectionTrainer(DetectionTrainer):
         self.branch_params = {
             'opt': self.model.train_op,
             'train_fusion_rgb': True,
-            'lr': 1e-5
+            'lr': 5e-4
         }
 
 

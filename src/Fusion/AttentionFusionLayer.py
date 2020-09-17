@@ -3,18 +3,18 @@ import tensorflow as tf
 from ops.ops import *
 
 
-def AttentionFusionLayerFunc3(original_rgb_features, fv_lidar_features, train_fusion_fv_lidar, original_lidar_feats, scope, kernel_lidar=5, kernel_rgb=5, stride_lidar=3, stride_rgb=3, reuse=False):
+def AttentionFusionLayerFunc3(original_rgb_features, fv_lidar_features, train_fusion_fv_lidar, original_lidar_feats, scope, is_training=True, kernel_lidar=5, kernel_rgb=5, stride_lidar=3, stride_rgb=3, reuse=False):
     with tf.variable_scope(scope, reuse=reuse):
         
         lidar_features = conv(original_lidar_feats, 64, kernel=kernel_lidar, stride=stride_lidar, scope=scope+'conv_bev', reuse=reuse)
-        lidar_features = batch_norm(lidar_features, scope='bn_fusion_lidar')
+        lidar_features = batch_norm(lidar_features, is_training=is_training, scope='bn_fusion_lidar')
         lidar_features = relu(lidar_features)
         lidar_features = dropout(lidar_features, rate=0.5, scope='dropout_lidar_feats')
 
         # print('lidar_features', lidar_features)
 
         rgb_features = conv(original_rgb_features, 64,  kernel=kernel_rgb, stride=stride_rgb, scope=scope+'conv_rgb', reuse=reuse)
-        rgb_features = batch_norm(rgb_features, scope='bn_fusion_rgb')
+        rgb_features = batch_norm(rgb_features, is_training=is_training, scope='bn_fusion_rgb')
         rgb_features = relu(rgb_features)
         rgb_features = dropout(rgb_features, rate=0.5, scope='dropout_lidar_feats')
 
@@ -90,8 +90,8 @@ def AttentionFusionLayerFunc3(original_rgb_features, fv_lidar_features, train_fu
         # print('original_rgb_features', original_rgb_features)
         # print('original_lidar_feats', original_lidar_feats)
 
-        rt = upsample(rt, size=(stride_lidar, stride_lidar), scope='rt_upsample', use_deconv=True, kernel_size=6)
-        rt2 = upsample(rt2, size=(stride_rgb, stride_rgb), scope='rt2_upsample', use_deconv=True, kernel_size=6)
+        rt = upsample(rt, is_training=is_training, size=(stride_lidar, stride_lidar), scope='rt_upsample', use_deconv=True, kernel_size=6)
+        rt2 = upsample(rt2, is_training=is_training, size=(stride_rgb, stride_rgb), scope='rt2_upsample', use_deconv=True, kernel_size=6)
 
         # print('rt', rt)
         # print('rt2', rt2)
@@ -128,16 +128,16 @@ def AttentionFusionLayerFunc3(original_rgb_features, fv_lidar_features, train_fu
         c1 = int(original_lidar_feats.get_shape()[-1])
         original_lidar_feats2 = tf.concat([rt, original_lidar_feats], axis=-1)
         original_lidar_feats2 = conv(original_lidar_feats2, c1, kernel=1, stride=1, scope='final_conv_between_modalities_lidar', reuse=reuse)
-        original_lidar_feats2 = batch_norm(original_lidar_feats2, scope='final_bn_between_modalities_lidar')
+        original_lidar_feats2 = batch_norm(original_lidar_feats2, is_training=is_training, scope='final_bn_between_modalities_lidar')
         original_lidar_feats2 = relu(original_lidar_feats2)
-        original_lidar_feats2 = dropout(original_lidar_feats2, rate=0.5, scope='dropout_lidar')
+        # original_lidar_feats2 = dropout(original_lidar_feats2, rate=0.5, scope='dropout_lidar')
 
         c2 = int(original_rgb_features.get_shape()[-1])
         original_rgb_features2 = tf.concat([rt2, original_rgb_features], axis=-1)
         original_rgb_features2 = conv(original_rgb_features2, c2, kernel=1, stride=1, scope='final_conv_between_modalities_rgb', reuse=reuse)
-        original_rgb_features2 = batch_norm(original_rgb_features2, scope='final_bn_between_modalities_rgb')
+        original_rgb_features2 = batch_norm(original_rgb_features2, is_training=is_training, scope='final_bn_between_modalities_rgb')
         original_rgb_features2 = relu(original_rgb_features2)
-        original_rgb_features2 = dropout(original_rgb_features2, rate=0.5, scope='dropout_rgb')
+        # original_rgb_features2 = dropout(original_rgb_features2, rate=0.5, scope='dropout_rgb')
         
 
     return original_lidar_feats2, original_rgb_features2

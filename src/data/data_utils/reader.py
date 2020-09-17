@@ -160,7 +160,7 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
                 lines = lines[:1]
         else:
             # lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car', 'Van', 'Truck', 'Tram']), lines))
-             lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car']), lines))
+             lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car', 'Van']), lines))
     
     def get_parameter(index):
         return list(map(lambda x: x[index], lines))

@@ -105,9 +105,10 @@ class Model(object):
                         strides_lidar = [5, 3, 3]
                         kernels_rgb = [7, 5, 5]
                         strides_rgb = [4, 3, 3]
+                        lidar_loc = [0, 1, 3]
                         for i in range(3):
                           
-                            att_lidar, att_rgb = AttentionFusionLayerFunc3(self.cnn.res_groups[i], None, None, self.cnn_lidar.res_groups[i], 'attention_fusion_'+str(i), kernel_lidar=kernels_lidar[i], kernel_rgb=kernels_rgb[i], stride_lidar=strides_lidar[i], stride_rgb=strides_rgb[i])
+                            att_lidar, att_rgb = AttentionFusionLayerFunc3(self.cnn.res_groups[i], None, None, self.cnn_lidar.res_groups[lidar_loc[i]], 'attention_fusion_'+str(i), is_training=self.is_training, kernel_lidar=kernels_lidar[i], kernel_rgb=kernels_rgb[i], stride_lidar=strides_lidar[i], stride_rgb=strides_rgb[i])
                           
                             with tf.variable_scope('cond'):
                                 with tf.variable_scope('cond_img'):
@@ -126,6 +127,11 @@ class Model(object):
 
 
                 with tf.variable_scope("image_branch"):
+
+                    # print("self.cnn.res_groups")
+                    # print(self.cnn.res_groups)
+                    # print("self.cnn.res_groups2")
+                    # print(self.cnn.res_groups2)
                     
                     if self.params['fusion']:
                         self.cnn.res_groups2.append(self.cnn.res_groups[3])
@@ -145,8 +151,12 @@ class Model(object):
 
                 with tf.variable_scope("lidar_branch"):
                     with tf.variable_scope("fpn"): 
-                        # fpn_lidar = FPN(self.cnn_lidar.res_groups2[:3], "fpn_lidar", is_training=self.is_training)
-
+                        # print("self.cnn_lidar.res_groups")
+                        # print(self.cnn_lidar.res_groups)
+                        # print("self.cnn_lidar.res_groups2")
+                        # print(self.cnn_lidar.res_groups2)
+                        fpn_lidar = FPN([self.cnn_lidar.res_groups2[0], self.cnn_lidar.res_groups2[2]], "fpn_lidar", is_training=self.is_training)
+                        # print("fpn_lidar", fpn_lidar)
                         # self.debug_layers['fpn_lidar'] = fpn_lidar
                         
                         # fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
@@ -157,8 +167,13 @@ class Model(object):
                         # fpn_lidar[1] = upsample(fpn_lidar[1], size=(2, 2), scope='fpn_upsample_1', use_deconv=True, kernel_size=4)
                         # fpn_lidar[2] = upsample(fpn_lidar[2], size=(4, 4), scope='fpn_upsample_2', use_deconv=True, kernel_size=4)
 
+                        fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
+                        # fpn_lidar[2] = upsample(fpn_lidar[2], is_training=self.is_training, size=(2, 2), scope='fpn_upsample_2', use_deconv=True, kernel_size=4)
 
-                        # fpn_lidar = tf.concat(fpn_lidar[:], 3)
+
+                        fpn_lidar = tf.concat(fpn_lidar[:], 3)
+
+                        # print("hereeeeeeeeeeee")
                     
                         # self.debug_layers['fpn_lidar_output'] = fpn_lidar
 
@@ -170,14 +185,17 @@ class Model(object):
                         #     fpn_lidar = temp
 
 
-                        fpn_lidar1 = self.cnn_lidar.train_logits
+                        # fpn_lidar1 = self.cnn_lidar.train_logits
+                        # fpn_lidar2 = self.cnn_lidar.train_logits
 
-                        fpn_lidar2 = self.cnn_lidar.train_logits
+                        fpn_lidar1 = fpn_lidar
+                        fpn_lidar2 = fpn_lidar
+
 
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
                             temp = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
-                            temp = batch_norm(temp, scope='bn_post_fpn_1_' + str(i))
+                            temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
                             temp = relu(temp)
                             # fpn_lidar = fpn_lidar + temp
                             fpn_lidar1 = temp
@@ -187,7 +205,7 @@ class Model(object):
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
                             temp = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
-                            temp = batch_norm(temp, scope='bn_post_fpn_2_' + str(i))
+                            temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
                             temp = relu(temp)
                             # fpn_lidar = fpn_lidar + temp
                             fpn_lidar2 = temp
@@ -299,18 +317,18 @@ class Model(object):
 
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
-                            self.regression_loss_bev += 1000 * (2 - self.iou_loc - self.iou) * self.loc_reg_loss 
+                            self.regression_loss_bev += 1000 * (1 - self.iou) * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 100 * (2 - self.iou_dim - self.iou) * self.dim_reg_loss 
+                            self.regression_loss_bev += 50 * (1 - self.iou) * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
                             self.regression_loss_bev += 1000 * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
-                            self.model_loss_bev +=  50 * (2 - self.recall - self.precision)  * self.classification_loss
+                            self.model_loss_bev +=  10 * (2 - self.recall - self.precision)  * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
-                        if self.params['train_dir'] == 1:
-                            self.model_loss_bev += 0.1 * self.dir_reg_loss
+                        # if self.params['train_dir'] == 1:
+                        #     self.model_loss_bev += 0.1 * self.dir_reg_loss
 
 
                         # self.regression_loss_bev = 0

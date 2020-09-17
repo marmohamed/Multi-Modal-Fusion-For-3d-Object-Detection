@@ -25,9 +25,9 @@ num_summary_images_detection=5
 
 train_kitti=false
 train_city=false
-train_bev=true
+train_bev=false
 train_fusion=false
-train_end_to_end=false
+train_end_to_end=true
 
 
 
@@ -68,7 +68,7 @@ if [ "$train_bev" = true ]; then
                 --epochs $epochs_bev \
                 --start_epoch $start_epoch_bev \
                 --num_summary_images $num_summary_images_detection \
-                --batch_size 4 \
+                --batch_size 1 \
                 --train_fusion False \
                 --train_images_seg False \
                 --augment True
@@ -95,7 +95,7 @@ fi
 if [ "$train_end_to_end" = true ]; then
     python Main.py --data_path $data_path \
                 --train_end_to_end True \
-                --restore True \
+                --restore False \
                 --epochs $epochs_end \
                 --start_epoch $start_epoch_end \
                 --num_summary_images $num_summary_images_detection \

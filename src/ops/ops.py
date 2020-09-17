@@ -52,7 +52,7 @@ def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='
 
 
 
-def upsample(x, size=(2, 2), scope='upsample_0', use_deconv=False, filters=32, kernel_size=5):
+def upsample(x, size=(2, 2), is_training=True, scope='upsample_0', use_deconv=False, filters=32, kernel_size=5):
     with tf.variable_scope(scope):
         if use_deconv:
             x = tf.keras.layers.Conv2DTranspose(filters,
@@ -60,7 +60,7 @@ def upsample(x, size=(2, 2), scope='upsample_0', use_deconv=False, filters=32, k
                                                 strides=size,
                                                 padding='SAME',
                                                 dilation_rate=1)(x)
-            x = batch_norm(x, scope='bn_' + scope)
+            x = batch_norm(x, is_training, scope='bn_' + scope)
             x = relu(x)
         else:
             x = tf.keras.layers.UpSampling2D(size=size)(x)
@@ -203,7 +203,8 @@ def avg_pooling(x) :
 
 
 def relu(x):
-    return tf.nn.relu(x)
+    # return tf.nn.relu(x)
+    return leaky_relu(x)
 
 def leaky_relu(x):
     return tf.nn.leaky_relu(x)
@@ -219,7 +220,9 @@ def batch_norm(x, is_training=True, scope='batch_norm'):
                                         decay=0.9, epsilon=1e-05,
                                         center=True, scale=True, updates_collections=None,
                                         is_training=is_training, scope=scope)
-    # return group_norm(x, G=32, eps=1e-5, scope=scope)
+    # with tf.variable_scope(scope) :
+    #     return tf.layers.BatchNormalization(renorm=True)(x, training=is_training)
+    return group_norm(x, G=32, eps=1e-5, scope=scope)
 
 def group_norm(x, G=32, eps=1e-5, scope='group_norm') :
     with tf.variable_scope(scope) :
