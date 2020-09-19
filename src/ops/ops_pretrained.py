@@ -78,18 +78,19 @@ def dropout(c,**kwargs):
 
 def batch_norm(c, is_training=True, **kwargs):
     # parameters = [p for p in c.parameters()]
-    beta = tf.constant_initializer(c.bias.data.numpy())
-    gamma = tf.constant_initializer(c.weight.data.numpy())
-    running_mean = tf.constant_initializer(c.running_mean.data.numpy())
-    running_var = tf.constant_initializer(c.running_var.data.numpy())
-    x = tf.layers.batch_normalization(kwargs['inp'], epsilon=c.eps, momentum=c.momentum,
-                                    beta_initializer=beta,
-                                    gamma_initializer=gamma,
-                                    moving_mean_initializer = running_mean,
-                                    moving_variance_initializer = running_var,
-                                    training=is_training
-                                    )
-    return x
+    # beta = tf.constant_initializer(c.bias.data.numpy())
+    # gamma = tf.constant_initializer(c.weight.data.numpy())
+    # running_mean = tf.constant_initializer(c.running_mean.data.numpy())
+    # running_var = tf.constant_initializer(c.running_var.data.numpy())
+    # x = tf.layers.batch_normalization(kwargs['inp'], epsilon=c.eps, momentum=c.momentum,
+    #                                 beta_initializer=beta,
+    #                                 gamma_initializer=gamma,
+    #                                 moving_mean_initializer = running_mean,
+    #                                 moving_variance_initializer = running_var,
+    #                                 training=is_training
+    #                                 )
+    # return x
+    return kwargs['inp']
 
 def resblock(x_init, parameters, bns, is_training=True, scope='resblock', downsample=False) :
     with tf.variable_scope(scope) :
