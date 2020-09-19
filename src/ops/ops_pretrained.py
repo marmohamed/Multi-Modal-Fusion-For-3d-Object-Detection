@@ -76,7 +76,7 @@ def fully_conneted_not_trained(x, units, use_bias=True, scope='fully_0'):
 def dropout(c,**kwargs):
     return kwargs['inp']
 
-def batch_norm(c, **kwargs):
+def batch_norm(c, is_training=True, **kwargs):
     # parameters = [p for p in c.parameters()]
     beta = tf.constant_initializer(c.bias.data.numpy())
     gamma = tf.constant_initializer(c.weight.data.numpy())
@@ -86,23 +86,24 @@ def batch_norm(c, **kwargs):
                                     beta_initializer=beta,
                                     gamma_initializer=gamma,
                                     moving_mean_initializer = running_mean,
-                                    moving_variance_initializer = running_var
+                                    moving_variance_initializer = running_var,
+                                    training=is_training
                                     )
     return x
 
-def resblock(x_init, parameters, bns, scope='resblock', downsample=False) :
+def resblock(x_init, parameters, bns, is_training=True, scope='resblock', downsample=False) :
     with tf.variable_scope(scope) :
 
         x = conv2d(parameters[0], inp=x_init)
-        x = batch_norm(bns[0], inp=x)
+        x = batch_norm(bns[0], is_training=is_training, inp=x)
         x = relu(inp=x)
     
         x = conv2d(parameters[2], inp=x)
-        x = batch_norm(bns[2], inp=x)
+        x = batch_norm(bns[2], is_training=is_training, inp=x)
 
         if downsample :
             x_init = conv2d(parameters[1], inp=x_init)
-            x_init = batch_norm(bns[1], inp=x_init)
+            x_init = batch_norm(bns[1], is_training=is_training, inp=x_init)
 
         x = x + x_init
         x = relu(inp = x)
