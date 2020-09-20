@@ -17,7 +17,7 @@ start_epoch_kitti=$((epochs_img_head_city+epochs_img_all_city))
 start_epoch_bev=0
 start_epoch_fusion=$((epochs_bev+start_epoch_bev))
 start_epoch_end=$((epochs_fusion+epochs_bev+start_epoch_bev))
-# start_epoch_end=0
+start_epoch_end=0
 
 
 num_summary_images_segmentation=5

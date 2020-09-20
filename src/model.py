@@ -267,17 +267,7 @@ class Model(object):
                                                             **loss_params)
 
                         
-                        
-                        # fusion
-                        # self.regression_loss_fusion = 0.5 * ((1-self.iou_loc)*(1-self.iou)) * tf.exp(-self.loc_weight) * self.loc_reg_loss + self.loc_weight +\
-                        #              ((1-self.iou_dim)*(1-self.iou)) * tf.exp(-self.dim_weight) * self.dim_reg_loss + self.dim_weight +\
-                        #               0.1 * ((1-self.theta_accuracy)**2) * tf.exp(-self.theta_weight) * self.theta_reg_loss + self.theta_weight 
-                        #             #   + 10 * self.dir_reg_loss
-                        # self.model_loss_fusion = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss_fusion += (1-self.precision)*(1-self.recall) * tf.exp(-self.cls_weight) * self.classification_loss + self.cls_weight
-                        # if self.params['train_reg']:
-                        #     self.model_loss_fusion += self.regression_loss_fusion
+                
 
                         ## F1 SCORE
                         # loc_ratios = np.array([2.4375, 1., 9.375 ])
@@ -300,52 +290,37 @@ class Model(object):
                         # WORKING - BEV
 
                       
+                   
+
                         # self.regression_loss_bev = 0
                         # if self.params['train_loc'] == 1:
-                        #     self.regression_loss_bev += 100 * self.loc_reg_loss 
+                        #     self.regression_loss_bev += 1000 * (1 - self.iou) * self.loc_reg_loss 
                         # if self.params['train_dim'] == 1:
-                        #     self.regression_loss_bev += 5 * self.dim_reg_loss 
+                        #     self.regression_loss_bev += 50 * (1 - self.iou) * self.dim_reg_loss 
                         # if self.params['train_theta'] == 1:
                         #     self.regression_loss_bev += 1000 * self.theta_reg_loss 
                         # self.model_loss_bev = 0
                         # if self.params['train_cls']:
-                        #     self.model_loss_bev +=  0.5 * self.classification_loss
+                        #     self.model_loss_bev +=  10 * (2 - self.recall - self.precision)  * self.classification_loss
                         # if self.params['train_reg']:
                         #     self.model_loss_bev +=  1 * self.regression_loss_bev
-                        # if self.params['train_dir'] == 1:
-                        #     self.model_loss_bev += 0.1 * self.dir_reg_loss
-
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
-                            self.regression_loss_bev += 1000 * (1 - self.iou) * self.loc_reg_loss 
+                            self.regression_loss_bev += 1000 * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 50 * (1 - self.iou) * self.dim_reg_loss 
+                            self.regression_loss_bev += 50 * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
                             self.regression_loss_bev += 1000 * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
-                            self.model_loss_bev +=  10 * (2 - self.recall - self.precision)  * self.classification_loss
+                            self.model_loss_bev +=  10 * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
                         # if self.params['train_dir'] == 1:
                         #     self.model_loss_bev += 0.1 * self.dir_reg_loss
 
 
-                        # self.regression_loss_bev = 0
-                        # if self.params['train_loc'] == 1:
-                        #     self.regression_loss_bev += (2 - self.iou_loc - self.iou) * 30 * self.loc_reg_loss 
-                        # if self.params['train_dim'] == 1:
-                        #     self.regression_loss_bev += (2 - self.iou_dim - self.iou) * 50 * self.dim_reg_loss 
-                        # if self.params['train_theta'] == 1:
-                        #     self.regression_loss_bev += 100 * self.theta_reg_loss 
-                        # if self.params['train_dir'] == 1:
-                        #     self.regression_loss_bev += 1 * self.dir_reg_loss
-                        # self.model_loss_bev = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss_bev += 1 * (2 - self.recall - self.precision) * 1 * self.classification_loss
-                        # if self.params['train_reg']:
-                        #     self.model_loss_bev +=  5 * self.regression_loss_bev
-
+                     
                         # self.regression_loss = tf.cond(self.train_fusion_rgb, lambda: self.regression_loss_fusion, lambda: self.regression_loss_bev)
                         # self.model_loss = tf.cond(self.train_fusion_rgb, lambda: self.model_loss_fusion, lambda: self.model_loss_bev)
 
@@ -363,15 +338,7 @@ class Model(object):
                         #     self.model_loss += self.regression_loss
                         
 
-                        # self.regression_loss =  self.loc_reg_loss *((1-self.iou_loc)*(1-self.iou)) +\
-                        #                         5 * 0.1 * self.dim_reg_loss * ((1-self.iou_dim)*(1-self.iou)) +\
-                        #                         0.1 * self.theta_reg_loss * ((1-self.theta_accuracy)**2)
-                        # self.model_loss = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss +=  2e-1 * 0.1 * self.classification_loss * (1-self.precision)*(1-self.recall)
-                        # if self.params['train_reg']:
-                        #     self.model_loss += self.regression_loss
-
+                      
 
 
                 self.model_loss_img = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y_true_img, logits=self.detection_layer))
