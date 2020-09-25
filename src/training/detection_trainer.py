@@ -78,8 +78,7 @@ class DetectionTrainer(Trainer):
         if self.dataset is None:
             self.dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, training, augment)
 
-        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, True, False)
-        # self.eval_dataset = DetectionDatasetLoader(self.data_base_path, 20, training_per, random_seed, training, False)
+        self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, False, False)
 
 
         losses = []

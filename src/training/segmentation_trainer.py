@@ -74,7 +74,7 @@ class SegmentationTrainer(Trainer):
 
                     loss, _, acc = sess.run([self.model.model_loss_img, opt, self.model.accuracy], 
                                                     feed_dict={self.model.train_inputs_rgb: images, self.model.y_true_img: labels,
-                                                     self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)),
+                                                     self.model.train_inputs_lidar: np.zeros((1, 512, 448, 41)),
                                                      self.model.is_training: True, self.model.train_fusion_rgb: False})
                                 
                     losses.append(loss)
@@ -107,7 +107,7 @@ class SegmentationTrainer(Trainer):
 
                 loss, acc = sess.run([self.model.model_loss_img, self.model.accuracy], 
                                                     feed_dict={self.model.train_inputs_rgb: images, self.model.y_true_img: labels,
-                                                    self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)),\
+                                                    self.model.train_inputs_lidar: np.zeros((1, 512, 448, 41)),\
                                                      self.model.is_training: False, self.model.train_fusion_rgb: False})
                                 
                 losses.append(loss)
@@ -126,7 +126,7 @@ class SegmentationTrainer(Trainer):
         for i in range(kwargs['num_summary_images']):
             images, _ = self.eval_dataset.get_next()
             output = sess.run(self.model.detection_layer, feed_dict={self.model.train_inputs_rgb: images, 
-                            self.model.train_inputs_lidar: np.zeros((1, 512, 448, 40)), self.model.is_training: False, self.model.train_fusion_rgb: False})
+                            self.model.train_inputs_lidar: np.zeros((1, 512, 448, 41)), self.model.is_training: False, self.model.train_fusion_rgb: False})
             output = output[0]
 
             images_cars.append(output[:, :, 0])

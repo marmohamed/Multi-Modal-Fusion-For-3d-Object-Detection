@@ -159,28 +159,28 @@ class DetectionDatasetLoader(DatasetLoader):
         for camera_path, lidar_path, label_path, calib_path in zip(list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths):
                 
 
-                if True:
-                #     if np.random.random_sample() >= 0.5:
-                #         translate_x = random.randint(-5, 5)
-                #     else:
-                #         translate_x = 0
-                #     if np.random.random_sample() >= 0.5:
-                #         translate_y = random.randint(-5, 5)
-                #     else:
-                #         translate_y = 0
-                #     # translate_z = random.random() - 0.5
-                #     translate_z = 0
-                #     if np.random.random_sample() >= 0.3:
-                #         ang = random.randint(-5, 5)
-                #     else:
-                #         ang = 0
-                #     if np.random.random_sample() >= 0.6:    
-                #         fliplr = True
-                #     else:
-                #         fliplr = False
+                if training:
+                    if np.random.random_sample() >= 0.5:
+                        translate_x = random.randint(-5, 5)
+                    else:
+                        translate_x = 0
+                    if np.random.random_sample() >= 0.5:
+                        translate_y = random.randint(-5, 5)
+                    else:
+                        translate_y = 0
+                    # translate_z = random.random() - 0.5
+                    translate_z = 0
+                    if np.random.random_sample() >= 0.3:
+                        ang = random.randint(-5, 5)
+                    else:
+                        ang = 0
+                    if np.random.random_sample() >= 0.6:    
+                        fliplr = True
+                    else:
+                        fliplr = False
 
 
-                # else:
+                else:
                     translate_x = 0
                     translate_y = 0
                     translate_z = 0

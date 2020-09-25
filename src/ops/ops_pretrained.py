@@ -33,7 +33,7 @@ def conv2d(c,**kwargs):
     return x
 
 def relu(**kwargs):
-    return tf.nn.relu(kwargs['inp'])
+    return tf.nn.leaky_relu(kwargs['inp'])
     
 def max_pool(c,**kwargs):
     padding = 'VALID' if c.padding is 0 else 'SAME'
@@ -90,21 +90,39 @@ def batch_norm(c, is_training=True, **kwargs):
     #                                 training=is_training
     #                                 )
     # return x
-    return kwargs['inp']
+    return group_norm(kwargs['inp'], G=32, eps=1e-5, scope=kwargs['scope'])
+
+def group_norm(x, G=32, eps=1e-5, scope='group_norm') :
+    with tf.variable_scope(scope) :
+        N, H, W, C = x.get_shape().as_list()
+        # print(N, H, W, C)
+        G = min(G, C)
+
+        x = tf.reshape(x, [-1, H, W, G, C // G])
+        mean, var = tf.nn.moments(x, [1, 2, 4], keep_dims=True)
+        x = (x - mean) / tf.sqrt(var + eps)
+
+        gamma = tf.get_variable('gamma', [1, 1, 1, C], initializer=tf.constant_initializer(1.0))
+        beta = tf.get_variable('beta', [1, 1, 1, C], initializer=tf.constant_initializer(0.0))
+
+
+        x = tf.reshape(x, [-1, H, W, C]) * gamma + beta
+
+    return x
 
 def resblock(x_init, parameters, bns, is_training=True, scope='resblock', downsample=False) :
     with tf.variable_scope(scope) :
 
         x = conv2d(parameters[0], inp=x_init)
-        x = batch_norm(bns[0], is_training=is_training, inp=x)
+        x = batch_norm(bns[0], is_training=is_training, inp=x, scope=scope+'_0')
         x = relu(inp=x)
     
         x = conv2d(parameters[2], inp=x)
-        x = batch_norm(bns[2], is_training=is_training, inp=x)
+        x = batch_norm(bns[2], is_training=is_training, inp=x, scope=scope+'_1')
 
         if downsample :
             x_init = conv2d(parameters[1], inp=x_init)
-            x_init = batch_norm(bns[1], is_training=is_training, inp=x_init)
+            x_init = batch_norm(bns[1], is_training=is_training, inp=x_init, scope=scope+'_2')
 
         x = x + x_init
         x = relu(inp = x)
