@@ -16,54 +16,38 @@ from data.data_utils.fv_utils import *
 ########IMAGES##############
 ############################
 
-def __read_camera(image_path, image_size, fliplr=False):
+def __read_camera(image_path, image_size, translate_x = 0, translate_y = 0, fliplr=False):
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    h, w, _ = image.shape
-    ''' 
-    pad if the dimensions is less the the required dimensions
-    '''
-    if h < image_size[0]:
-        diff_h_1 = ( image_size[0] - h ) // 2
-        diff_h_2 = ( image_size[0] - h ) - diff_h_1
-        diff_w_1 = ( image_size[1] - w ) // 2
-        diff_w_2 = ( image_size[1] - w ) - diff_w_1
-        if w < image_size[1]:
-            # image = np.lib.pad(image, ((diff_h_1, diff_h_2), (diff_w_1, diff_w_2)), 'constant')
-            image = np.lib.pad(image, ((0, diff_h_1 + diff_h_2), (0, diff_w_1 + diff_w_2)), 'constant')
-        else:
-            # image = np.lib.pad(image, ((diff_h_1, diff_h_2), (0, 0)), 'constant')
-            image = np.lib.pad(image, ((0, diff_h_1 + diff_h_2), (0, 0)), 'constant')
-    elif w < image_size[1]:
-        diff_w_1 = ( image_size[1] - w ) // 2
-        diff_w_2 = ( image_size[1] - w ) - diff_w_1
-        # image = np.lib.pad(image, ((0, 0), (diff_w_1, diff_w_2)), 'constant')
-        image = np.lib.pad(image, ((0, 0), (0, diff_w_1 + diff_w_2)), 'constant')
+    image = cv2.resize(image, (3, image_size[0]), interpolation = cv2.INTER_AREA)
+    if translate_x > 0:
+        image [:, abs(translate_x):image_size[1]]= image[:, :image_size[1]-abs(translate_x)]
+        image[:, :abs(translate_x)] = 0
+    elif translate_x < 0:
+        image [:, :image_size[1]-abs(translate_x)]= image[:, abs(translate_x):image_size[1]]
+        image[:, image_size[1]-abs(translate_x):] = 0
 
-
-    ''' 
-    cropping to the required dimensions
-    '''
-    # TODO: take this into consideration when reading the labels
-    h2, w2, _ = image.shape
-    mid_h = h2 // 2
-    mid_w = w2 // 2
-    # print(mid_h-(image_size[0]//2), mid_h+(image_size[0]//2), mid_w-(image_size[1]//2), mid_w+(image_size[1]//2))
-    image = image[mid_h-(image_size[0]//2):mid_h+(image_size[0]//2), mid_w-(image_size[1]//2):mid_w+(image_size[1]//2)]
+    if translate_y > 0:
+        image [abs(translate_y):image_size[0], :]= image[:image_size[0]-abs(translate_y), :]
+        image[:abs(translate_y), :] = 0
+    elif translate_y < 0:
+        image [:image_size[0]-abs(translate_y), :]= image[abs(translate_y):image_size[0], :]
+        image[image_size[0]-abs(translate_y):, :] = 0
+    
     if fliplr:
         image = np.fliplr(image)
-    return image[:, :, :], h-image_size[0], w-image_size[1]
+    return image, 0, 0
 
 def read_camera(image_path, image_size, fliplr=False):
-    return __read_camera(image_path, image_size, fliplr=fliplr)
+    return __read_camera(image_path, image_size, translate_x = 0, translate_y = 0, fliplr=fliplr)
 
 
 ############################
 ########LIDAR###############
 ############################
 
-def read_lidar(lidar_path, calib_path, lidar_size, img_width=1224, img_height=370, translate_x=0, translate_y=0, translate_z=0, ang=0, fliplr=False):
-    image = velo_points_bev(lidar_path, calib_path, size=lidar_size, img_width=img_width, img_height=img_height,
+def read_lidar(rot, tr, sc, lidar_path, calib_path, lidar_size, img_width=1224, img_height=370, translate_x=0, translate_y=0, translate_z=0, ang=0, fliplr=False):
+    image = velo_points_bev(rot, tr, sc, lidar_path, calib_path, size=lidar_size, img_width=img_width, img_height=img_height,
                      translate_x=translate_x, translate_y=translate_y, translate_z=translate_z, ang=ang, fliplr=fliplr)
     
     return image
@@ -116,26 +100,65 @@ def inverse_rigid_trans(Tr):
     inv_Tr[0:3,3] = np.dot(-np.transpose(Tr[0:3,0:3]), Tr[0:3,3])
     return inv_Tr
 
-def project_rect_to_ref(pts_3d_rect, RO):
+def project_rect_to_ref(pts_3d_rect, R0):
         ''' Input and Output are nx3 points '''
-        return np.transpose(np.dot(np.linalg.inv(RO), np.transpose(pts_3d_rect)))
+        # return np.transpose(np.dot(np.linalg.inv(RO), np.transpose(pts_3d_rect)))
+        return np.transpose(np.dot(np.linalg.inv(R0.reshape((3, 3))), np.transpose(pts_3d_rect)))
     
+# def project_ref_to_velo(pts_3d_ref, Tr_velo_to_cam):
+#         C2V = inverse_rigid_trans(Tr_velo_to_cam)
+#         pts_3d_ref = cart2hom(pts_3d_ref) # nx4
+#         return np.dot(pts_3d_ref, np.transpose(C2V))
+
 def project_ref_to_velo(pts_3d_ref, Tr_velo_to_cam):
-        C2V = inverse_rigid_trans(Tr_velo_to_cam)
         pts_3d_ref = cart2hom(pts_3d_ref) # nx4
+        C2V = inverse_rigid_trans(Tr_velo_to_cam.reshape((3, 4)))
         return np.dot(pts_3d_ref, np.transpose(C2V))
     
-def project_rect_to_velo(pts_3d_rect, RO, Tr_velo_to_cam):
+def project_rect_to_velo2(rot, tr, sc, pts_3d_rect, RO, Tr_velo_to_cam):
         ''' Input: nx3 points in rect camera coord.
             Output: nx3 points in velodyne coord.
         ''' 
         pts_3d_ref = project_rect_to_ref(pts_3d_rect, RO)
         temp = project_ref_to_velo(pts_3d_ref, Tr_velo_to_cam)
-       
+        temp = temp.transpose() + tr[:3, :1]
+        temp = np.dot(sc[:3, :3], np.dot(rot[:3, :3], temp)).transpose()
         return temp
+
+def project_point_from_camera_coor_to_velo_coor2(rot, tr, sc, location, dimemsion, agnle, calib_data):
+    R = roty(agnle)
+    h, w, l = dimemsion
+    x, y, z = location
+    x_corners = [l/2,l/2,-l/2,-l/2,l/2,l/2,-l/2,-l/2];
+    y_corners = [0,0,0,0,-h,-h,-h,-h];
+    z_corners = [w/2,-w/2,-w/2,w/2,w/2,-w/2,-w/2,w/2];
+    
+    # rotate and translate 3d bounding box
+    corners_3d = np.dot(R, np.vstack([x_corners,y_corners,z_corners]))
+    #print corners_3d.shape
+    corners_3d[0,:] = corners_3d[0,:] + x;
+    corners_3d[1,:] = corners_3d[1,:] + y;
+    corners_3d[2,:] = corners_3d[2,:] + z;
+    #print 'cornsers_3d: ', corners_3d
+    # only draw 3d bounding box for objs in front of the camera
+#     if np.any(corners_3d[2,:]<0.1):
+#         corners_2d = None
+#         return corners_2d, np.transpose(corners_3d)
+
+    # project the 3d bounding box into the image plane
+#     corners_2d = project_to_image(np.transpose(corners_3d), calib_data['P3'].reshape((3, 4)));
+    box3d_pts_3d = np.transpose(corners_3d)
+
+    pts_3d_ref = project_rect_to_ref(box3d_pts_3d, calib_data['R0_rect'])
+    result = project_ref_to_velo(pts_3d_ref, calib_data['Tr_velo_to_cam'])
+#     print(result)
+    temp = result
+    temp = temp.transpose() + tr[:3, :1]
+    temp = np.dot(sc[:3, :3], np.dot(rot[:3, :3], temp)).transpose()
+    return temp
     
 
-def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_range=(-40, 40), z_range=(-3.0, 1), 
+def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_range=(-40, 40), z_range=(-3.0, 1), 
                     size=(512, 448, 40), get_actual_dims=False, from_file=True, translate_x=0, translate_y=0, translate_z=0, ang=0, get_neg=False, fliplr=False):
 
     """
@@ -160,7 +183,7 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
                 lines = lines[:1]
         else:
             # lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car', 'Van', 'Truck', 'Tram']), lines))
-             lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car', 'Van']), lines))
+             lines = list(filter(lambda x: len(x) > 0 and ( x[0] in ['Car']), lines))
     
     def get_parameter(index):
         return list(map(lambda x: x[index], lines))
@@ -180,10 +203,10 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
     calib_data = read_calib(calib_path)
 
     locations = np.array([[location_x[i], location_y[i], location_z[i]] for i in range(len(classes))])
-    # print(locations)
+    print(locations.shape)
     if len(locations) > 0 and len(locations[0]) > 0:
-        locations = project_rect_to_velo(locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
-    # print(locations)
+        locations = project_rect_to_velo2(rot, tr, sc, locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
+    print(locations.shape)
     # print(z_range)
 
     indx = []
@@ -210,13 +233,7 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
         classes = classes[indx]
         directions = directions[indx]
 
-    if len(locations) > 0:
-        locations[:, :3] = locations[:, :3] - np.array([translate_x, translate_y, translate_z])
-
-    # print('.......')
-    # print(len(locations))
-
-    points = [project_point_from_camera_coor_to_velo_coor([location_x[i], location_y[i], location_z[i]], 
+    points = [project_point_from_camera_coor_to_velo_coor2(rot, tr, sc, [location_x[i], location_y[i], location_z[i]], 
                                                         [dimension_height[i], dimension_width[i], dimension_length[i]],
                                                         angles[i],
                                                          calib_data)
@@ -269,16 +286,15 @@ def read_label(label_path, calib_path, shift_h, shift_w, x_range=(0, 71), y_rang
 
     if ang != 0:
         for i in range(len(locations)):
-            w = size[0]
-            h = size[1]
-            output[i][0], output[i][1] = rotate2((w//2, h//2), (output[i][0], output[i][1]), ang / 57.2958)
+            # w = size[0]
+            # h = size[1]
+            # output[i][0], output[i][1] = rotate2((w//2, h//2), (output[i][0], output[i][1]), ang / 57.2958)
             output[i][6] = output[i][6] - ang / 57.2958
 
     output = list(filter(lambda point: 0 <= point[0] < size[0] and 0 <= point[1] < size[1] and 0 <= point[2] < size[2] , output))
     output = np.array(output)
 
     return points, output, calib_data['Tr_velo_to_cam'], calib_data['R0_rect'], calib_data['P2'], directions
-
 
 
 def rotate(origin, point, angle):
