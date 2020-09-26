@@ -201,7 +201,9 @@ class DetectionDatasetLoader(DatasetLoader):
                     tr_y = translate_y
                     tr_z = translate_z
                     tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
-
+                    translate_x = 0
+                    translate_y = 0
+                    translate_z = 0
                     
                     sc_x = 1
                     sc_y = 1
