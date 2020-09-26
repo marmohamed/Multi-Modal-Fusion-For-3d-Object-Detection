@@ -38,8 +38,8 @@ def __read_camera(image_path, image_size, translate_x = 0, translate_y = 0, flip
         image = np.fliplr(image)
     return image, 0, 0
 
-def read_camera(image_path, image_size, fliplr=False):
-    return __read_camera(image_path, image_size, translate_x = 0, translate_y = 0, fliplr=fliplr)
+def read_camera(image_path, image_size, translate_x = 0, translate_y = 0, fliplr=False):
+    return __read_camera(image_path, image_size, translate_x = translate_x, translate_y = translate_x, fliplr=fliplr)
 
 
 ############################
