@@ -29,9 +29,9 @@ def velo_points_bev(rot, tr, sc, lidar_path, calib_path, x_range=(0, 71), y_rang
         calib, 0, 0, img_width, img_height, True)
     # points = imgfov_pc_velo
     points = points[fov_inds, :]
-    print(points.shape)
+    # print(points.shape)
     points = (points.transpose() + tr).transpose()
-    print(points.shape)
+    # print(points.shape)
     points = np.matmul(rot, points.transpose()).transpose()
     points = np.matmul(sc, points.transpose()).transpose()
     x = points[:, 0]
