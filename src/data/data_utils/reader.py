@@ -19,7 +19,7 @@ from data.data_utils.fv_utils import *
 def __read_camera(image_path, image_size, translate_x = 0, translate_y = 0, fliplr=False):
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.resize(image, (3, image_size[0]), interpolation = cv2.INTER_AREA)
+    image = cv2.resize(image, (image_size[1], image_size[0]), interpolation = cv2.INTER_AREA)
     if translate_x > 0:
         image [:, abs(translate_x):image_size[1]]= image[:, :image_size[1]-abs(translate_x)]
         image[:, :abs(translate_x)] = 0
@@ -39,7 +39,7 @@ def __read_camera(image_path, image_size, translate_x = 0, translate_y = 0, flip
     return image, 0, 0
 
 def read_camera(image_path, image_size, translate_x = 0, translate_y = 0, fliplr=False):
-    return __read_camera(image_path, image_size, translate_x = translate_x, translate_y = translate_x, fliplr=fliplr)
+    return __read_camera(image_path, image_size, translate_x = translate_x, translate_y = translate_y, fliplr=fliplr)
 
 
 ############################
@@ -203,10 +203,10 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
     calib_data = read_calib(calib_path)
 
     locations = np.array([[location_x[i], location_y[i], location_z[i]] for i in range(len(classes))])
-    print(locations.shape)
+    # print(locations.shape)
     if len(locations) > 0 and len(locations[0]) > 0:
         locations = project_rect_to_velo2(rot, tr, sc, locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
-    print(locations.shape)
+    # print(locations.shape)
     # print(z_range)
 
     indx = []
