@@ -22,8 +22,8 @@ class ResNetImage(ResNet):
             x = conv2d(self.model.conv1, inp=x)
 
             
-            x = batch_norm(self.model.bn1, is_training=is_training, inp=x)
-            x = relu(inp=x, scope='bn_rgb_0')
+            x = batch_norm(self.model.bn1, is_training=is_training, inp=x, scope='bn_rgb_0')
+            x = relu(inp=x)
             x = max_pool(self.model.maxpool, inp=x)
 
             x = resblock(x, [self.model.layer1[0].conv1, None, self.model.layer1[0].conv2], 
