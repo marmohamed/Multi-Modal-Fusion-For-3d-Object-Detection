@@ -131,10 +131,10 @@ class DetectionTrainer(Trainer):
                             # self.model.train_writer.add_summary(s1, counter//100)
                             while True:
 
-                                self.base_lr = sess.run(clr.cyclic_learning_rate(counter, learning_rate=self.branch_params['learning_rate'], \
+                                self.base_lr = clr.cyclic_learning_rate2(counter, learning_rate=self.branch_params['learning_rate'], \
                                                                     max_lr=self.branch_params['max_lr'],\
                                                                     step_size=self.branch_params['step_size'],\
-                                                                    mode='exp_range', gamma=.997))
+                                                                    mode='exp_range', gamma=.997)                                
                                 min_lr = self.base_lr
 
                                 s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })

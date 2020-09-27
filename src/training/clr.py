@@ -3,6 +3,8 @@ from tensorflow.python.framework import ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.eager import context
 
+import math
+
 def cyclic_learning_rate(global_step,
                          learning_rate=0.01,
                          max_lr=0.1,
@@ -116,3 +118,31 @@ def cyclic_learning_rate(global_step,
     if not context.executing_eagerly():
       cyclic_lr = cyclic_lr()
     return cyclic_lr
+
+
+def cyclic_learning_rate2(global_step,
+                         learning_rate=0.01,
+                         max_lr=0.1,
+                         step_size=20.,
+                         gamma=0.99994,
+                         mode='triangular',
+                         name=None):
+
+      double_step = 2. * step_size
+      global_div_double_step = global_step / double_step
+      cycle = math.floor(1. + global_div_double_step)
+      # computing: x = abs( global_step / step_size – 2 * cycle + 1 )
+      double_cycle = 2. * cycle
+      global_div_step = global_step / (step_size*1.)
+      tmp = global_div_step - double_cycle
+      x = abs(1. + tmp)
+      # computing: clr = learning_rate + ( max_lr – learning_rate ) * max( 0, 1 - x )
+      a1 = max(0., 1. - x)
+      a2 = max_lr - learning_rate
+      clr = a1 * a2
+      if mode == 'triangular2':
+        clr = clr / math.pow(2, cycle-1)
+      if mode == 'exp_range':
+        clr = math.pow(gamma, global_step) * clr
+      return clr + learning_rate
+    
