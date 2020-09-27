@@ -18,7 +18,7 @@ from Fusion.FusionLayer import *
 from data.segmentation_dataset_loader import *
 from data.detection_dataset_loader import *
 from training.Trainer import *
-from training.clr import clr
+from training import clr
 
 from evaluation.evaluate import *
 from utils.summary_images_utils import *
