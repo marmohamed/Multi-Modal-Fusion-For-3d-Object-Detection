@@ -4,8 +4,8 @@ from tensorflow.python.ops import math_ops
 from tensorflow.python.eager import context
 
 def cyclic_learning_rate(global_step,
-                         learning_rate=0.0001,
-                         max_lr=0.001,
+                         learning_rate=0.01,
+                         max_lr=0.1,
                          step_size=20.,
                          gamma=0.99994,
                          mode='triangular',
