@@ -134,7 +134,7 @@ class DetectionTrainer(Trainer):
                                 self.base_lr = clr.cyclic_learning_rate2(counter, learning_rate=self.branch_params['learning_rate'], \
                                                                     max_lr=self.branch_params['max_lr'],\
                                                                     step_size=self.branch_params['step_size'],\
-                                                                    mode='exp_range', gamma=.997)                                
+                                                                    mode='triangular', gamma=.997)                                
                                 min_lr = self.base_lr
 
                                 s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })

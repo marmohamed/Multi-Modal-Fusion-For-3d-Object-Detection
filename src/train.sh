@@ -25,9 +25,9 @@ num_summary_images_detection=5
 
 train_kitti=false
 train_city=false
-train_bev=false
+train_bev=true
 train_fusion=false
-train_end_to_end=true
+train_end_to_end=false
 
 
 
@@ -68,7 +68,7 @@ if [ "$train_bev" = true ]; then
                 --epochs $epochs_bev \
                 --start_epoch $start_epoch_bev \
                 --num_summary_images $num_summary_images_detection \
-                --batch_size 1 \
+                --batch_size 2 \
                 --train_fusion False \
                 --train_images_seg False \
                 --augment True
