@@ -201,6 +201,7 @@ class DetectionDatasetLoader(DatasetLoader):
                     tr_y = translate_y
                     tr_z = translate_z
                     tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
+                    
                     translate_x = 0
                     translate_y = 0
                     translate_z = 0
@@ -268,6 +269,9 @@ class DetectionDatasetLoader(DatasetLoader):
 
                 #         lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 255), dtype=np.int)
 
+                tr_z *= -1
+                tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
+                
                 _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, ang=ang, fliplr=fliplr)
                 label = get_target(label, directions,  anchors=anchors)
                 camera_image = camera_image / 255.
