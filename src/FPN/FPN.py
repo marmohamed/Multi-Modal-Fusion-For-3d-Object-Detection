@@ -21,8 +21,8 @@ def FPN(layers_outputs, scope, is_training=True, reuse=False):
             new_layer = dropout(new_layer, rate=0.2, scope='new_layer_pre_fpn_' + str(i), training=is_training)
 
             if i != len(layers_outputs)-1:
-
-                prev_layer = upsample(prev_layer, scope='upsample_' + str(i), filters=64, use_deconv=True, kernel_size=4)
+                if new_layer.get_shape()[1] > prev_layer.get_shape()[1]:
+                    prev_layer = upsample(prev_layer, scope='upsample_' + str(i), filters=64, use_deconv=True, kernel_size=4)
 
                 new_layer_height = new_layer.get_shape()[1]
                 prev_layer_height = prev_layer.get_shape()[1]

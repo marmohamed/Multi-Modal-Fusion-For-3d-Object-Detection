@@ -304,16 +304,28 @@ class Model(object):
                         #     self.model_loss_bev +=  10 * (2 - self.recall - self.precision)  * self.classification_loss
                         # if self.params['train_reg']:
                         #     self.model_loss_bev +=  1 * self.regression_loss_bev
+                        
+                        
+                        
+                        # self.regression_loss_bev = 0
+                        # if self.params['train_loc'] == 1:
+                        #     self.regression_loss_bev += 1000 * (2 - self.iou - self.iou_loc)* self.loc_reg_loss 
+                        # if self.params['train_dim'] == 1:
+                        #     self.regression_loss_bev += 50 * (2 - self.iou - self.iou_dim) * self.dim_reg_loss 
+                        # if self.params['train_theta'] == 1:
+                        #     self.regression_loss_bev += 1000 * self.theta_reg_loss 
+                        # self.model_loss_bev = 0
+
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
-                            self.regression_loss_bev += 1000 * (2 - self.iou - self.iou_loc)* self.loc_reg_loss 
+                            self.regression_loss_bev += 30 * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 50 * (2 - self.iou - self.iou_dim) * self.dim_reg_loss 
+                            self.regression_loss_bev += 20 * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
-                            self.regression_loss_bev += 1000 * self.theta_reg_loss 
+                            self.regression_loss_bev += 30 * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
-                            self.model_loss_bev +=  1 * (2 - self.recall - self.precision) * self.classification_loss
+                            self.model_loss_bev +=  5 * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
                         # if self.params['train_dir'] == 1:

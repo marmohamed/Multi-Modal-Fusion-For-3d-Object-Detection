@@ -216,10 +216,10 @@ def leaky_relu(x):
 
 def batch_norm(x, is_training=True, scope='batch_norm'):
     
-    return tf_contrib.layers.batch_norm(x,
-                                        decay=0.9, epsilon=1e-05,
-                                        center=True, scale=True, updates_collections=None,
-                                        is_training=is_training, scope=scope)
+    # return tf_contrib.layers.batch_norm(x,
+    #                                     decay=0.9, epsilon=1e-05,
+    #                                     center=True, scale=True, updates_collections=None,
+    #                                     is_training=is_training, scope=scope)
     # with tf.variable_scope(scope) :
     #     return tf.layers.BatchNormalization(renorm=True)(x, training=is_training)
     return group_norm(x, G=32, eps=1e-5, scope=scope)
