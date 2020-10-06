@@ -144,19 +144,51 @@ class DetectionDatasetLoader(DatasetLoader):
         return (camera_tensors, lidar_tensors, label_tensors, Tr_velo_to_cams, R0_rects, P3s, shift_hs, shift_ws)
 
 
+    def apply_mask(self, image, size=30, n_squares=3):
+        h, w, channels = image.shape
+        new_image = image[:]
+        for _ in range(n_squares):
+            y = np.random.randint(h)
+            x = np.random.randint(w)
+            y1 = np.clip(y - size // 2, 0, h)
+            y2 = np.clip(y + size // 2, 0, h)
+            x1 = np.clip(x - size // 2, 0, w)
+            x2 = np.clip(x + size // 2, 0, w)
+            new_image[y1:y2,x1:x2,:] = 0
+        return new_image
+
+
+    def apply_mask_lidar(self, image, size_x=30, size_y=30, size_z=5, n_squares=1):
+        w, l, h = image.shape
+        new_image = image[:]
+        for _ in range(n_squares):
+            x = np.random.randint(w)
+            y = np.random.randint(l)
+            z = np.random.randint(h)
+
+            y1 = np.clip(y - size_y // 2, 0, l)
+            y2 = np.clip(y + size_y // 2, 0, l)
+            x1 = np.clip(x - size_x // 2, 0, w)
+            x2 = np.clip(x + size_x // 2, 0, w)
+            z1 = np.clip(z - size_z // 2, 0, h)
+            z2 = np.clip(z + size_z // 2, 0, h)
+            new_image[x1:x2, y1:y2,z1:z2] = 0.
+        return new_image
+
+
     def __data_generator(self, base_path, image_size, lidar_size, anchors, list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths, 
                         augment_translate=False, augment_rotate=False, training=True):
 
-        # if training:
-        #     value = random.randint(0, 50)
-        #     random.seed(value)
-        #     random.shuffle(list_camera_paths)
-        #     random.seed(value)
-        #     random.shuffle(list_lidar_paths)
-        #     random.seed(value)
-        #     random.shuffle(list_label_paths)
-        #     random.seed(value)
-        #     random.shuffle(list_calib_paths)
+        if training:
+            value = random.randint(0, 50)
+            random.seed(value)
+            random.shuffle(list_camera_paths)
+            random.seed(value)
+            random.shuffle(list_lidar_paths)
+            random.seed(value)
+            random.shuffle(list_label_paths)
+            random.seed(value)
+            random.shuffle(list_calib_paths)
 
         for camera_path, lidar_path, label_path, calib_path in zip(list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths):
                 
@@ -247,34 +279,61 @@ class DetectionDatasetLoader(DatasetLoader):
 
 
                 camera_image, shift_h, shift_w = read_camera(camera_path, image_size, image_translate_x, image_translate_y, fliplr=fliplr)
+                camera_image = camera_image / 255.
+                if training:
+                    if np.random.random_sample() >= 0.5:
+                        noise = np.random.rand(370, 1224, 3)
+                        ones = np.ones_like(camera_image)
+                        ones[noise > 0.8] = 1
+                        ones[noise <= 0.8] = 0
+                        camera_image = np.clip(camera_image + ones, 0, 1)
+
+                    if np.random.random_sample() >= 0.5:
+                        noise = np.random.rand(370, 1224, 3)
+                        zeros = np.zeros_like(camera_image)
+                        zeros[noise > 0.8] = 0
+                        zeros[noise <= 0.8] = 1
+                        camera_image = np.clip(camera_image * zeros, 0, 1)
+
+                    if np.random.random_sample() >= 0.5:
+                        camera_image = self.apply_mask(camera_image)
+
+                
                 h, w, _ = cv2.imread(camera_path).shape
                 lidar_image = read_lidar(rot, tr, sc, lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y, fliplr=fliplr)
 
-                # if training:
-                #     if np.random.random_sample() >= 0.8:
-                #         noise = np.random.rand(512, 448, 40)
-                #         noise2 = np.random.rand(512, 448, 40)
+                if training:
+                    if np.random.random_sample() >= 0.5:
+                        noise = np.random.rand(512, 448, 41)
+                        noise2 = np.random.rand(512, 448, 41)
 
-                #         noise = np.array(noise>=0.99, dtype=np.int)
-                #         noise2 = np.array(noise2>=0.99, dtype=np.int)
+                        noise = np.array(noise>=0.99, dtype=np.int)
+                        noise2 = np.array(noise2>=0.99, dtype=np.int)
 
-                #         lidar_image = np.array(np.clip(lidar_image + noise*noise2*255, 0, 255), dtype=np.int)
+                        lidar_image = np.array(np.clip(lidar_image + noise*noise2*255, 0, 255), dtype=np.int)
 
-                #     if np.random.random_sample() >= 0.8:
-                #         noise = np.random.rand(512, 448, 40)
-                #         noise2 = np.random.rand(512, 448, 40)
+                    if np.random.random_sample() >= 0.5:
+                        noise = np.random.rand(512, 448, 41)
+                        noise2 = np.random.rand(512, 448, 41)
 
-                #         noise = np.array(noise>=0.1, dtype=np.int)
-                #         noise2 = np.array(noise2>=0.1, dtype=np.int)
+                        noise = np.array(noise>=0.1, dtype=np.int)
+                        noise2 = np.array(noise2>=0.1, dtype=np.int)
 
-                #         lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 255), dtype=np.int)
+                        lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 255), dtype=np.int)
+
+                    if np.random.random_sample() >= 0.5:
+                        lidar_image = self.apply_mask_lidar(lidar_image)
 
                 tr_z *= -1
                 tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
                 
                 _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, ang=ang, fliplr=fliplr)
                 label = get_target(label, directions,  anchors=anchors)
-                camera_image = camera_image / 255.
+                
+
+                
+
+
                 lidar_image = (lidar_image - 127.) / 127.
                 yield(camera_image, lidar_image, label,
                                     np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
@@ -285,199 +344,6 @@ class DetectionDatasetLoader(DatasetLoader):
                                     )
 
 
-                # camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                # h, w, _ = cv2.imread(camera_path).shape
-                # lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w)
-                # _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w)
-                # label = get_target(label, directions,  anchors=anchors)
-                # camera_image = camera_image / 255.
-                # lidar_image = lidar_image / 255.
-                # yield(camera_image, lidar_image, label,
-                #             np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #             np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #             np.array(P3).reshape((3, 4)), 
-                #             np.array([shift_h]), 
-                #             np.array([shift_w])
-                #             )
-
-
-                # if training:
-                #     camera_image, shift_h, shift_w = read_camera(camera_path, image_size, fliplr=True)
-                #     h, w, _ = cv2.imread(camera_path).shape
-                #     lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w, fliplr=True)
-                #     _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w, fliplr=True)
-                #     label = get_target(label, directions,  anchors=anchors)
-                #     camera_image = camera_image / 255.
-                #     lidar_image = lidar_image / 255.
-                #     yield(camera_image, lidar_image, label,
-                #                 np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #                 np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #                 np.array(P3).reshape((3, 4)), 
-                #                 np.array([shift_h]), 
-                #                 np.array([shift_w])
-                #                 )
-
-                #     camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                #     h, w, _ = cv2.imread(camera_path).shape
-                #     lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w)
-                    
-                #     noise = np.random.rand(512, 448, 40)
-                #     noise2 = np.random.rand(512, 448, 40)
-
-                #     noise = np.array(noise>=0.99, dtype=np.int)
-                #     noise2 = np.array(noise2>=0.99, dtype=np.int)
-
-                #     lidar_image = np.array(np.clip(lidar_image + noise*noise2*255, 0, 255), dtype=np.int)
-
-                #     _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w)
-                #     label = get_target(label, directions,  anchors=anchors)
-                #     camera_image = camera_image / 255.
-                #     lidar_image = lidar_image / 255.
-                #     yield(camera_image, lidar_image, label,
-                #                 np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #                 np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #                 np.array(P3).reshape((3, 4)), 
-                #                 np.array([shift_h]), 
-                #                 np.array([shift_w])
-                #                 )
-
-
-                #     camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                #     h, w, _ = cv2.imread(camera_path).shape
-                #     lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w)
-                    
-                #     noise = np.random.rand(512, 448, 40)
-                #     noise2 = np.random.rand(512, 448, 40)
-
-                #     noise = np.array(noise>=0.1, dtype=np.int)
-                #     noise2 = np.array(noise2>=0.1, dtype=np.int)
-
-                #     lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 255), dtype=np.int)
-
-                #     _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w)
-                #     label = get_target(label, directions,  anchors=anchors)
-                #     camera_image = camera_image / 255.
-                #     lidar_image = lidar_image / 255.
-                #     yield(camera_image, lidar_image, label,
-                #                 np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #                 np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #                 np.array(P3).reshape((3, 4)), 
-                #                 np.array([shift_h]), 
-                #                 np.array([shift_w])
-                #                 )
-
-
-
-                # if augment_rotate:
-                #         translate_x = 0
-                #         translate_y = 0
-                #         translate_z = 0
-                #         ang = random.randint(-5, 5)
-                    
-                #         camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                #         h, w, _ = cv2.imread(camera_path).shape
-                #         lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y)
-                #         _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, ang=ang)
-                #         label = get_target(label, directions,  anchors=anchors)
-                #         camera_image = camera_image / 255.
-                #         lidar_image = lidar_image / 255.
-                #         yield(camera_image, lidar_image, label,
-                #                     np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #                     np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #                     np.array(P3).reshape((3, 4)), 
-                #                     np.array([shift_h]), 
-                #                     np.array([shift_w])
-                #                     )
-
-                # if augment_translate:
-                #         translate_x = random.randint(-5, 5)
-                #         translate_y = random.randint(-5, 5)
-                #         translate_z = random.random() - 0.5
-                #         translate_z = 0
-                #         ang = 0
-                        
-                #         camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                #         h, w, _ = cv2.imread(camera_path).shape
-                #         lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y, translate_z=translate_z)
-                #         _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, translate_z=-translate_z, ang=ang)
-                #         label = get_target(label, directions,  anchors=anchors)
-                #         camera_image = camera_image / 255.
-                #         lidar_image = lidar_image / 255.
-                #         yield(camera_image, lidar_image, label,
-                #                     np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #                     np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #                     np.array(P3).reshape((3, 4)), 
-                #                     np.array([shift_h]), 
-                #                     np.array([shift_w])
-                #                     )
-
-                # if augment_rotate and augment_translate:
-                #         translate_x = random.randint(-5, 5)
-                #         translate_y = random.randint(-5, 5)
-                #         translate_z = random.random() - 0.5
-                #         translate_z = 0
-                #         ang = random.randint(-5, 5)
-                    
-                #         camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                #         h, w, _ = cv2.imread(camera_path).shape
-                #         lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y, translate_z=translate_z)
-                #         _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, translate_z=-translate_z, ang=ang)
-                #         label = get_target(label, directions,  anchors=anchors)
-                #         camera_image = camera_image / 255.
-                #         lidar_image = lidar_image / 255.
-                #         yield(camera_image, lidar_image, label,
-                #                     np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                #                     np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                #                     np.array(P3).reshape((3, 4)), 
-                #                     np.array([shift_h]), 
-                #                     np.array([shift_w])
-                #                     )
-
-
-                        # translate_x = random.randint(-10, 10)
-                        # translate_y = random.randint(-10, 10)
-                        # translate_z = random.random() - 0.5
-                        # translate_z = 0
-                        # ang = random.randint(-15, -5)
-                    
-                        # camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                        # h, w, _ = cv2.imread(camera_path).shape
-                        # lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y, translate_z=translate_z)
-                        # _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, translate_z=-translate_z, ang=ang)
-                        # label = get_target(label, directions,  anchors=anchors)
-                        # camera_image = camera_image / 255.
-                        # lidar_image = lidar_image / 255.
-                        # yield(camera_image, lidar_image, label,
-                        #             np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                        #             np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                        #             np.array(P3).reshape((3, 4)), 
-                        #             np.array([shift_h]), 
-                        #             np.array([shift_w])
-                        #             )
-
-
-                        # translate_x = random.randint(-10, 10)
-                        # translate_y = random.randint(-10, 10)
-                        # translate_z = random.random() - 0.5
-                        # translate_z = 0
-                        # ang = random.randint(5, 15)
-                    
-                        # camera_image, shift_h, shift_w = read_camera(camera_path, image_size)
-                        # h, w, _ = cv2.imread(camera_path).shape
-                        # lidar_image = read_lidar(lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y, translate_z=translate_z)
-                        # _, label, Tr_velo_to_cam, R0_rect, P3, directions = read_label(label_path, calib_path, shift_h, shift_w, translate_x=translate_x, translate_y=translate_y, translate_z=-translate_z, ang=ang)
-                        # label = get_target(label, directions,  anchors=anchors)
-                        # camera_image = camera_image / 255.
-                        # lidar_image = lidar_image / 255.
-                        # yield(camera_image, lidar_image, label,
-                        #             np.concatenate([np.array(Tr_velo_to_cam).reshape((3, 4)), np.array([[0, 0, 0, 1]])], axis=0),
-                        #             np.concatenate([np.concatenate([np.array(R0_rect).reshape((3, 3)), np.array([[0], [0], [0]])], axis=1),  np.array([[0, 0, 0, 1]])], axis=0),
-                        #             np.array(P3).reshape((3, 4)), 
-                        #             np.array([shift_h]), 
-                        #             np.array([shift_w])
-                        #             )
-
-
-                        
+           
 
 
