@@ -83,7 +83,7 @@ class DetectionTrainer(Trainer):
 
         losses = []
         self.count_not_best = 0
-        # self.base_lr = self.branch_params['lr']
+        self.base_lr = self.branch_params['lr']
         self.last_loss = float('inf')
         # self.anchors = prepare_anchors()
         # self.anchors = np.repeat(self.anchors, batch_size, axis=0)
@@ -110,10 +110,10 @@ class DetectionTrainer(Trainer):
                     for e in range(start_epoch, start_epoch+epochs, 1):
                         
                         self.dataset.reset_generator()
-                        # min_lr = self.get_lr(e-start_epoch)
+                        min_lr = self.get_lr(e-start_epoch)
 
-                        # print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
-                        print('Start epoch {0}'.format(e))
+                        print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
+                        # print('Start epoch {0}'.format(e))
                       
                         try:
                             epoch_loss = []
@@ -124,21 +124,21 @@ class DetectionTrainer(Trainer):
                             epoch_theta_loss = []
                             epoch_dir_loss = []
                             
-                            # s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
-                            # self.model.train_writer.add_summary(s1, e)
+                            s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                            self.model.train_writer.add_summary(s1, e)
                             # min_lr = 1e-6
                             # s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
                             # self.model.train_writer.add_summary(s1, counter//100)
                             while True:
 
-                                self.base_lr = clr.cyclic_learning_rate2(counter, learning_rate=self.branch_params['learning_rate'], \
-                                                                    max_lr=self.branch_params['max_lr'],\
-                                                                    step_size=self.branch_params['step_size'],\
-                                                                    mode='triangular', gamma=.997)                                
-                                min_lr = self.base_lr
+                                # self.base_lr = clr.cyclic_learning_rate2(counter, learning_rate=self.branch_params['learning_rate'], \
+                                #                                     max_lr=self.branch_params['max_lr'],\
+                                #                                     step_size=self.branch_params['step_size'],\
+                                #                                     mode='triangular', gamma=.997)                                
+                                # min_lr = self.base_lr
 
-                                s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
-                                self.model.train_writer.add_summary(s1, counter)
+                                # s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                                # self.model.train_writer.add_summary(s1, counter)
 
                                 feed_dict = self.__prepare_dataset_feed_dict(self.dataset, 
                                                                             self.branch_params['train_fusion_rgb'], 
@@ -181,7 +181,15 @@ class DetectionTrainer(Trainer):
 
                             self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch_dir_loss, e, True)
                             
-                            print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e, np.mean(np.array(epoch_loss).flatten()), np.mean(np.array(epoch_cls_loss).flatten()), np.mean(np.array(epoch_reg_loss).flatten())))
+                            # print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e, np.mean(np.array(epoch_loss).flatten()), np.mean(np.array(epoch_cls_loss).flatten()), np.mean(np.array(epoch_reg_loss).flatten())))
+                            print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}, theta_loss = {4}, loc_loss = {5}, dim_loss = {6}'.format(e,\
+                                np.mean(np.array(epoch_loss).flatten()),\
+                                np.mean(np.array(epoch_cls_loss).flatten()),\
+                                np.mean(np.array(epoch_reg_loss).flatten()),\
+                                np.mean(np.array(epoch_theta_loss).flatten()),\
+                                np.mean(np.array(epoch_loc_loss).flatten()),\
+                                np.mean(np.array(epoch_dim_loss).flatten())
+                                ))
 
                             eval_batch_size=batch_size
                             d = {
@@ -259,8 +267,15 @@ class DetectionTrainer(Trainer):
         finally:
             self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, theta_loss, dir_loss, epoch, False)
 
-            print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch, np.mean(np.array(loss).flatten()), np.mean(np.array(cls_loss).flatten()), np.mean(np.array(reg_loss).flatten())))
-            
+            # print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch, np.mean(np.array(loss).flatten()), np.mean(np.array(cls_loss).flatten()), np.mean(np.array(reg_loss).flatten())))
+            print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}, theta_loss = {4}, loc_loss = {5}, dim_loss = {6}'.format(epoch,\
+                                np.mean(np.array(loss).flatten()),\
+                                np.mean(np.array(cls_loss).flatten()),\
+                                np.mean(np.array(reg_loss).flatten()),\
+                                np.mean(np.array(theta_loss).flatten()),\
+                                np.mean(np.array(loc_loss).flatten()),\
+                                np.mean(np.array(dim_loss).flatten())
+                                ))
             
         # self.eval_dataset.reset_generator()
         # th=0.5
