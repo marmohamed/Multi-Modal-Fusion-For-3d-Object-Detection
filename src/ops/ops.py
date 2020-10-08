@@ -18,6 +18,13 @@ weight_regularizer = tf_contrib.layers.l2_regularizer(0.005)
 # Layer
 ##################################################################################
 
+def ws_reg(kernel):
+    kernel_mean = tf.math.reduce_mean(kernel, axis=[0, 1, 2], keepdims=True, name='kernel_mean')
+    kernel = kernel - kernel_mean
+    # kernel_std = tf.math.reduce_std(kernel, axis=[0, 1, 2], keepdims=True, name='kernel_std')
+    kernel_std = tf.keras.backend.std(kernel, axis=[0, 1, 2], keepdims=True)
+    kernel = kernel / (kernel_std + 1e-5)
+
 def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='conv_0', reuse=False, focal_init=None, separable=False):
     with tf.variable_scope(scope, reuse=reuse):
         if focal_init is not None:
@@ -26,7 +33,8 @@ def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='
             x = tf.layers.conv2d(inputs=x, filters=channels,
                                 kernel_size=kernel, kernel_initializer=weight_init,
                                 bias_initializer=tf.constant_initializer(np_arr),
-                                kernel_regularizer=weight_regularizer,
+                                # kernel_regularizer=weight_regularizer,
+                                kernel_regularizer=ws_reg,
                                 strides=stride, use_bias=use_bias, padding=padding)
             return x
         else:

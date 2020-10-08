@@ -4,6 +4,13 @@ import numpy as np
 
 # https://github.com/leonidk/pytorch-tf/blob/master/pytorch-tf.ipynb
 
+def ws_reg(kernel):
+    kernel_mean = tf.math.reduce_mean(kernel, axis=[0, 1, 2], keepdims=True, name='kernel_mean')
+    kernel = kernel - kernel_mean
+    # kernel_std = tf.math.reduce_std(kernel, axis=[0, 1, 2], keepdims=True, name='kernel_std')
+    kernel_std = tf.keras.backend.std(kernel, axis=[0, 1, 2], keepdims=True)
+    kernel = kernel / (kernel_std + 1e-5)
+
 
 def conv2d(c,**kwargs):
     padding = 'VALID' if c.padding[0] is 0 else 'SAME'
@@ -22,13 +29,17 @@ def conv2d(c,**kwargs):
         x = tf.keras.layers.Conv2D(c.out_channels, c.kernel_size, 
                                     strides=[c.stride[0], c.stride[1]],
                                     padding=padding,
+                                    kernel_regularizer=ws_reg,
                                     kernel_initializer=tf.constant_initializer(W),
-                                    bias_initializer=tf.constant_initializer(b), use_bias=c.bias)(x)
+                                    bias_initializer=tf.constant_initializer(b), 
+                                    use_bias=c.bias)(x)
     else:
         x = tf.keras.layers.Conv2D(c.out_channels, c.kernel_size, 
                                     strides=[c.stride[0], c.stride[1]],
                                     padding=padding,
-                                    kernel_initializer=tf.constant_initializer(W), use_bias=c.bias)(x)
+                                    kernel_regularizer=ws_reg,
+                                    kernel_initializer=tf.constant_initializer(W), 
+                                    use_bias=c.bias)(x)
 
     return x
 
