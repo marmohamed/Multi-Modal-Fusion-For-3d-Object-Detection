@@ -151,46 +151,15 @@ class Model(object):
 
                 with tf.variable_scope("lidar_branch"):
                     with tf.variable_scope("fpn"): 
-                        # print("self.cnn_lidar.res_groups")
-                        # print(self.cnn_lidar.res_groups)
-                        # print("self.cnn_lidar.res_groups2")
-                        # print(self.cnn_lidar.res_groups2)
-                        fpn_lidar = FPN(self.cnn_lidar.res_groups2, "fpn_lidar", is_training=self.is_training)
-                        # print("fpn_lidar", fpn_lidar)
-                        # self.debug_layers['fpn_lidar'] = fpn_lidar
                         
-                        # fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
-                        # fpn_lidar[2] = upsample(fpn_lidar[2], size=(2, 2), scope='fpn_upsample_1', use_deconv=True, kernel_size=4)
-                        # # fpn_lidar[3] = upsample(fpn_lidar[3], size=(4, 4), scope='fpn_upsample_2', use_deconv=True)
-
-                        # # fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
-                        # fpn_lidar[1] = upsample(fpn_lidar[1], size=(2, 2), scope='fpn_upsample_1', use_deconv=True, kernel_size=4)
-                        # fpn_lidar[2] = upsample(fpn_lidar[2], size=(4, 4), scope='fpn_upsample_2', use_deconv=True, kernel_size=4)
-
+                        fpn_lidar = FPN(self.cnn_lidar.res_groups2, "fpn_lidar", is_training=self.is_training)
+                    
                         fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
-                        # fpn_lidar[2] = upsample(fpn_lidar[2], is_training=self.is_training, size=(2, 2), scope='fpn_upsample_2', use_deconv=True, kernel_size=4)
-
 
                         fpn_lidar = tf.concat(fpn_lidar[:], 3)
 
-                        # print("hereeeeeeeeeeee")
-                    
-                        # self.debug_layers['fpn_lidar_output'] = fpn_lidar
-
-                        # for i in range(1):
-                        #     temp = conv(fpn_lidar, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_'+str(i))
-                        #     temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_' + str(i))
-                        #     temp = relu(temp)
-                        #     # temp = dropout(temp, rate=0.1, scope='dropout_post_fpn_0', training=self.is_training)
-                        #     fpn_lidar = temp
-
-
-                        # fpn_lidar1 = self.cnn_lidar.train_logits
-                        # fpn_lidar2 = self.cnn_lidar.train_logits
-
-                        fpn_lidar1 = fpn_lidar
-                        fpn_lidar2 = fpn_lidar
-
+                        fpn_lidar1 = fpn_lidar[:]
+                        fpn_lidar2 = fpn_lidar[:]
 
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
