@@ -53,7 +53,8 @@ def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='
             else:
                 x = tf.layers.conv2d(inputs=x, filters=channels,
                                 kernel_size=kernel, kernel_initializer=weight_init,
-                                kernel_regularizer=weight_regularizer,
+                                # kernel_regularizer=weight_regularizer,
+                                kernel_regularizer=ws_reg,
                                 strides=stride, use_bias=use_bias, padding=padding)
 
         return x
