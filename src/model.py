@@ -161,9 +161,9 @@ class Model(object):
                         fpn_lidar1 = fpn_lidar[:]
                         fpn_lidar2 = fpn_lidar[:]
 
-                        num_conv_blocks=2
+                        num_conv_blocks=1
                         for i in range(0, num_conv_blocks):
-                            temp = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
+                            temp = conv(fpn_lidar1, 128, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
                             temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
                             temp = relu(temp)
                             # fpn_lidar = fpn_lidar + temp
@@ -171,15 +171,15 @@ class Model(object):
                             # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
                             self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar1
 
-                        num_conv_blocks=2
-                        for i in range(0, num_conv_blocks):
-                            temp = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
-                            temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
-                            temp = relu(temp)
-                            # fpn_lidar = fpn_lidar + temp
-                            fpn_lidar2 = temp
-                            # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
-                            self.debug_layers['fpn_lidar_output_post_conv_2_'+str(i)] = fpn_lidar2
+                        # num_conv_blocks=1
+                        # for i in range(0, num_conv_blocks):
+                        #     temp = conv(fpn_lidar2, 128, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
+                        #     temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
+                        #     temp = relu(temp)
+                        #     # fpn_lidar = fpn_lidar + temp
+                        #     fpn_lidar2 = temp
+                        #     # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                        #     self.debug_layers['fpn_lidar_output_post_conv_2_'+str(i)] = fpn_lidar2
 
                        
 
@@ -187,8 +187,8 @@ class Model(object):
                             final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
                             final_output_2_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
                             
-                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
-                            final_output_2_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
+                            final_output_1_8 = conv(fpn_lidar1, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
+                            final_output_2_8 = conv(fpn_lidar1, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
 
                             final_output_1 = tf.concat([final_output_1_7, final_output_1_8], -1)
                             final_output_2 = tf.concat([final_output_2_7, final_output_2_8], -1)
