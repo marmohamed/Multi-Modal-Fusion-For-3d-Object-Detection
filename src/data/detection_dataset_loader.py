@@ -242,11 +242,11 @@ class DetectionDatasetLoader(DatasetLoader):
                     sc_y = 1
                     sc_z = 1
 
-                    if np.random.random_sample() >= 0.5:
-                       sc_x += ((random.random() * 2) - 1.) / 10.
+                    # if np.random.random_sample() >= 0.5:
+                    #    sc_x += ((random.random() * 2) - 1.) / 10.
 
-                    if np.random.random_sample() >= 0.5:
-                       sc_y += ((random.random() * 2) - 1.) / 10.
+                    # if np.random.random_sample() >= 0.5:
+                    #    sc_y += ((random.random() * 2) - 1.) / 10.
 
 
                     sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])
