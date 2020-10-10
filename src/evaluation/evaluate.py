@@ -45,7 +45,8 @@ def convert_prediction_into_real_values(label_tensor,
             out[:2] = out[:2] * ratio
             out[2] = out[2] * 40
             
-            out[3:6] = np.exp(np.maximum(0, out[3:6])) * anchors
+            # out[3:6] = np.exp(np.maximum(0, out[3:6])) * anchors
+            out[3:6] = np.exp(out[3:6]) * anchors
             
             k = ones_index[2][i]
 

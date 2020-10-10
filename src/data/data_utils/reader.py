@@ -114,6 +114,15 @@ def project_ref_to_velo(pts_3d_ref, Tr_velo_to_cam):
         pts_3d_ref = cart2hom(pts_3d_ref) # nx4
         C2V = inverse_rigid_trans(Tr_velo_to_cam.reshape((3, 4)))
         return np.dot(pts_3d_ref, np.transpose(C2V))
+
+
+def project_rect_to_velo(pts_3d_rect, RO, Tr_velo_to_cam):
+        ''' Input: nx3 points in rect camera coord.
+            Output: nx3 points in velodyne coord.
+        ''' 
+        pts_3d_ref = project_rect_to_ref(pts_3d_rect, RO)
+        temp = project_ref_to_velo(pts_3d_ref, Tr_velo_to_cam)
+        return temp
     
 def project_rect_to_velo2(rot, tr, sc, pts_3d_rect, RO, Tr_velo_to_cam):
         ''' Input: nx3 points in rect camera coord.
@@ -121,8 +130,12 @@ def project_rect_to_velo2(rot, tr, sc, pts_3d_rect, RO, Tr_velo_to_cam):
         ''' 
         pts_3d_ref = project_rect_to_ref(pts_3d_rect, RO)
         temp = project_ref_to_velo(pts_3d_ref, Tr_velo_to_cam)
+        # print('before 2')
+        # print(temp)
         temp = temp.transpose() + tr[:3, :1]
         temp = np.dot(sc[:3, :3], np.dot(rot[:3, :3], temp)).transpose()
+        # print('after 2')
+        # print(temp)
         return temp
 
 def project_point_from_camera_coor_to_velo_coor2(rot, tr, sc, location, dimemsion, agnle, calib_data):
@@ -151,10 +164,13 @@ def project_point_from_camera_coor_to_velo_coor2(rot, tr, sc, location, dimemsio
 
     pts_3d_ref = project_rect_to_ref(box3d_pts_3d, calib_data['R0_rect'])
     result = project_ref_to_velo(pts_3d_ref, calib_data['Tr_velo_to_cam'])
-#     print(result)
+    # print('before')
+    # print(result)
     temp = result
     temp = temp.transpose() + tr[:3, :1]
     temp = np.dot(sc[:3, :3], np.dot(rot[:3, :3], temp)).transpose()
+    # print('after')
+    # print(temp)
     return temp
     
 
@@ -204,10 +220,14 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
 
     locations = np.array([[location_x[i], location_y[i], location_z[i]] for i in range(len(classes))])
     # print(locations.shape)
+    print(locations)
     if len(locations) > 0 and len(locations[0]) > 0:
         locations = project_rect_to_velo2(rot, tr, sc, locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
+    # if len(locations) > 0 and len(locations[0]) > 0:
+    #     locations = project_rect_to_velo(locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
     # print(locations.shape)
     # print(z_range)
+    print(locations)
 
     indx = []
     i = 0
@@ -218,10 +238,11 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
             indx.append(i)
         i += 1
 
+    
     locations = np.array(list(filter(lambda point: (point[0] >= x_range[0]  and point[0] <= x_range[1])
                                     and (point[1] >= y_range[0] and point[1] <= y_range[1])
                                     and (point[2] >= z_range[0] and point[2] <= z_range[1]) , locations)))
-
+    
     if len(indx) > 0:
         dimension_height = dimension_height[indx]
         dimension_width = dimension_width[indx]
@@ -238,6 +259,11 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
                                                         angles[i],
                                                          calib_data)
                 for i in range(len(locations))]
+    # points = [project_point_from_camera_coor_to_velo_coor([location_x[i], location_y[i], location_z[i]], 
+    #                                                     [dimension_height[i], dimension_width[i], dimension_length[i]],
+    #                                                     angles[i],
+    #                                                      calib_data)
+    #             for i in range(len(locations))]
     
     x_size = (x_range[1] - x_range[0])
     y_size = (y_range[1] - y_range[0])
@@ -278,6 +304,9 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
     output = [[-(locations[i][0] + -1*x_range[0]) * x_fac + size[0], -(locations[i][1] + -1*y_range[0]) * y_fac + size[1], -(locations[i][2] + -1*z_range[0]) * z_fac + size[2], 
                 dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
                 for i in range(len(locations))]
+    # output = [[locations[i][0], locations[i][1], locations[i][2], 
+    #             dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
+    #             for i in range(len(locations))]
     # import math
     if fliplr:
         for i in range(len(locations)):

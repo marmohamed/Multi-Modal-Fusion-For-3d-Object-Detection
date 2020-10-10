@@ -113,7 +113,7 @@ class LossCalculator(object):
 
         loc_ratios = np.array([2.4375, 1., 9.375*10 ])
         reg_losses1 = [loss_fn(truth[:, :, :, :, i], tf.tanh(predictions[:, :, :, :, i])*0.5) * loc_ratios[i] for i in range(3)] 
-        reg_losses2 = [loss_fn(truth[:, :, :, :, i], tf.nn.relu(predictions[:, :, :, :, i])) for i in range(3, 6)] 
+        reg_losses2 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3, 6)] 
         reg_losses3 = [loss_fn((truth[:, :, :, :, i] + np.pi/4) / (np.pi/2), tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(6, 7)]
 
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), tf.nn.sigmoid_cross_entropy_with_logits(labels=t, logits=p), tf.zeros_like(p))
