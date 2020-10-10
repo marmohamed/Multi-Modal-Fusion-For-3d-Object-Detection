@@ -220,14 +220,14 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
 
     locations = np.array([[location_x[i], location_y[i], location_z[i]] for i in range(len(classes))])
     # print(locations.shape)
-    print(locations)
+    # print(locations)
     if len(locations) > 0 and len(locations[0]) > 0:
         locations = project_rect_to_velo2(rot, tr, sc, locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
     # if len(locations) > 0 and len(locations[0]) > 0:
     #     locations = project_rect_to_velo(locations, calib_data['R0_rect'].reshape((3, 3)), calib_data['Tr_velo_to_cam'].reshape((3, 4)))
     # print(locations.shape)
     # print(z_range)
-    print(locations)
+    # print(locations)
 
     indx = []
     i = 0
