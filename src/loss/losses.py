@@ -136,7 +136,7 @@ class LossCalculator(object):
         z_ = tf.tanh(predictions[:, :, :, :, 2])*0.5*anchors_size[2] + 0.5
 
         size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
-        size_pred = tf.math.exp(tf.nn.relu(predictions[:, :, :, :, 3:6]))*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
 
         x1 = x + size_true[:, :, :, :, 0]/2
@@ -325,7 +325,7 @@ class LossCalculator(object):
         z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
 
         size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
-        size_pred = tf.math.exp(tf.nn.relu(predictions[:, :, :, :, 3:6]))*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
 
         x1 = x + size_true[:, :, :, :, 0]/2
