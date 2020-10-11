@@ -29,7 +29,7 @@ def conv2d(c,**kwargs):
         x = tf.keras.layers.Conv2D(c.out_channels, c.kernel_size, 
                                     strides=[c.stride[0], c.stride[1]],
                                     padding=padding,
-                                    kernel_regularizer=ws_reg,
+                                    # kernel_regularizer=ws_reg,
                                     kernel_initializer=tf.constant_initializer(W),
                                     bias_initializer=tf.constant_initializer(b), 
                                     use_bias=c.bias)(x)
@@ -37,7 +37,7 @@ def conv2d(c,**kwargs):
         x = tf.keras.layers.Conv2D(c.out_channels, c.kernel_size, 
                                     strides=[c.stride[0], c.stride[1]],
                                     padding=padding,
-                                    kernel_regularizer=ws_reg,
+                                    # kernel_regularizer=ws_reg,
                                     kernel_initializer=tf.constant_initializer(W), 
                                     use_bias=c.bias)(x)
 
