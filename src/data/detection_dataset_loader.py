@@ -280,7 +280,7 @@ class DetectionDatasetLoader(DatasetLoader):
 
                 camera_image, shift_h, shift_w = read_camera(camera_path, image_size, image_translate_x, image_translate_y, fliplr=fliplr)
                 camera_image = camera_image / 255.
-                if training:
+                if False:
                     if np.random.random_sample() >= 0.5:
                         noise = np.random.rand(370, 1224, 3)
                         ones = np.ones_like(camera_image)
@@ -302,7 +302,7 @@ class DetectionDatasetLoader(DatasetLoader):
                 h, w, _ = cv2.imread(camera_path).shape
                 lidar_image = read_lidar(rot, tr, sc, lidar_path, calib_path, lidar_size, img_height=h, img_width=w, ang=ang, translate_x=translate_x, translate_y=translate_y, fliplr=fliplr)
 
-                if training:
+                if False:
                     if np.random.random_sample() >= 0.5:
                         noise = np.random.rand(512, 448, 41)
                         noise2 = np.random.rand(512, 448, 41)

@@ -96,7 +96,7 @@ class DetectionTrainer(Trainer):
 
                 with tf.Session(config=config) as sess:
                     if restore:
-                        self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp_best2/'))
+                        self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp/'))
                     else:
                         sess.run(tf.global_variables_initializer())
 
