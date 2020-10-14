@@ -152,43 +152,43 @@ class Model(object):
                 with tf.variable_scope("lidar_branch"):
                     with tf.variable_scope("fpn"): 
                         
-                        fpn_lidar = FPN(self.cnn_lidar.res_groups2, "fpn_lidar", is_training=self.is_training)
+                        # fpn_lidar = FPN(self.cnn_lidar.res_groups2, "fpn_lidar", is_training=self.is_training)
                     
-                        fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
+                        # fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
 
-                        fpn_lidar = tf.concat(fpn_lidar[:], 3)
+                        # fpn_lidar = tf.concat(fpn_lidar[:], 3)
 
-                        fpn_lidar1 = fpn_lidar[:]
-                        fpn_lidar2 = fpn_lidar[:]
+                        # fpn_lidar1 = fpn_lidar[:]
+                        # fpn_lidar2 = fpn_lidar[:]
 
-                        num_conv_blocks=2
-                        for i in range(0, num_conv_blocks):
-                            temp = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
-                            temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
-                            temp = relu(temp)
-                            # fpn_lidar = fpn_lidar + temp
-                            fpn_lidar1 = temp
-                            # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
-                            self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar1
+                        # num_conv_blocks=2
+                        # for i in range(0, num_conv_blocks):
+                        #     temp = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
+                        #     temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
+                        #     temp = relu(temp)
+                        #     # fpn_lidar = fpn_lidar + temp
+                        #     fpn_lidar1 = temp
+                        #     # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                        #     self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar1
 
-                        num_conv_blocks=2
-                        for i in range(0, num_conv_blocks):
-                            temp = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
-                            temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
-                            temp = relu(temp)
-                            # fpn_lidar = fpn_lidar + temp
-                            fpn_lidar2 = temp
-                            # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
-                            self.debug_layers['fpn_lidar_output_post_conv_2_'+str(i)] = fpn_lidar2
+                        # num_conv_blocks=2
+                        # for i in range(0, num_conv_blocks):
+                        #     temp = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
+                        #     temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
+                        #     temp = relu(temp)
+                        #     # fpn_lidar = fpn_lidar + temp
+                        #     fpn_lidar2 = temp
+                        #     # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                        #     self.debug_layers['fpn_lidar_output_post_conv_2_'+str(i)] = fpn_lidar2
 
-                       
+                        fpn_lidar = self.cnn_lidar.res_groups2[-1]                       
 
                         if self.params['focal_loss']:
-                            final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
-                            final_output_2_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
+                            final_output_1_7 = conv(fpn_lidar, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
+                            final_output_2_7 = conv(fpn_lidar, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
                             
-                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
-                            final_output_2_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
+                            final_output_1_8 = conv(fpn_lidar, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
+                            final_output_2_8 = conv(fpn_lidar, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
 
                             final_output_1 = tf.concat([final_output_1_7, final_output_1_8], -1)
                             final_output_2 = tf.concat([final_output_2_7, final_output_2_8], -1)
@@ -235,93 +235,31 @@ class Model(object):
                                                             reg_loss_instance,
                                                             **loss_params)
 
-                        
-                
-
-                        ## F1 SCORE
-                        # loc_ratios = np.array([2.4375, 1., 9.375 ])
-                        # self.iou_loc_weights = self.iou_loc_x * loc_ratios[0]/np.sum(loc_ratios) + self.iou_loc_y * loc_ratios[1]/np.sum(loc_ratios) + self.iou_loc_z * loc_ratios[2]/np.sum(loc_ratios)
-                        # self.regression_loss = ((1-self.iou_loc_weights)*(1-self.iou)) + \
-                        #              ((1-self.iou_dim)*(1-self.iou)) +\
-                        #                100 * self.theta_reg_loss 
-                        #             #    + 10*self.dir_reg_loss
-                        # self.model_loss = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss += (self.recall_pos) + self.recall_neg
-                        # if self.params['train_reg']:
-                        #     self.model_loss += self.regression_loss
-                        ## end f1 score 
-
-                        
-                        # self.model_loss += tf.cond(self.cls_training, lambda: self.recall_pos + self.recall_neg, lambda: tf.constant(0, dtype=tf.float32))
-                        # self.model_loss += tf.cond(self.reg_training, lambda: self.regression_loss, lambda: tf.constant(0, dtype=tf.float32))
-
-                        # WORKING - BEV
-
-                      
-                   
-
-                        # self.regression_loss_bev = 0
-                        # if self.params['train_loc'] == 1:
-                        #     self.regression_loss_bev += 1000 * (1 - self.iou) * self.loc_reg_loss 
-                        # if self.params['train_dim'] == 1:
-                        #     self.regression_loss_bev += 50 * (1 - self.iou) * self.dim_reg_loss 
-                        # if self.params['train_theta'] == 1:
-                        #     self.regression_loss_bev += 1000 * self.theta_reg_loss 
-                        # self.model_loss_bev = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss_bev +=  10 * (2 - self.recall - self.precision)  * self.classification_loss
-                        # if self.params['train_reg']:
-                        #     self.model_loss_bev +=  1 * self.regression_loss_bev
-                        
-                        
-                        
-                        # self.regression_loss_bev = 0
-                        # if self.params['train_loc'] == 1:
-                        #     self.regression_loss_bev += 1000 * (2 - self.iou - self.iou_loc)* self.loc_reg_loss 
-                        # if self.params['train_dim'] == 1:
-                        #     self.regression_loss_bev += 50 * (2 - self.iou - self.iou_dim) * self.dim_reg_loss 
-                        # if self.params['train_theta'] == 1:
-                        #     self.regression_loss_bev += 1000 * self.theta_reg_loss 
-                        # self.model_loss_bev = 0
+                        self.weight_cls = tf.placeholder(tf.float32, shape=())
+                        self.weight_dim = tf.placeholder(tf.float32, shape=())
+                        self.weight_loc = tf.placeholder(tf.float32, shape=())
+                        self.weight_theta = tf.placeholder(tf.float32, shape=())
 
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
-                            self.regression_loss_bev += 30 * self.loc_reg_loss 
+                            self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 20 * self.dim_reg_loss 
+                            self.regression_loss_bev += 1 * self.weight_dim * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
-                            self.regression_loss_bev += 30 * self.theta_reg_loss 
+                            self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
-                            self.model_loss_bev +=  5 * self.classification_loss
+                            self.model_loss_bev +=  1000 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
-                        # if self.params['train_dir'] == 1:
-                        #     self.model_loss_bev += 0.1 * self.dir_reg_loss
-
+                       
 
                      
-                        # self.regression_loss = tf.cond(self.train_fusion_rgb, lambda: self.regression_loss_fusion, lambda: self.regression_loss_bev)
-                        # self.model_loss = tf.cond(self.train_fusion_rgb, lambda: self.model_loss_fusion, lambda: self.model_loss_bev)
-
                         self.regression_loss = self.regression_loss_bev
                         self.model_loss = self.model_loss_bev
                         
 
-                        # for end to end
-
-                        # self.regression_loss = 20 * self.loc_reg_loss + 15 * self.dim_reg_loss + 10 * self.theta_reg_loss + 0.1 * self.dir_reg_loss
-                        # self.model_loss = 0
-                        # if self.params['train_cls']:
-                        #     self.model_loss += 0.3 * self.classification_loss
-                        # if self.params['train_reg']:
-                        #     self.model_loss += self.regression_loss
-                        
-
-                      
-
-
+                       
                 self.model_loss_img = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y_true_img, logits=self.detection_layer))
                 head_only_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                         "image_branch/image_head")

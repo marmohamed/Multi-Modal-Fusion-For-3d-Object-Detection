@@ -41,6 +41,10 @@ class DetectionTrainer(Trainer):
         self._set_params()
         self.count_not_best = 0
         self.base_lr = 0.0001
+        self.count_not_best_cls = 0
+        self.count_not_best_loc = 0
+        self.count_not_best_dim = 0
+        self.count_not_best_theta = 0
         
 
     @abstractmethod
@@ -83,8 +87,18 @@ class DetectionTrainer(Trainer):
 
         losses = []
         self.count_not_best = 0
+        self.count_not_best_cls = 0
+        self.count_not_best_loc = 0
+        self.count_not_best_dim = 0
+        self.count_not_best_theta = 0
         self.base_lr = self.branch_params['lr']
         self.last_loss = float('inf')
+        self.last_loss_cls = float('inf')
+        self.last_loss_loc = float('inf')
+        self.last_loss_dim = float('inf')
+        self.last_loss_theta = float('inf')
+
+        
        
         with self.model.graph.as_default():
                 
@@ -93,6 +107,11 @@ class DetectionTrainer(Trainer):
 
                 np.random.seed(random_seed)
                 tf.set_random_seed(random_seed)
+
+                self.weight_cls = 1
+                self.weight_loc = 1
+                self.weight_dim = 1
+                self.weight_theta = 1
 
                 with tf.Session(config=config) as sess:
                     if restore:
@@ -139,10 +158,16 @@ class DetectionTrainer(Trainer):
                                 # s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
                                 # self.model.train_writer.add_summary(s1, counter)
 
+                                
+
                                 feed_dict = self.__prepare_dataset_feed_dict(self.dataset, 
                                                                             self.branch_params['train_fusion_rgb'], 
                                                                             batch_size=batch_size)
                                 feed_dict[self.model.learning_rate_placeholder] = min_lr
+                                feed_dict[self.model.weight_cls] = self.weight_cls
+                                feed_dict[self.model.weight_loc] = self.weight_loc
+                                feed_dict[self.model.weight_dim] = self.weight_dim
+                                feed_dict[self.model.weight_theta] = self.weight_theta
 
                                 loss, _, classification_loss, regression_loss, loc_loss, dim_loss,\
                                     theta_loss, dir_loss, summary, theta_accuracy,\
@@ -244,14 +269,21 @@ class DetectionTrainer(Trainer):
 
     def get_lr(self, epoch):
      
-        if self.count_not_best % 4 == 0 and self.count_not_best > 0:
-            self.base_lr *= 0.5
-        # if epoch == 35 or epoch == 50:
-        #     self.base_lr *= 0.1
+        # if self.count_not_best % 4 == 0 and self.count_not_best > 0:
+        #     self.base_lr *= 0.5
 
+        if self.count_not_best_cls % 2 == 0 and self.count_not_best_cls > 0:
+            self.weight_cls *= 0.5
+        if self.count_not_best_dim % 2 == 0 and self.count_not_best_dim > 0:
+            self.weight_dim *= 0.8
+        if self.count_not_best_loc % 2 == 0 and self.count_not_best_loc > 0:
+            self.weight_loc *= 0.8
+        if self.count_not_best_theta % 2 == 0 and self.count_not_best_theta > 0:
+            self.weight_theta *= 0.8
+     
         lr = max(self.base_lr, 1.e-9)
         lr = min(self.base_lr, 1.e-3)
-        # lr /= 4
+
         return lr
 
         
@@ -278,6 +310,10 @@ class DetectionTrainer(Trainer):
                                                             self.branch_params['train_fusion_rgb'],
                                                             is_training=False,
                                                             batch_size=batch_size)
+                feed_dict[self.model.weight_cls] = self.weight_cls
+                feed_dict[self.model.weight_loc] = self.weight_loc
+                feed_dict[self.model.weight_dim] = self.weight_dim
+                feed_dict[self.model.weight_theta] = self.weight_theta
                 
                 all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_, dir_loss_,\
                     iou_, iou_dim_, iou_loc_, precision_, recall_, theta_diff = sess.run([self.model.model_loss, 
@@ -314,15 +350,6 @@ class DetectionTrainer(Trainer):
             pass
         finally:
             self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, theta_loss, dir_loss, epoch, False)
-
-            # print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}, theta_loss = {4}, loc_loss = {5}, dim_loss = {6}'.format(epoch,\
-            #                     np.mean(np.array(loss).flatten()),\
-            #                     np.mean(np.array(cls_loss).flatten()),\
-            #                     np.mean(np.array(reg_loss).flatten()),\
-            #                     np.mean(np.array(theta_loss).flatten()),\
-            #                     np.mean(np.array(loc_loss).flatten()),\
-            #                     np.mean(np.array(dim_loss).flatten())
-            #                     ))
 
             print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch,\
                                 np.mean(np.array(loss).flatten()),\
@@ -425,6 +452,32 @@ class DetectionTrainer(Trainer):
             else:
                 self.count_not_best += 1
 
+            if self.last_loss_cls > np.mean(np.array(epoch_cls_loss)):
+                self.last_loss_cls = np.mean(np.array(epoch_cls_loss).flatten())
+                self.count_not_best_cls = 0
+            else:
+                self.count_not_best_cls += 1
+
+            if self.last_loss_dim > np.mean(np.array(epoch_dim_loss)):
+                self.last_loss_dim = np.mean(np.array(epoch_dim_loss).flatten())
+                self.count_not_best_dim = 0
+            else:
+                self.count_not_best_dim += 1
+
+            if self.last_loss_loc > np.mean(np.array(epoch_loc_loss)):
+                self.last_loss_loc = np.mean(np.array(epoch_loc_loss).flatten())
+                self.count_not_best_loc = 0
+            else:
+                self.count_not_best_loc += 1
+
+            if self.last_loss_theta > np.mean(np.array(epoch_theta_loss)):
+                self.last_loss_theta = np.mean(np.array(epoch_theta_loss).flatten())
+                self.count_not_best_theta = 0
+            else:
+                self.count_not_best_theta += 1
+
+            
+
         
 
       
@@ -435,7 +488,7 @@ class BEVDetectionTrainer(DetectionTrainer):
         self.branch_params = {
             'opt': self.model.train_op_lidar,
             'train_fusion_rgb': False,
-            'lr': 5e-4,
+            'lr': 0.000125,
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4
