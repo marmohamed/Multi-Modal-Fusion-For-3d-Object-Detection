@@ -330,20 +330,16 @@ class Model(object):
                 self.iou_dim_summary = tf.summary.scalar('iou_dim_batches', self.iou_dim)
                 self.theta_accuracy_summary = tf.summary.scalar('theta_accuracy_batches', self.theta_accuracy)
 
-                self.cls_weight_summary = tf.summary.scalar('cls_weight_summary', self.cls_weight)
-                self.loc_weight_summary = tf.summary.scalar('loc_weight_summary', self.loc_weight)
-                self.dim_weight_summary = tf.summary.scalar('dim_weight_summary', self.dim_weight)
-                self.theta_weight_summary = tf.summary.scalar('theta_weight_summary', self.theta_weight)
+                self.cls_weight_summary = tf.summary.scalar('cls_weight_summary', self.weight_cls)
+                self.loc_weight_summary = tf.summary.scalar('loc_weight_summary', self.weight_loc)
+                self.dim_weight_summary = tf.summary.scalar('dim_weight_summary', self.weight_dim)
+                self.theta_weight_summary = tf.summary.scalar('theta_weight_summary', self.weight_theta)
 
 
                 self.recall_pos_summary = tf.summary.scalar('recall_pos_summary', self.recall_pos)
                 self.recall_neg_summary = tf.summary.scalar('recall_neg_summary', self.recall_neg)
 
-                # self.iou_loc_x_summary = tf.summary.scalar('iou_loc_x_summary', self.iou_loc_x)
-                # self.iou_loc_y_summary = tf.summary.scalar('iou_loc_y_summary', self.iou_loc_y)
-                # self.iou_loc_z_summary = tf.summary.scalar('iou_loc_z_summary', self.iou_loc_z)
-                # self.iou_loc_weights_summary = tf.summary.scalar('iou_loc_weights_summary', self.iou_loc_weights)
-
+              
                 self.merged = tf.summary.merge([self.lr_summary, self.model_loss_batches_summary, \
                                             self.cls_loss_batches_summary, self.reg_loss_batches_summary,\
                                             self.loc_reg_loss_batches_summary, self.dim_reg_loss_batches_summary,\
