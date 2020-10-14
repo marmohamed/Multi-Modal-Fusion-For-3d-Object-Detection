@@ -9,7 +9,7 @@ https://github.com/kuixu/kitti_object_vis
 import numpy as np
 
 
-cbox = np.array([[0,70.4],[-40,40],[-3,2]])
+cbox = np.array([[0,71],[-40,40],[-3,1]])
 
 class Calibration(object):
     ''' Calibration matrices and utils
