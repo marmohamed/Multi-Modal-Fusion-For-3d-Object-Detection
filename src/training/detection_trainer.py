@@ -127,6 +127,7 @@ class DetectionTrainer(Trainer):
                         min_lr = self.get_lr(e-start_epoch)
 
                         print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
+                        print('Cls: {0}, Dim: {1}, Loc: {2}, Theta: {3}'.format(self.weight_cls, self.weight_dim, self.weight_loc, self.weight_theta))
                         # print('Start epoch {0}'.format(e))
                       
                         try:
