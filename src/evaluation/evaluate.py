@@ -40,7 +40,7 @@ def convert_prediction_into_real_values(label_tensor,
             anchor = np.array([x+0.5, y+0.5, 0.5, anchors[0], anchors[1], anchors[2]])
             
             # out[:3] = sigmoid(out[:3])
-            out[:3] = np.tanh(out[:3])*0.5 * anchor[3:6] + anchor[:3]
+            out[:3] = out[:3] * anchor[3:6] + anchor[:3]
             
             out[:2] = out[:2] * ratio
             out[2] = out[2] * 40

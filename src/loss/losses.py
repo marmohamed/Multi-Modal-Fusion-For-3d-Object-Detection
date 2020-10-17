@@ -112,7 +112,7 @@ class LossCalculator(object):
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), reg_loss(t, p), tf.zeros_like(p))
 
         loc_ratios = np.array([2.4375, 1., 9.375*10 ])
-        reg_losses1 = [loss_fn(truth[:, :, :, :, i], tf.tanh(predictions[:, :, :, :, i])*0.5) * loc_ratios[i] for i in range(3)] 
+        reg_losses1 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) * loc_ratios[i] for i in range(3)] 
         reg_losses2 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3, 6)] 
         reg_losses3 = [loss_fn((truth[:, :, :, :, i] + np.pi/4) / (np.pi/2), tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(6, 7)]
 
@@ -129,11 +129,11 @@ class LossCalculator(object):
         anchors_size=np.array([3.9, 1.6, 1.5])
 
         x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
-        x_ = tf.tanh(predictions[:, :, :, :, 0])*0.5*anchors_size[0] + 0.5
+        x_ = predictions[:, :, :, :, 0] * anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
-        y_ = tf.tanh(predictions[:, :, :, :, 1])*0.5*anchors_size[1] + 0.5
+        y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
         z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
-        z_ = tf.tanh(predictions[:, :, :, :, 2])*0.5*anchors_size[2] + 0.5
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 0.5
 
         size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
         size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
@@ -168,11 +168,11 @@ class LossCalculator(object):
 
 
         x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
-        x_ = tf.tanh(predictions[:, :, :, :, 0])*0.5*anchors_size[0] + 0.5
+        x_ = predictions[:, :, :, :, 0]*anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
-        y_ = tf.tanh(predictions[:, :, :, :, 1])*0.5*anchors_size[1] + 0.5
+        y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
         z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
-        z_ = tf.tanh(predictions[:, :, :, :, 2])*0.5*anchors_size[2] + 0.5
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 0.5
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
@@ -210,7 +210,7 @@ class LossCalculator(object):
 
 
         x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
-        x_ = tf.tanh(predictions[:, :, :, :, 0])*0.5*anchors_size[0] + 0.5
+        x_ = predictions[:, :, :, :, 0] * anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = y
         z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
@@ -249,7 +249,7 @@ class LossCalculator(object):
         x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
         x_ = x
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
-        y_ = tf.tanh(predictions[:, :, :, :, 1])*0.5*anchors_size[1] + 0.5
+        y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
         z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
         z_ = z
 
@@ -287,7 +287,7 @@ class LossCalculator(object):
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = y
         z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
-        z_ = tf.tanh(predictions[:, :, :, :, 2])*0.5*anchors_size[2] + 0.5
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 0.5
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
