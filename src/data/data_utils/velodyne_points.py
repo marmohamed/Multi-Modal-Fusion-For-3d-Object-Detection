@@ -85,4 +85,5 @@ def velo_points_bev(rot, tr, sc, lidar_path, calib_path, x_range=(0, 71), y_rang
     img[x_lim, y_lim, -1] = i_lim * 255.
     if fliplr:
         img = np.fliplr(img)
+    img = img[:,:, ::-1]
     return img
