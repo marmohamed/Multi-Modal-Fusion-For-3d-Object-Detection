@@ -5,7 +5,7 @@ from utils.utils import *
 import math
 import os
 import tensorflow as tf
-from data.data_utils.reader import *
+from data.data_utils.data_reader import *
 
 
 # def iou_box(box, anchor):
@@ -97,10 +97,4 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
         y_target[x, y, k, 7:8] = [directions[i]]
         y_target[x, y, k, 8:9] = [1]
         
-        
-        
     return y_target
-
-
-def valid_indx(x, y, output_size):
-    return x < output_size[0] and x >= 0 and y < output_size[1] and y >= 0

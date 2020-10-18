@@ -229,8 +229,6 @@ class LossCalculator(object):
         iou_loc_x = tf.reduce_sum(iou_loc_x) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
 
 
-
-
         x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
         x_ = x
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5

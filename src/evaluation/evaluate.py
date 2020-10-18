@@ -37,7 +37,7 @@ def convert_prediction_into_real_values(label_tensor,
             y = ones_index[1][i]
             
             out = np.copy(label_tensor[ones_index[0][i], ones_index[1][i], ones_index[2][i], :])
-            anchor = np.array([x+0.5, y+0.5, 0.5, anchors[0], anchors[1], anchors[2]])
+            anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
             
             # out[:3] = sigmoid(out[:3])
             out[:3] = out[:3] * anchor[3:6] + anchor[:3]
@@ -122,10 +122,6 @@ def get_points(converted_points, calib_path,
             result[15] = sigmoid(converted_points_[-1])
 
             calib_data = read_calib(calib_path)
-
-            # x_range=(0, 70)
-            # y_range=(-40, 40)
-            # z_range=(-2.5, 1)
 
             x_size = (x_range[1] - x_range[0])
             y_size = (y_range[1] - y_range[0])

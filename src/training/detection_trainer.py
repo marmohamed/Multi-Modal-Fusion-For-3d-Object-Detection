@@ -56,7 +56,7 @@ class DetectionTrainer(Trainer):
 
         data = dataset.get_next(batch_size=batch_size)
        
-        camera_tensor, lidar_tensor, label_tensor, Tr_velo_to_cam, R0_rect, P3, shift_h, shift_w = data
+        camera_tensor, lidar_tensor, label_tensor = data
         d = {self.model.train_inputs_rgb: camera_tensor,
                 self.model.train_inputs_lidar: lidar_tensor,
                 self.model.y_true: label_tensor,                   
