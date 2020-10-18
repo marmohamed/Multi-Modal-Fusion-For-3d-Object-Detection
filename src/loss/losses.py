@@ -66,17 +66,6 @@ class LossCalculator(object):
 
     def __call__(self, truth, predictions, cls_loss, reg_loss, **params):
 
-        # precision = 0
-        # recall = 0
-
-        # for i in range(2):
-
-        #     precision_, recall_ = self.get_precision_recall(truth, predictions, i)
-        #     precision += precision_
-        #     recall += recall_
-        # precision = 0
-        # recall = 0
-
         # Classification
         c1 = cls_loss(truth[:, :, :, 0, 8], predictions[:, :, :, 0, 8], **params)
         c2 = cls_loss(truth[:, :, :, 1, 8], predictions[:, :, :, 1, 8], **params)
@@ -105,8 +94,7 @@ class LossCalculator(object):
         recall_neg = recall_neg_0 + recall_neg_1
         recall_pos = recall_pos_0 + recall_pos_1
 
-        
-
+    
         #regression
 
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), reg_loss(t, p), tf.zeros_like(p))
@@ -132,8 +120,8 @@ class LossCalculator(object):
         x_ = predictions[:, :, :, :, 0] * anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
-        z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
-        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 1.
 
         size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
         size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
@@ -143,15 +131,15 @@ class LossCalculator(object):
         x2 = x - size_true[:, :, :, :, 0]/2
         y1 = y + size_true[:, :, :, :, 1]/2
         y2 = y - size_true[:, :, :, :, 1]/2
-        z1 = z + size_true[:, :, :, :, 2]/2
-        z2 = z - size_true[:, :, :, :, 2]/2
+        z1 = z
+        z2 = z - size_true[:, :, :, :, 2]
 
         x1_ = x_ + size_pred[:, :, :, :, 0]/2
         x2_ = x_ - size_pred[:, :, :, :, 0]/2
         y1_ = y_ + size_pred[:, :, :, :, 1]/2
         y2_ = y_ - size_pred[:, :, :, :, 1]/2
-        z1_ = z_ + size_pred[:, :, :, :, 2]/2
-        z2_ = z_ - size_pred[:, :, :, :, 2]/2
+        z1_ = z_
+        z2_ = z_ - size_pred[:, :, :, :, 2]
 
         area_g = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
         area_d = size_pred[:, :, :, :, 0] * size_pred[:, :, :, :, 1]
@@ -171,22 +159,22 @@ class LossCalculator(object):
         x_ = predictions[:, :, :, :, 0]*anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
-        z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
-        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 1.
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
         y1 = y + size_true[:, :, :, :, 1]/2
         y2 = y - size_true[:, :, :, :, 1]/2
-        z1 = z + size_true[:, :, :, :, 2]/2
-        z2 = z - size_true[:, :, :, :, 2]/2
+        z1 = z
+        z2 = z - size_true[:, :, :, :, 2]
 
         x1_ = x_ + size_true[:, :, :, :, 0]/2
         x2_ = x_ - size_true[:, :, :, :, 0]/2
         y1_ = y_ + size_true[:, :, :, :, 1]/2
         y2_ = y_ - size_true[:, :, :, :, 1]/2
-        z1_ = z_ + size_true[:, :, :, :, 2]/2
-        z2_ = z_ - size_true[:, :, :, :, 2]/2
+        z1_ = z_
+        z2_ = z_ - size_true[:, :, :, :, 2]
 
         area_g = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
         area_d = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
@@ -203,9 +191,6 @@ class LossCalculator(object):
 
 
 
-
-
-
         ##############################################
 
 
@@ -213,22 +198,22 @@ class LossCalculator(object):
         x_ = predictions[:, :, :, :, 0] * anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = y
-        z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
         z_ = z
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
         y1 = y + size_true[:, :, :, :, 1]/2
         y2 = y - size_true[:, :, :, :, 1]/2
-        z1 = z + size_true[:, :, :, :, 2]/2
-        z2 = z - size_true[:, :, :, :, 2]/2
+        z1 = z
+        z2 = z - size_true[:, :, :, :, 2]
 
         x1_ = x_ + size_true[:, :, :, :, 0]/2
         x2_ = x_ - size_true[:, :, :, :, 0]/2
         y1_ = y_ + size_true[:, :, :, :, 1]/2
         y2_ = y_ - size_true[:, :, :, :, 1]/2
-        z1_ = z_ + size_true[:, :, :, :, 2]/2
-        z2_ = z_ - size_true[:, :, :, :, 2]/2
+        z1_ = z_
+        z2_ = z_ - size_true[:, :, :, :, 2]
 
         area_g = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
         area_d = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
@@ -250,22 +235,22 @@ class LossCalculator(object):
         x_ = x
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
-        z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
         z_ = z
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
         y1 = y + size_true[:, :, :, :, 1]/2
         y2 = y - size_true[:, :, :, :, 1]/2
-        z1 = z + size_true[:, :, :, :, 2]/2
-        z2 = z - size_true[:, :, :, :, 2]/2
+        z1 = z
+        z2 = z - size_true[:, :, :, :, 2]
 
         x1_ = x_ + size_true[:, :, :, :, 0]/2
         x2_ = x_ - size_true[:, :, :, :, 0]/2
         y1_ = y_ + size_true[:, :, :, :, 1]/2
         y2_ = y_ - size_true[:, :, :, :, 1]/2
-        z1_ = z_ + size_true[:, :, :, :, 2]/2
-        z2_ = z_ - size_true[:, :, :, :, 2]/2
+        z1_ = z_
+        z2_ = z_ - size_true[:, :, :, :, 2]
 
         area_g = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
         area_d = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
@@ -286,22 +271,22 @@ class LossCalculator(object):
         x_ = x
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = y
-        z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
-        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 1.
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
         y1 = y + size_true[:, :, :, :, 1]/2
         y2 = y - size_true[:, :, :, :, 1]/2
-        z1 = z + size_true[:, :, :, :, 2]/2
-        z2 = z - size_true[:, :, :, :, 2]/2
+        z1 = z
+        z2 = z - size_true[:, :, :, :, 2]
 
         x1_ = x_ + size_true[:, :, :, :, 0]/2
         x2_ = x_ - size_true[:, :, :, :, 0]/2
         y1_ = y_ + size_true[:, :, :, :, 1]/2
         y2_ = y_ - size_true[:, :, :, :, 1]/2
-        z1_ = z_ + size_true[:, :, :, :, 2]/2
-        z2_ = z_ - size_true[:, :, :, :, 2]/2
+        z1_ = z_
+        z2_ = z_ - size_true[:, :, :, :, 2]
 
         area_g = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
         area_d = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
@@ -322,7 +307,7 @@ class LossCalculator(object):
 
         x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
         y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
-        z = truth[:, :, :, :, 2]*anchors_size[2] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
 
         size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
         size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
@@ -332,15 +317,15 @@ class LossCalculator(object):
         x2 = x - size_true[:, :, :, :, 0]/2
         y1 = y + size_true[:, :, :, :, 1]/2
         y2 = y - size_true[:, :, :, :, 1]/2
-        z1 = z + size_true[:, :, :, :, 2]/2
-        z2 = z - size_true[:, :, :, :, 2]/2
+        z1 = z
+        z2 = z - size_true[:, :, :, :, 2]
 
         x1_ = x + size_pred[:, :, :, :, 0]/2
         x2_ = x - size_pred[:, :, :, :, 0]/2
         y1_ = y + size_pred[:, :, :, :, 1]/2
         y2_ = y - size_pred[:, :, :, :, 1]/2
-        z1_ = z + size_pred[:, :, :, :, 2]/2
-        z2_ = z - size_pred[:, :, :, :, 2]/2
+        z1_ = z
+        z2_ = z - size_pred[:, :, :, :, 2]
 
         area_g = size_true[:, :, :, :, 0] * size_true[:, :, :, :, 1]
         area_d = size_pred[:, :, :, :, 0] * size_pred[:, :, :, :, 1]
@@ -374,16 +359,7 @@ class LossCalculator(object):
         theta_diff = tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), theta_diff, tf.zeros_like(truth[:, :, :, :, 8]))
         true_count_theta = tf.math.count_nonzero(truth[:, :, :, :, -1], dtype=tf.float32)
         accuracy_theta = tf.reduce_sum(theta_diff) / (true_count_theta + 1e-8)
-        # accuracy_theta = 1
-        
-        
-        # return classification_loss, precision, recall,\
-        #         loc_reg_loss,\
-        #         dim_reg_loss,\
-        #         iou, iou_loc, iou_dim,\
-        #         theta_reg_loss, accuracy_theta,\
-        #         dir_reg_loss
-
+   
         return classification_loss,\
                 loc_reg_loss,\
                 dim_reg_loss,\

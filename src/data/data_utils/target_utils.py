@@ -88,7 +88,7 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
         
         label_i[6] = label_i[6] - k * (np.pi/2)
 
-        anchor = np.array([x+0.5, y+0.5, 0.5, anchors[0], anchors[1], anchors[2]])
+        anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
     
         label_i[:3] = (label_i[:3] - anchor[:3]) / anchor[3:6]
         label_i[3:6] = np.log(label_i[3:6]/anchors)
