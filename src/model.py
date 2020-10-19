@@ -249,7 +249,7 @@ class Model(object):
                             self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
-                            self.model_loss_bev +=  1000 * self.weight_cls * self.classification_loss
+                            self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
                        
