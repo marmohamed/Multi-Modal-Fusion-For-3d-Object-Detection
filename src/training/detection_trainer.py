@@ -97,6 +97,7 @@ class DetectionTrainer(Trainer):
         self.last_loss_loc = float('inf')
         self.last_loss_dim = float('inf')
         self.last_loss_theta = float('inf')
+        self.use_clr = self.branch_params['use_clr']
 
         
        
@@ -124,9 +125,11 @@ class DetectionTrainer(Trainer):
                     for e in range(start_epoch, start_epoch+epochs, 1):
                         
                         self.dataset.reset_generator()
-                        min_lr = self.get_lr(e-start_epoch)
-
-                        print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
+                        if not self.use_clr:
+                            min_lr = self.get_lr(e-start_epoch)
+                            print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
+                        else:
+                            print('Start epoch {0}'.format(e))
                         print('Cls: {0}, Dim: {1}, Loc: {2}, Theta: {3}'.format(self.weight_cls, self.weight_dim, self.weight_loc, self.weight_theta))
                         # print('Start epoch {0}'.format(e))
                       
@@ -144,20 +147,21 @@ class DetectionTrainer(Trainer):
                             epoch_precision = []
                             epoch_recall = []
                             epoch_theta_diffs = []
-                            
-                            s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
-                            self.model.train_writer.add_summary(s1, e)
+
+                            if not self.use_clr:
+                                s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                                self.model.train_writer.add_summary(s1, e)
                             
                             while True:
+                                if self.use_clr:
+                                    self.base_lr = clr.cyclic_learning_rate2(counter, learning_rate=self.branch_params['learning_rate'], \
+                                                                        max_lr=self.branch_params['max_lr'],\
+                                                                        step_size=self.branch_params['step_size'],\
+                                                                        mode='triangular', gamma=.997)                                
+                                    min_lr = self.base_lr
 
-                                # self.base_lr = clr.cyclic_learning_rate2(counter, learning_rate=self.branch_params['learning_rate'], \
-                                #                                     max_lr=self.branch_params['max_lr'],\
-                                #                                     step_size=self.branch_params['step_size'],\
-                                #                                     mode='triangular', gamma=.997)                                
-                                # min_lr = self.base_lr
-
-                                # s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
-                                # self.model.train_writer.add_summary(s1, counter)
+                                    s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                                    self.model.train_writer.add_summary(s1, counter)
 
                                 
 
@@ -492,7 +496,8 @@ class BEVDetectionTrainer(DetectionTrainer):
             'lr': 0.000125,
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
-            'max_lr': 1e-4
+            'max_lr': 1e-4,
+            'use_clr': False
         }
 
         
@@ -505,7 +510,8 @@ class FusionDetectionTrainer(DetectionTrainer):
             'lr': 1e-5,
             'step_size': 2 * 3682,
             'learning_rate': 1e-6,
-            'max_lr': 1e-4
+            'max_lr': 1e-4,
+            'use_clr': False
         }
 
 
@@ -518,7 +524,8 @@ class EndToEndDetectionTrainer(DetectionTrainer):
             'lr': 5e-4,
             'step_size': 2 * 3682,
             'learning_rate': 1e-6,
-            'max_lr': 1e-4
+            'max_lr': 1e-4,
+            'use_clr': False
         }
 
 
