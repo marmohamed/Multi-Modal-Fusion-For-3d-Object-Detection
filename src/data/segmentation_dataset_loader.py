@@ -9,7 +9,7 @@ import json
 from skimage.draw import polygon
 from abc import ABC, abstractmethod, ABCMeta
 
-from data.data_utils.reader import *
+from data.data_utils.data_reader import *
 from data.data_utils.target_utils import *
 from data.dataset_loader import *
 

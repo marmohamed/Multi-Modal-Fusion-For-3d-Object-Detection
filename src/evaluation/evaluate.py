@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from data.data_utils.reader import read_calib
+from data.data_utils.reader_utils import read_calib
 
 def cart2hom(pts_3d):
     ''' Input: nx3 points in Cartesian
@@ -39,13 +39,11 @@ def convert_prediction_into_real_values(label_tensor,
             out = np.copy(label_tensor[ones_index[0][i], ones_index[1][i], ones_index[2][i], :])
             anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
             
-            # out[:3] = sigmoid(out[:3])
             out[:3] = out[:3] * anchor[3:6] + anchor[:3]
             
             out[:2] = out[:2] * ratio
             out[2] = out[2] * 40
             
-            # out[3:6] = np.exp(np.maximum(0, out[3:6])) * anchors
             out[3:6] = np.exp(out[3:6]) * anchors
             
             k = ones_index[2][i]
