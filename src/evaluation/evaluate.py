@@ -1,6 +1,9 @@
 import numpy as np
 import math
 from data.data_utils.reader_utils import read_calib
+import tensorflow as tf
+from data.detection_dataset_loader import *
+
 
 def cart2hom(pts_3d):
     ''' Input: nx3 points in Cartesian
@@ -19,46 +22,6 @@ def project_ref_to_rect(pts_3d_ref, R0_rect):
         ''' Input and Output are nx3 points '''
         return np.transpose(np.dot(R0_rect, np.transpose(pts_3d_ref)))
 
-def sigmoid(x):
-    x = x.astype(np.float128)
-    x = 1 / (1 + np.exp(-x))
-    return x.astype(np.float32)
-
-def convert_prediction_into_real_values(label_tensor, 
-            anchors=np.array([3.9, 1.6, 1.5]), 
-            input_size=(512, 448), output_size=(128, 112), th=0.5):
-
-    ratio = input_size[0] // output_size[0]
-    result = []
-    ones_index = np.where(sigmoid(label_tensor[:, :, :, -1])>=th)
-    if len(ones_index) > 0 and len(ones_index[0]) > 0:
-        for i in range(0, len(ones_index[0]), 1):
-            x = ones_index[0][i]
-            y = ones_index[1][i]
-            
-            out = np.copy(label_tensor[ones_index[0][i], ones_index[1][i], ones_index[2][i], :])
-            anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
-            
-            out[:3] = out[:3] * anchor[3:6] + anchor[:3]
-            
-            out[:2] = out[:2] * ratio
-            out[2] = out[2] * 40
-            
-            out[3:6] = np.exp(out[3:6]) * anchors
-            
-            k = ones_index[2][i]
-
-            out[6] = sigmoid(out[6]) * np.pi/2 - np.pi/4
-            if k == 0 and out[6] < 0:
-                out[6] = out[6] + np.pi
-
-            out[6] = out[6] + k * (np.pi/2)
-                        
-            result.append(out)
-            
-    return np.array(result)
-
-# https://github.com/fregu856/3DOD_thesis/blob/master/evaluation/create_txt_files_val.py
 def ProjectTo2Dbbox(center, h, w, l, r_y, P2):
     # input: 3Dbbox in (rectified) camera coords
 
@@ -102,12 +65,63 @@ def ProjectTo2Dbbox(center, h, w, l, r_y, P2):
 
     return projected_2Dbbox
 
+
+def sigmoid(x):
+    x = x.astype(np.float128)
+    x = 1 / (1 + np.exp(-x))
+    x = x.astype(np.float32)
+    return x
+
+def convert_prediction_into_real_values(label_tensor, truth_value=None,
+            anchors=np.array([3.9, 1.6, 1.5]), 
+            input_size=(512, 448), output_size=(128, 112), is_label=False, th=0.5):
+
+    ratio = input_size[0] // output_size[0]
+    result = []
+    if not is_label:
+        ones_index = np.where(sigmoid(label_tensor[:, :, :, -1])>=th)
+    else:
+        ones_index = np.where(label_tensor[:, :, :, -1]>=th)
+    if truth_value is not None:
+        ones_index = np.where(truth_value[:, :, :, -1]>=th)
+#     print(ones_index)
+    if len(ones_index) > 0 and len(ones_index[0]) > 0:
+        for i in range(0, len(ones_index[0]), 1):
+            x = ones_index[0][i]
+            y = ones_index[1][i]
+            
+            out = np.copy(label_tensor[ones_index[0][i], ones_index[1][i], ones_index[2][i], :])
+            anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
+
+            out[:3] = out[:3] * anchor[3:6] + anchor[:3]
+            
+            out[:2] = out[:2] * ratio
+            out[2] = out[2] * 40
+            
+            out[3:6] = np.exp(out[3:6]) * anchors
+            
+            k = ones_index[2][i]
+            if not is_label:
+              out[6] = sigmoid(out[6]) * np.pi/2 - np.pi/4
+            else:
+                out[6] = out[6]
+            
+            if k == 0 and out[6] < 0:
+                out[6] = out[6] + np.pi
+                
+            out[6] = out[6] + k * (np.pi/2)
+                        
+            result.append(out)
+            
+    return np.array(result)
+
+
 def get_points(converted_points, calib_path, 
                 x_range=(0, 71), y_range=(-40, 40), z_range=(-3.0, 1), 
                 size=(512, 448, 40), th=0.5):
     all_result = []
     for converted_points_ in converted_points:
-        if sigmoid(converted_points_[8]) >= th:
+        if converted_points_[-1] >= th:
             result = [0] * 16
             result[0] = 'Car'
             result[1] = -1
@@ -119,7 +133,9 @@ def get_points(converted_points, calib_path,
             result[14] = converted_points_[6]
             result[15] = sigmoid(converted_points_[-1])
 
-            calib_data = read_calib(calib_path)
+            
+            calib_reader = CalibReader(calib_path)
+            calib_data = calib_reader.read_calib()
 
             x_size = (x_range[1] - x_range[0])
             y_size = (y_range[1] - y_range[0])
@@ -146,15 +162,81 @@ def get_points(converted_points, calib_path,
     return all_result
 
 
-def write_result_to_file(file_path, result=None):
-    if result is None:
-        text_file = open(file_path, "wb+")
-        text_file.close()
-    else:
-        res = '\n'.join([' '.join([str(l) for l in result[i]]) for i in range(len(result))])
-        text_file = open(file_path, "wb+")
-        text_file.write(res)
-        text_file.close()
+def prepare_dataset_feed_dict(model, dataset, train_fusion_rgb):
+        data = dataset.get_next(batch_size=1)
+        camera_tensor, lidar_tensor, label_tensor= data
+        d = {model.train_inputs_rgb: camera_tensor,
+                model.train_inputs_lidar: lidar_tensor,
+                model.y_true: label_tensor,
+                model.train_fusion_rgb: train_fusion_rgb,
+                model.is_training: False,
+                model.weight_cls: 1,
+                model.weight_dim: 1,
+                model.weight_loc: 1,
+                model.weight_theta: 1}
+        return d
 
 
+def write_predictions(labels_output, calib_path, new_file_path, th=0.5, truth_value=None, is_label=False):
+    converted_points = convert_prediction_into_real_values(labels_output, truth_value=truth_value, th=th, is_label=is_label)
+    points = get_points(converted_points, calib_path, th=th)
+    res = '\n'.join([' '.join([str(l) for l in points[i]]) for i in range(len(points))])
+    text_file = open(new_file_path, "wb+")
+    text_file.write(res.encode())
+    text_file.close()
+
+def write_all_predictions(model, dir_name, training, augment=False, get_best=False, fusion=False):
+    with model.graph.as_default():
+            
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+
+        with tf.Session(config=config) as sess:
+            if get_best:
+                model.saver.restore(sess, tf.train.latest_checkpoint('../training_files/tmp_best_2/'))
+            else:
+                model.saver.restore(sess, tf.train.latest_checkpoint('../training_files/tmp/'))
+
+            dataset = DetectionDatasetLoader(base_path='../../../Data', training_per=0.5, batch_size=1, random_seed=0, training=training, augment=augment)
         
+            cls_losses = []
+            reg_losses = []
+            total_losses = []
+            i = 0
+            
+            apply_nms=False
+
+            if training:
+                file_name = '/trainsplit.txt'
+            else:
+                            file_name = '/valsplit.txt'
+            base_path = '../../../Data'
+            with open(base_path + file_name, 'r') as f:
+                            list_file_nums = f.readlines()
+            list_files = ['0'*(6-len(l.strip())) + l.strip() for l in list_file_nums]
+            list_calib_paths = list(map(lambda x: base_path + '/data_object_calib/training/calib/' + x + '.txt', list_files))
+            
+            try:    
+                while True:
+                    feed_dict = prepare_dataset_feed_dict(model, dataset, fusion)
+                    final_output= sess.run(model.final_output, feed_dict=feed_dict)
+
+                    if i < len(list_files):
+                        current_file = list_files[i]
+
+                        for th, th_str in zip([0.05, 0.1, 0.2, 0.3, 0.4, 0.5], ['05, 10, 20, 30, 40, 50']):
+                            new_file_path = '../prediction_files/' + dir_name + '/bev/th' + th_str + '_2/data/' + current_file + '.txt'
+                            write_predictions(final_output, list_calib_paths[i], new_file_path, th=th)
+                            
+                    else:
+                        break
+
+                    i += 1
+                    if i % 100 == 0:
+                        print('i = ', i)
+            except tf.errors.OutOfRangeError:
+                pass
+            except StopIteration:
+                pass
+            finally:
+                print('Done')

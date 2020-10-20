@@ -152,8 +152,8 @@ class DetectionDatasetLoader(DatasetLoader):
         return new_image
 
 
-    def get_augmentation_parameters(self, training):
-        if training:
+    def get_augmentation_parameters(self):
+        if self.augment:
 
                     if np.random.random_sample() >= 0.5:
                         image_translate_x = random.randint(-50, 50)
@@ -254,7 +254,7 @@ class DetectionDatasetLoader(DatasetLoader):
 
         for camera_path, lidar_path, label_path, calib_path in zip(list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths):
                 
-                rot, tr, sc, image_translate_x, image_translate_y, ang = self.get_augmentation_parameters(training)
+                rot, tr, sc, image_translate_x, image_translate_y, ang = self.get_augmentation_parameters()
                 
                 data_reader_obj = DataReader(camera_path, calib_path, label_path, lidar_path, rot, sc, tr, ang, image_translate_x, image_translate_y)
 
