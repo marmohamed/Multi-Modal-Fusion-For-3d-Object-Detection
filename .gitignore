@@ -8,4 +8,5 @@ src/old_training_files/*
 src/.ipynb_checkpoints/*
 src/prediction_files/*
 src/training_files/*
+src/training_files_archive/*
 src/Notebooks/.ipynb_checkpoints/*
