@@ -6,7 +6,7 @@ from data.data_utils.fv_utils import *
 
 class LidarReader:
 
-    def __init__(self, lidar_path, calib_path, image_path, rot, tr, sc, 
+    def __init__(self, lidar_path, calib_path, image_path, rot, tr, sc, fliplr=False,
                         x_range=(0, 71), 
                         y_range=(-40, 40), 
                         z_range=(-3.0, 1), 
@@ -21,6 +21,7 @@ class LidarReader:
         self.y_range = y_range
         self.z_range = z_range
         self.size = size
+        self.fliplr = fliplr
 
 
 
@@ -75,14 +76,33 @@ class LidarReader:
         z_lim = z_lim[(x_lim2>-self.size[0]) & (x_lim2<= 0) & (y_lim2>-self.size[1]) & (y_lim2 <= 0) & (z_lim2<self.size[2]) & (z_lim2 >= 0)]
         i_lim = i_lim[(x_lim2>-self.size[0]) & (x_lim2<= 0) & (y_lim2>-self.size[1]) & (y_lim2 <= 0) & (z_lim2<self.size[2]) & (z_lim2 >= 0)]
         
+
+        d = dict()
+        for i in range(len(x_lim)):
+            if (x_lim[i], y_lim[i]) in d:
+                d[(x_lim[i], y_lim[i])].append(i_lim[i])
+            else:
+                d[(x_lim[i], y_lim[i])] = [i_lim[i]]
+        
         
         img = np.zeros([self.size[0], self.size[1], self.size[2]+1], dtype=np.float32)
-        # occupancy grid
         img[x_lim, y_lim, z_lim] = 255.
-        img[x_lim, y_lim, -1] = i_lim * 255.
+        for k in d:
+            img[k[0], k[1], -1] = max(d[k])*255.
+            
         img = img[:,:, ::-1]
-        img = (img - 127.) / 127.
+        img = img / 255.
+        if self.fliplr:
+            img = np.fliplr(img)
         return img
+        
+        # img = np.zeros([self.size[0], self.size[1], self.size[2]+1], dtype=np.float32)
+        # # occupancy grid
+        # img[x_lim, y_lim, z_lim] = 255.
+        # img[x_lim, y_lim, -1] = i_lim * 255.
+        # img = img[:,:, ::-1]
+        # img = (img - 127.) / 127.
+        # return img
 
 
     def in_range_points(self, points, x, y, z, x_range, y_range, z_range):

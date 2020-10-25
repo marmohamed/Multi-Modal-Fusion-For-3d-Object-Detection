@@ -13,7 +13,7 @@ from data.data_utils.fv_utils import *
 
 class LabelReader:
 
-    def __init__(self, label_path, calib_path, rot, tr, sc, ang, calib_reader,
+    def __init__(self, label_path, calib_path, rot, tr, sc, ang, calib_reader, fliplr=False,
                     x_range=(0, 71), 
                     y_range=(-40, 40), 
                     z_range=(-3.0, 1), 
@@ -33,6 +33,7 @@ class LabelReader:
         self.from_file = from_file
         self.ang = ang
         self.calib_reader = calib_reader
+        self.fliplr = fliplr
 
 
     def read_label(self):
@@ -149,6 +150,12 @@ class LabelReader:
         if self.ang != 0:
             for i in range(len(locations)):
               output[i][6] = output[i][6] - self.ang / 57.2958
+
+        if self.fliplr:
+            for i in range(len(locations)):
+                h = self.size[1]
+                output[i][1] = h - output[i][1]
+                output[i][6] = ((-output[i][6]*57.2958) + 180) / 57.2958
 
         output = list(filter(lambda point: 0 <= point[0] < self.size[0] and 0 <= point[1] < self.size[1] and 0 <= point[2] < self.size[2] , output))
         output = np.array(output)

@@ -30,12 +30,12 @@ def focal_loss(prediction_tensor, target_tensor, weights=None, alpha=0.25, gamma
     # target_tensor > zeros <=> z=1, so negative coefficient = 0.
     neg_p_sub = array_ops.where(target_tensor > zeros, zeros, sigmoid_p)
     
-    per_entry_cross_ent = - 100 * alpha * (pos_p_sub ** gamma) * tf.log(tf.clip_by_value(sigmoid_p, 1e-8, 1.0)) \
+    per_entry_cross_ent = - 1 * alpha * (pos_p_sub ** gamma) * tf.log(tf.clip_by_value(sigmoid_p, 1e-8, 1.0)) \
                           - (1 - alpha) * (neg_p_sub ** gamma) * tf.log(tf.clip_by_value(1.0 - sigmoid_p, 1e-8, 1.0))
 
     # true_count_theta = tf.math.count_nonzero(target_tensor[:, :, :, :], dtype=tf.float32)
 
-    return tf.reduce_mean(per_entry_cross_ent)
+    return tf.reduce_sum(per_entry_cross_ent)
 
 
 

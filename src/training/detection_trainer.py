@@ -80,7 +80,7 @@ class DetectionTrainer(Trainer):
                     **kwargs):
 
         if self.dataset is None:
-            self.dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, training, augment)
+            self.dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, training, True)
 
         self.eval_dataset = DetectionDatasetLoader(self.data_base_path, num_samples, training_per, random_seed, False, False)
 
@@ -277,13 +277,13 @@ class DetectionTrainer(Trainer):
         # if self.count_not_best % 4 == 0 and self.count_not_best > 0:
         #     self.base_lr *= 0.5
 
-        if self.count_not_best_cls % 2 == 0 and self.count_not_best_cls > 0:
-            self.weight_cls *= 0.5
-        if self.count_not_best_dim % 2 == 0 and self.count_not_best_dim > 0:
+        if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
+            self.weight_cls *= 0.8
+        if self.count_not_best_dim % 3 == 0 and self.count_not_best_dim > 0:
             self.weight_dim *= 0.8
-        if self.count_not_best_loc % 2 == 0 and self.count_not_best_loc > 0:
+        if self.count_not_best_loc % 3 == 0 and self.count_not_best_loc > 0:
             self.weight_loc *= 0.8
-        if self.count_not_best_theta % 2 == 0 and self.count_not_best_theta > 0:
+        if self.count_not_best_theta % 3 == 0 and self.count_not_best_theta > 0:
             self.weight_theta *= 0.8
      
         lr = max(self.base_lr, 1.e-9)
@@ -315,10 +315,10 @@ class DetectionTrainer(Trainer):
                                                             self.branch_params['train_fusion_rgb'],
                                                             is_training=False,
                                                             batch_size=batch_size)
-                feed_dict[self.model.weight_cls] = self.weight_cls
-                feed_dict[self.model.weight_loc] = self.weight_loc
-                feed_dict[self.model.weight_dim] = self.weight_dim
-                feed_dict[self.model.weight_theta] = self.weight_theta
+                feed_dict[self.model.weight_cls] = 1
+                feed_dict[self.model.weight_loc] = 1
+                feed_dict[self.model.weight_dim] = 1
+                feed_dict[self.model.weight_theta] = 1
                 
                 all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_, dir_loss_,\
                     iou_, iou_dim_, iou_loc_, precision_, recall_, theta_diff = sess.run([self.model.model_loss, 
@@ -493,7 +493,7 @@ class BEVDetectionTrainer(DetectionTrainer):
         self.branch_params = {
             'opt': self.model.train_op_lidar,
             'train_fusion_rgb': False,
-            'lr': 0.000125,
+            'lr': 5e-4,
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,

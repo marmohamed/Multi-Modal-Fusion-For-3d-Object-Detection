@@ -19,7 +19,7 @@ class DataReader:
                     rot, sc, tr, ang, 
                     translate_x, translate_y, 
                     get_actual_dims=False, 
-                    from_file=True):
+                    from_file=True, fliplr=False):
         self.image_path = image_path
         self.calib_path = calib_path
         self.label_path = label_path
@@ -27,10 +27,10 @@ class DataReader:
         self.rot = rot
         self.sc = sc
         self.tr = tr
-        self.lidar_reader = LidarReader(lidar_path, calib_path, image_path, rot, tr, sc)
+        self.lidar_reader = LidarReader(lidar_path, calib_path, image_path, rot, tr, sc, fliplr=fliplr)
         self.image_reader = ImageReader(image_path, translate_x, translate_y)
         self.calib_reader = CalibReader(calib_path)
-        self.label_reader = LabelReader(label_path, calib_path, rot, tr, sc, ang, self.calib_reader, 
+        self.label_reader = LabelReader(label_path, calib_path, rot, tr, sc, ang, self.calib_reader, fliplr=fliplr,
                                         get_actual_dims=get_actual_dims, 
                                         from_file=from_file)
 
