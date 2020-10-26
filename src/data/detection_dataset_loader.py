@@ -259,7 +259,7 @@ class DetectionDatasetLoader(DatasetLoader):
                 
                 rot, tr, sc, image_translate_x, image_translate_y, ang, fliplr = self.get_augmentation_parameters()
                 
-                data_reader_obj = DataReader(camera_path, calib_path, label_path, lidar_path, rot, sc, tr, ang, image_translate_x, image_translate_y)
+                data_reader_obj = DataReader(camera_path, calib_path, label_path, lidar_path, rot, sc, tr, ang, image_translate_x, image_translate_y, fliplr=fliplr)
 
                 camera_image = data_reader_obj.read_image()
                 lidar_image = data_reader_obj.lidar_reader.read_lidar()

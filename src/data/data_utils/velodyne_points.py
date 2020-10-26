@@ -6,7 +6,7 @@ from data.data_utils.fv_utils import *
 
 class LidarReader:
 
-    def __init__(self, lidar_path, calib_path, image_path, rot, tr, sc, fliplr=False, interpolate=True,
+    def __init__(self, lidar_path, calib_path, image_path, rot, tr, sc, fliplr=False, interpolate=False,
                         x_range=(0, 71), 
                         y_range=(-40, 40), 
                         z_range=(-3.0, 1), 
