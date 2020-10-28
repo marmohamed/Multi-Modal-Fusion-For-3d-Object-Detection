@@ -269,7 +269,7 @@ class DetectionDatasetLoader(DatasetLoader):
                 lidar_image = data_reader_obj.lidar_reader.read_lidar()
 
                 if self.augment:
-                    if np.random.random_sample() >= 0.3:
+                    if np.random.random_sample() >= 0.7:
                         noise = np.random.rand(512, 448, 41)
                         noise2 = np.random.rand(512, 448, 41)
 
@@ -278,7 +278,7 @@ class DetectionDatasetLoader(DatasetLoader):
 
                         lidar_image = np.array(np.clip(lidar_image + noise*noise2, 0, 1), dtype=np.float)
 
-                    if np.random.random_sample() >= 0.3:
+                    if np.random.random_sample() >= 0.7:
                         noise = np.random.rand(512, 448, 41)
                         noise2 = np.random.rand(512, 448, 41)
 
@@ -287,7 +287,7 @@ class DetectionDatasetLoader(DatasetLoader):
 
                         lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 1), dtype=np.float)
 
-                    if np.random.random_sample() >= 0.5:
+                    if np.random.random_sample() >= 0.7:
                         lidar_image = self.apply_mask_lidar(lidar_image)
 
                 _, label, directions = data_reader_obj.label_reader.read_label()

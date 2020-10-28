@@ -14,7 +14,7 @@ epochs_end=60
 
 
 start_epoch_kitti=$((epochs_img_head_city+epochs_img_all_city))
-start_epoch_bev=0
+start_epoch_bev=65
 start_epoch_fusion=$((epochs_bev+start_epoch_bev))
 start_epoch_end=$((epochs_fusion+epochs_bev+start_epoch_bev))
 start_epoch_end=0
@@ -64,7 +64,7 @@ if [ "$train_bev" = true ]; then
 
     python Main.py --data_path $data_path \
                 --train_bev True \
-                --restore False \
+                --restore True \
                 --epochs $epochs_bev \
                 --start_epoch $start_epoch_bev \
                 --num_summary_images $num_summary_images_detection \

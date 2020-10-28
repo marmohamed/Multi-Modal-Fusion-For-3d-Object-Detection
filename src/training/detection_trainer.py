@@ -109,14 +109,14 @@ class DetectionTrainer(Trainer):
                 np.random.seed(random_seed)
                 tf.set_random_seed(random_seed)
 
-                self.weight_cls = 1
-                self.weight_loc = 1
-                self.weight_dim = 1
-                self.weight_theta = 1
+                self.weight_cls = 0.5120000000000001
+                self.weight_loc = 0.06871947673600004
+                self.weight_dim = 0.6400000000000001
+                self.weight_theta = 0.1677721600000001
 
                 with tf.Session(config=config) as sess:
                     if restore:
-                        self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp/'))
+                        self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp_best2/'))
                     else:
                         sess.run(tf.global_variables_initializer())
 
