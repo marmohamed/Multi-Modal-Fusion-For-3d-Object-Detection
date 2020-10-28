@@ -460,6 +460,12 @@ class DetectionTrainer(Trainer):
         writer.add_summary(dir_loss_summary, epoch)
 
         if not training:
+            
+            self.cls_losses.append(np.mean(np.array(cls_loss).flatten()))
+            self.dim_losses.append(np.mean(np.array(dim_loss).flatten()))
+            self.loc_losses.append(np.mean(np.array(loc_loss).flatten()))
+            self.theta_losses.append(np.mean(np.array(theta_loss).flatten()))
+
             if self.last_loss > np.mean(np.array(epoch_loss)):
                 self.last_loss = np.mean(np.array(epoch_loss).flatten())
                 save_path = self.model.best_saver.save(sess, "./training_files/tmp_best2/model.ckpt", global_step=self.model.global_step)
