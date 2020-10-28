@@ -368,6 +368,11 @@ class DetectionTrainer(Trainer):
         finally:
             self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, theta_loss, dir_loss, epoch, False)
 
+            self.cls_losses.append(np.mean(np.array(cls_loss).flatten()))
+            self.dim_losses.append(np.mean(np.array(dim_loss).flatten()))
+            self.loc_losses.append(np.mean(np.array(loc_loss).flatten()))
+            self.theta_losses.append(np.mean(np.array(theta_loss).flatten()))
+
             print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch,\
                                 np.mean(np.array(loss).flatten()),\
                                 np.mean(np.array(cls_loss).flatten()),\
@@ -460,11 +465,6 @@ class DetectionTrainer(Trainer):
         writer.add_summary(dir_loss_summary, epoch)
 
         if not training:
-            
-            self.cls_losses.append(np.mean(np.array(cls_loss).flatten()))
-            self.dim_losses.append(np.mean(np.array(dim_loss).flatten()))
-            self.loc_losses.append(np.mean(np.array(loc_loss).flatten()))
-            self.theta_losses.append(np.mean(np.array(theta_loss).flatten()))
 
             if self.last_loss > np.mean(np.array(epoch_loss)):
                 self.last_loss = np.mean(np.array(epoch_loss).flatten())
