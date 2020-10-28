@@ -215,6 +215,7 @@ class DetectionDatasetLoader(DatasetLoader):
                     else:
                         fliplr = False
                     
+                    fliplr = np.random.random_sample() >= 0.5
 
         else:
                     image_translate_x = 0

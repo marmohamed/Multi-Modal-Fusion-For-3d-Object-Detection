@@ -19,7 +19,7 @@ class LabelReader:
                     z_range=(-3.0, 1), 
                     size=(512, 448, 40), 
                     get_actual_dims=False, 
-                    from_file=True):
+                    from_file=True, fliplr=False):
         self.label_path = label_path
         self.calib_path = calib_path
         self.rot = rot

@@ -32,7 +32,7 @@ class DataReader:
         self.calib_reader = CalibReader(calib_path)
         self.label_reader = LabelReader(label_path, calib_path, rot, tr, sc, ang, self.calib_reader, fliplr=fliplr,
                                         get_actual_dims=get_actual_dims, 
-                                        from_file=from_file)
+                                        from_file=from_file, fliplr=fliplr)
 
  
     def read_lidar(self):
