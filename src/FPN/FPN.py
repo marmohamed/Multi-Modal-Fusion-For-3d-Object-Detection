@@ -12,7 +12,7 @@ def FPN(layers_outputs, scope, is_training=True, reuse=False):
         if 'rgb' in scope:
             channels = [64, 128, 192, 256]
         else:
-            channels = [64] * 4
+            channels = [128] * 4
 
         for i in range(len(layers_outputs)-1, -1, -1):
             new_layer = conv(layers_outputs[i], new_features[i], kernel=1, stride=1, scope='conv0_' + str(i))

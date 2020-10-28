@@ -14,7 +14,7 @@ epochs_end=60
 
 
 start_epoch_kitti=$((epochs_img_head_city+epochs_img_all_city))
-start_epoch_bev=65
+start_epoch_bev=0
 start_epoch_fusion=$((epochs_bev+start_epoch_bev))
 start_epoch_end=$((epochs_fusion+epochs_bev+start_epoch_bev))
 start_epoch_end=0
@@ -28,6 +28,7 @@ train_city=false
 train_bev=true
 train_fusion=false
 train_end_to_end=false
+train_bev_lr_find=false
 
 
 
@@ -64,7 +65,26 @@ if [ "$train_bev" = true ]; then
 
     python Main.py --data_path $data_path \
                 --train_bev True \
-                --restore True \
+                --restore False \
+                --epochs $epochs_bev \
+                --start_epoch $start_epoch_bev \
+                --num_summary_images $num_summary_images_detection \
+                --batch_size 2 \
+                --train_fusion False \
+                --train_images_seg False \
+                --augment True
+
+    # python write_prediction_in_files.py 
+  
+fi
+
+
+if [ "$train_bev_lr_find" = true ]; then
+
+    python Main.py --data_path $data_path \
+                --train_bev False \
+                --train_bev_lr_find True \
+                --restore False \
                 --epochs $epochs_bev \
                 --start_epoch $start_epoch_bev \
                 --num_summary_images $num_summary_images_detection \

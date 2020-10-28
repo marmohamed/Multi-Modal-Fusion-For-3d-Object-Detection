@@ -17,6 +17,7 @@ from Fusion.FusionLayer import *
 from training.Trainer import *
 from training.segmentation_trainer import *
 from training.detection_trainer import *
+from training.detection_trainer_lr_find import *
 
 
 
@@ -31,6 +32,7 @@ class ModelTrainer(object):
         self.fusion_trainer = FusionDetectionTrainer(self.model, self.data_base_path, None)
         self.bev_trainer = BEVDetectionTrainer(self.model, self.data_base_path, None)
         self.end_to_end_trainer = EndToEndDetectionTrainer(self.model, self.data_base_path, None)
+        self.detection_trainer_lr_find = BEVDetectionTrainerLRFind(self.model, self.data_base_path, None)
 
     def train_end_to_end(self, **kwargs):
         d = {'num_summary_images': kwargs['num_summary_images']}
@@ -59,6 +61,22 @@ class ModelTrainer(object):
                     start_epoch=kwargs['start_epoch'],
                     augment=kwargs['augment'],
                     **d)
+
+
+    def train_bev_lr_find(self, **kwargs):
+        d = {'num_summary_images': kwargs['num_summary_images']}
+        self.detection_trainer_lr_find.train(restore=kwargs['restore'], 
+                    epochs=kwargs['epochs'], 
+                    num_samples=kwargs['num_samples'], 
+                    training_per=kwargs['training_per'], 
+                    random_seed=kwargs['random_seed'], 
+                    training=kwargs['training'], 
+                    batch_size=kwargs['batch_size'], 
+                    save_steps=kwargs['save_steps'],
+                    start_epoch=kwargs['start_epoch'],
+                    augment=kwargs['augment'],
+                    **d)
+
 
     def train_fusion(self, **kwargs):
         d = {'num_summary_images': kwargs['num_summary_images']}

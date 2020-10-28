@@ -32,12 +32,12 @@ import os
 
 
 
-class DetectionTrainer(Trainer):
+class DetectionTrainerLRFind(Trainer):
 
     __metaclass__ = ABCMeta
 
     def __init__(self, model, data_base_path, dataset):
-        super(DetectionTrainer, self).__init__(model, data_base_path, dataset)
+        super(DetectionTrainerLRFind, self).__init__(model, data_base_path, dataset)
         self._set_params()
         self.count_not_best = 0
         self.base_lr = 0.0001
@@ -99,11 +99,6 @@ class DetectionTrainer(Trainer):
         self.last_loss_theta = float('inf')
         self.use_clr = self.branch_params['use_clr']
 
-        self.cls_losses = []
-        self.dim_losses = []
-        self.loc_losses = []
-        self.theta_losses = []
-
         
        
         with self.model.graph.as_default():
@@ -126,12 +121,13 @@ class DetectionTrainer(Trainer):
                         sess.run(tf.global_variables_initializer())
 
                     counter = 0
-
+                    min_lr = 1e-6
+                    self.base_lr = min_lr
                     for e in range(start_epoch, start_epoch+epochs, 1):
                         
                         self.dataset.reset_generator()
                         if not self.use_clr:
-                            min_lr = self.get_lr(e-start_epoch)
+                            # min_lr = self.get_lr(e-start_epoch)
                             print('Start epoch {0} with min_lr = {1}'.format(e, min_lr))
                         else:
                             print('Start epoch {0}'.format(e))
@@ -155,7 +151,7 @@ class DetectionTrainer(Trainer):
 
                             if not self.use_clr:
                                 s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
-                                self.model.train_writer.add_summary(s1, e)
+                                self.model.train_writer.add_summary(s1, counter//100)
                             
                             while True:
                                 if self.use_clr:
@@ -217,12 +213,19 @@ class DetectionTrainer(Trainer):
 
                                 counter += 1
 
+                                if counter % 100 == 0:
+                                    min_lr *= 1.5
+                                    self.base_lr = min_lr
+
+                                    s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
+                                    self.model.train_writer.add_summary(s1,counter//100)
+
                         except (tf.errors.OutOfRangeError, StopIteration):
                             pass
 
                         finally:
                             # pass
-                            save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                            save_path = self.model.saver.save(sess, "./training_files2/tmp/model.ckpt", global_step=self.model.global_step)
                            
                             print("Model saved in path: %s" % save_path)
 
@@ -249,54 +252,35 @@ class DetectionTrainer(Trainer):
                                 ))
                             
 
-                            eval_batch_size=batch_size
-                            d = {
-                                'num_summary_images': kwargs['num_summary_images'],
-                                'random_seed': random_seed,
-                                'training_per': training_per,
-                                'num_samples': num_samples,
-                                }
-                            self.eval(sess, e, eval_batch_size, **d)
+                            # eval_batch_size=batch_size
+                            # d = {
+                            #     'num_summary_images': kwargs['num_summary_images'],
+                            #     'random_seed': random_seed,
+                            #     'training_per': training_per,
+                            #     'num_samples': num_samples,
+                            #     }
+                            # self.eval(sess, e, eval_batch_size, **d)
                             
                             
 
-                    save_path = self.model.saver.save(sess, "./training_files/tmp/model.ckpt", global_step=self.model.global_step)
+                    save_path = self.model.saver.save(sess, "./training_files2/tmp/model.ckpt", global_step=self.model.global_step)
                  
                     print("Model saved in path: %s" % save_path)
                     
 
     def get_lr(self, epoch):
      
-        if self.count_not_best % 4 == 0 and self.count_not_best > 0:
-            self.base_lr *= 0.8
+        # if self.count_not_best % 4 == 0 and self.count_not_best > 0:
+        #     self.base_lr *= 0.5
 
-        # if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
-        #     self.weight_cls *= 0.8
-        # if self.count_not_best_dim % 3 == 0 and self.count_not_best_dim > 0:
-        #     self.weight_dim *= 0.8
-        # if self.count_not_best_loc % 3 == 0 and self.count_not_best_loc > 0:
-        #     self.weight_loc *= 0.8
-        # if self.count_not_best_theta % 3 == 0 and self.count_not_best_theta > 0:
-        #     self.weight_theta *= 0.8
-
-        if len(self.cls_losses) >= 2:
-          self.cls_losses = self.cls_losses[::-1][:2][::-1]
-          self.dim_losses = self.dim_losses[::-1][:2][::-1]
-          self.loc_losses = self.loc_losses[::-1][:2][::-1]
-          self.theta_losses = self.theta_losses[::-1][:2][::-1]
-
-          c = self.cls_losses[1] / self.cls_losses[0]
-          d = self.dim_losses[1] / self.dim_losses[0]
-          l = self.loc_losses[1] / self.loc_losses[0]
-          th = self.theta_losses[1] / self.theta_losses[0]
-          
-          T = 2
-          K = 4
-
-          self.weight_cls = (K * np.exp(c/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
-          self.weight_dim = (K * np.exp(d/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
-          self.weight_loc = (K * np.exp(l/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
-          self.weight_theta = (K * np.exp(th/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
+        if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
+            self.weight_cls *= 0.8
+        if self.count_not_best_dim % 3 == 0 and self.count_not_best_dim > 0:
+            self.weight_dim *= 0.8
+        if self.count_not_best_loc % 3 == 0 and self.count_not_best_loc > 0:
+            self.weight_loc *= 0.8
+        if self.count_not_best_theta % 3 == 0 and self.count_not_best_theta > 0:
+            self.weight_theta *= 0.8
      
         lr = max(self.base_lr, 1.e-9)
         lr = min(self.base_lr, 1.e-3)
@@ -462,7 +446,7 @@ class DetectionTrainer(Trainer):
         if not training:
             if self.last_loss > np.mean(np.array(epoch_loss)):
                 self.last_loss = np.mean(np.array(epoch_loss).flatten())
-                save_path = self.model.best_saver.save(sess, "./training_files/tmp_best2/model.ckpt", global_step=self.model.global_step)
+                save_path = self.model.best_saver.save(sess, "./training_files2/tmp_best2/model.ckpt", global_step=self.model.global_step)
                            
                 print("(Best) Model saved in path: %s" % save_path)
                 self.count_not_best = 0
@@ -499,13 +483,13 @@ class DetectionTrainer(Trainer):
 
       
 
-class BEVDetectionTrainer(DetectionTrainer):
+class BEVDetectionTrainerLRFind(DetectionTrainerLRFind):
 
     def _set_params(self):
         self.branch_params = {
             'opt': self.model.train_op_lidar,
             'train_fusion_rgb': False,
-            'lr': 1e-4,
+            'lr': 5e-4,
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,
@@ -513,7 +497,7 @@ class BEVDetectionTrainer(DetectionTrainer):
         }
 
         
-class FusionDetectionTrainer(DetectionTrainer):
+class FusionDetectionTrainerLRFind(DetectionTrainerLRFind):
     
     def _set_params(self):
         self.branch_params = {
@@ -527,7 +511,7 @@ class FusionDetectionTrainer(DetectionTrainer):
         }
 
 
-class EndToEndDetectionTrainer(DetectionTrainer):
+class EndToEndDetectionTrainerLRFind(DetectionTrainerLRFind):
     
     def _set_params(self):
         self.branch_params = {

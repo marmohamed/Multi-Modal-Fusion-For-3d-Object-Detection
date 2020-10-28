@@ -13,7 +13,7 @@ from data.data_utils.fv_utils import *
 
 class LabelReader:
 
-    def __init__(self, label_path, calib_path, rot, tr, sc, ang, calib_reader, fliplr=False,
+    def __init__(self, label_path, calib_path, rot, tr, sc, ang, calib_reader,
                     x_range=(0, 71), 
                     y_range=(-40, 40), 
                     z_range=(-3.0, 1), 

@@ -19,6 +19,7 @@ from models.ResnetLidarFV import *
 from FPN.FPN import *
 
 from Fusion.FusionLayer import *
+from PCGrad_tf import *
 
 class Model(object):
 
@@ -152,7 +153,7 @@ class Model(object):
                 with tf.variable_scope("lidar_branch"):
                     with tf.variable_scope("fpn"): 
                         
-                        fpn_lidar = FPN([self.cnn_lidar.res_groups2[0], self.cnn_lidar.res_groups2[2]], "fpn_lidar", is_training=self.is_training)
+                        fpn_lidar = FPN([self.cnn_lidar.res_groups2[0], self.cnn_lidar.res_groups2[1], self.cnn_lidar.res_groups2[2]], "fpn_lidar", is_training=self.is_training)
                     
                         fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
 
@@ -184,11 +185,11 @@ class Model(object):
                         # fpn_lidar = self.cnn_lidar.res_groups2[-1]                       
 
                         if self.params['focal_loss']:
-                            final_output_1_7 = conv(fpn_lidar, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
-                            final_output_2_7 = conv(fpn_lidar, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
+                            final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
+                            final_output_2_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
                             
-                            final_output_1_8 = conv(fpn_lidar, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
-                            final_output_2_8 = conv(fpn_lidar, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
+                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
+                            final_output_2_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
 
                             final_output_1 = tf.concat([final_output_1_7, final_output_1_8], -1)
                             final_output_2 = tf.concat([final_output_2_7, final_output_2_8], -1)
@@ -253,13 +254,18 @@ class Model(object):
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
                             # self.model_loss_bev +=  10 * (2 - self.recall - self.precision) * self.weight_cls * self.classification_loss
-                            self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
+                            self.model_loss_bev +=  10 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
 
                      
                         self.regression_loss = self.regression_loss_bev
                         self.model_loss = self.model_loss_bev
+
+                        self.losses = [ 1000 * self.weight_loc * self.loc_reg_loss , 
+                                        100 * self.weight_dim * self.dim_reg_loss, 
+                                        1000 * self.weight_theta * self.theta_reg_loss, 
+                                        10 * self.weight_cls * self.classification_loss]
                         
 
                        
@@ -310,7 +316,7 @@ class Model(object):
                     self.train_op_fusion = None
 
 
-                self.train_op = tf.train.AdamOptimizer(1e-3).minimize(self.model_loss, global_step=self.global_step)
+                self.train_op = PCGrad(tf.train.AdamOptimizer(1e-3)).minimize(self.losses, global_step=self.global_step)
 
                 self.saver = tf.train.Saver(max_to_keep=1)
 
