@@ -153,7 +153,7 @@ class Model(object):
                 with tf.variable_scope("lidar_branch"):
                     with tf.variable_scope("fpn"): 
                         
-                        fpn_lidar = FPN([self.cnn_lidar.res_groups2[0], self.cnn_lidar.res_groups2[1], self.cnn_lidar.res_groups2[2]], "fpn_lidar", is_training=self.is_training)
+                        fpn_lidar = FPN([self.cnn_lidar.res_groups2[0], self.cnn_lidar.res_groups2[1], self.cnn_lidar.res_groups2[2], self.cnn_lidar.res_groups2[3]], "fpn_lidar", is_training=self.is_training)
                     
                         fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope='maxpool_fpn0')
 
