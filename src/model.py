@@ -228,7 +228,7 @@ class Model(object):
                         loss_params = {'focal_loss': self.params['focal_loss'], 'weight': self.params['weight_loss'], 'mse': self.params['mse_loss']}
                         self.classification_loss, self.loc_reg_loss, self.dim_reg_loss,\
                                     self.theta_reg_loss, self.dir_reg_loss,\
-                                    self.precision, self.recall, self.iou, self.iou_loc, self.iou_dim, self.theta_accuracy,\
+                                    self.precision, self.recall, self.iou, self.iou_2d, self.iou_loc, self.iou_dim, self.theta_accuracy,\
                                     self.recall_pos, self.recall_neg, self.iou_loc_x, self.iou_loc_y, self.iou_loc_z = loss_calculator(
                                                             self.y_true,
                                                             self.final_output, 
@@ -335,6 +335,7 @@ class Model(object):
                 self.recall_summary = tf.summary.scalar('recall_batches', self.recall)
 
                 self.iou_summary = tf.summary.scalar('iou_batches', self.iou)
+                self.iou_2d_summary = tf.summary.scalar('iou_2d_batches', self.iou_2d)
                 self.iou_loc_summary = tf.summary.scalar('iou_loc_batches', self.iou_loc)
                 self.iou_dim_summary = tf.summary.scalar('iou_dim_batches', self.iou_dim)
                 self.theta_accuracy_summary = tf.summary.scalar('theta_accuracy_batches', self.theta_accuracy)
@@ -354,7 +355,7 @@ class Model(object):
                                             self.loc_reg_loss_batches_summary, self.dim_reg_loss_batches_summary,\
                                             self.theta_reg_loss_batches_summary, self.dir_reg_loss_batches_summary,\
                                             self.precision_summary, self.recall_summary,\
-                                            self.iou_summary, self.iou_loc_summary, self.iou_dim_summary,\
+                                            self.iou_summary, self.iou_2d_summary, self.iou_loc_summary, self.iou_dim_summary,\
                                             self.theta_accuracy_summary,\
                                             self.cls_weight_summary, self.loc_weight_summary, self.dim_weight_summary,self.theta_weight_summary,\
                                             self.recall_pos_summary, self.recall_neg_summary,\

@@ -140,7 +140,7 @@ class LabelReader:
         
         for i in range(len(locations)):
             if angles[i] < 0:
-                angles[i] += 3.14
+                angles[i] += np.pi
 
         output = [[-(locations[i][0] + -1*self.x_range[0]) * x_fac + self.size[0], -(locations[i][1] + -1*self.y_range[0]) * y_fac + self.size[1], -(locations[i][2] + -1*self.z_range[0]) * z_fac + self.size[2], 
                     dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 

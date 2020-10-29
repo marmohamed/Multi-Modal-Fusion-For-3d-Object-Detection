@@ -46,6 +46,61 @@ from data.data_utils.data_reader import *
 
 # np.array([8.04520593, 2.62727732, 9.24066019])
 # def get_target(labels, anchors=np.array([[0, 1.63,1.5,3.89 ], [ 0, 2.08,2.59,6.05]]), input_size=(512, 448), output_size=(128, 112)):
+# def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(512, 448), output_size=(128, 112)):
+#     # ASSUMPTION: I will assume that the anchors contain a record for the height
+#     """
+#     - calculate the ratio = input size / final output size
+#     - divide each of the x, y and z by the ratio
+#     - subtract each of the x, y and z ....
+#     """
+
+#     ratio = input_size[0] // output_size[0]
+#     y_target = np.zeros((output_size[0], output_size[1], 2, 9), np.float32)
+   
+#     for i in range(len(labels)):
+#         label_i = np.array(labels[i])
+
+#         x = int(label_i[0]/ratio)
+#         y = int(label_i[1]/ratio)
+
+#         if x >= output_size[0]:
+#             x = output_size[0] - 1
+#         if y >= output_size[1]:
+#             y = output_size[1] - 1
+
+#         if x < 0 or y < 0:
+#             continue
+
+#         label_i[0:2] = label_i[0:2] / (ratio*1.0)
+#         label_i[2] = label_i[2] / 40.
+
+#         if label_i[6] < 0:
+#             label_i[6] += 3.14
+
+#         angle = label_i[6] * 57.2958
+#         if (angle >= 0 and angle <= 45) or (angle >= 135 and angle <= 225) or (angle >= 315 and angle <= 360):
+#             k = 0
+#         else:
+#             k = 1
+
+#         if label_i[6] >= 3 * np.pi / 4:
+#             label_i[6] = label_i[6] - np.pi
+        
+#         label_i[6] = label_i[6] - k * (np.pi/2)
+
+#         anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
+    
+#         label_i[:3] = (label_i[:3] - anchor[:3]) / anchor[3:6]
+#         label_i[3:6] = np.log(label_i[3:6]/anchors)
+
+#         y_target[x, y, k, :7] = label_i
+#         y_target[x, y, k, 7:8] = [directions[i]]
+#         y_target[x, y, k, 8:9] = [1]
+        
+#     return y_target
+
+
+
 def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(512, 448), output_size=(128, 112)):
     # ASSUMPTION: I will assume that the anchors contain a record for the height
     """
@@ -56,7 +111,6 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
 
     ratio = input_size[0] // output_size[0]
     y_target = np.zeros((output_size[0], output_size[1], 2, 9), np.float32)
-   
     for i in range(len(labels)):
         label_i = np.array(labels[i])
 
@@ -74,20 +128,22 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
         label_i[0:2] = label_i[0:2] / (ratio*1.0)
         label_i[2] = label_i[2] / 40.
 
-        if label_i[6] < 0:
-            label_i[6] += 3.14
-
-        angle = label_i[6] * 57.2958
-        if (angle >= 0 and angle <= 45) or (angle >= 135 and angle <= 225) or (angle >= 315 and angle <= 360):
+        temp = label_i[6]
+        angle = temp * 57.2958
+        if (angle >= 0 and angle <= 45) or (angle <= 0 and angle >= -45)\
+            or (angle >= 135 and angle <= 180) or (angle <= -135 and angle >= -180):
+            if angle >= 135:
+                label_i[6] = label_i[6] - np.pi
+            elif angle <= -135:
+                label_i[6] = label_i[6] + np.pi
             k = 0
         else:
+            if angle < 0:
+                label_i[6] = label_i[6] + np.pi
             k = 1
 
-        if label_i[6] >= 3 * np.pi / 4:
-            label_i[6] = label_i[6] - np.pi
-        
         label_i[6] = label_i[6] - k * (np.pi/2)
-
+        
         anchor = np.array([x+0.5, y+0.5, 1., anchors[0], anchors[1], anchors[2]])
     
         label_i[:3] = (label_i[:3] - anchor[:3]) / anchor[3:6]
