@@ -308,7 +308,7 @@ class Model(object):
                                             "image_branch/image_head/fpn"))
                     self.fusion_only_vars.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                             "lidar_branch/fpn"))
-                    self.train_op_fusion = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder)).minimize(self.model_loss,\
+                    self.train_op_fusion = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder)).minimize(self.losses,\
                                                                                 var_list=self.fusion_only_vars,\
                                                                                 global_step=self.global_step)
                    
