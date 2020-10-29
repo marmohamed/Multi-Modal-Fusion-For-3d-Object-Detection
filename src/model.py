@@ -295,8 +295,8 @@ class Model(object):
                                                             self.params['decay_rate'], self.params['staircase'])  
 
                 self.learning_rate_placeholder = tf.placeholder(tf.float32, [], name='learning_rate')
-                self.opt_lidar = tf.train.AdamOptimizer(self.learning_rate_placeholder)
-                self.train_op_lidar = self.opt_lidar.minimize(self.model_loss,\
+                self.opt_lidar = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder))
+                self.train_op_lidar = self.opt_lidar.minimize(self.losses,\
                                                                             var_list=self.lidar_only_vars,\
                                                                             global_step=self.global_step)
               
@@ -308,7 +308,7 @@ class Model(object):
                                             "image_branch/image_head/fpn"))
                     self.fusion_only_vars.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                             "lidar_branch/fpn"))
-                    self.train_op_fusion = tf.train.AdamOptimizer(1e-3).minimize(self.model_loss,\
+                    self.train_op_fusion = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder)).minimize(self.model_loss,\
                                                                                 var_list=self.fusion_only_vars,\
                                                                                 global_step=self.global_step)
                    
@@ -316,7 +316,7 @@ class Model(object):
                     self.train_op_fusion = None
 
 
-                self.train_op = PCGrad(tf.train.AdamOptimizer(1e-3)).minimize(self.losses, global_step=self.global_step)
+                self.train_op = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder)).minimize(self.losses, global_step=self.global_step)
 
                 self.saver = tf.train.Saver(max_to_keep=1)
 
