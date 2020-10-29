@@ -43,11 +43,11 @@ class LossCalculator(object):
 
 
         iou, iou_2d = self.get_iou(truth, predictions)
-        iou_dim = self.get_iou(truth, predictions)
-        iou_loc = self.get_iou(truth, predictions)
-        iou_loc_x = self.get_iou(truth, predictions)
-        iou_loc_y = self.get_iou(truth, predictions)
-        iou_loc_z = self.get_iou(truth, predictions)
+        iou_dim = self.get_iou_dim(truth, predictions)
+        iou_loc = self.get_iou_loc(truth, predictions)
+        iou_loc_x = self.get_iou_loc_x(truth, predictions)
+        iou_loc_y = self.get_iou_loc_y(truth, predictions)
+        iou_loc_z = self.get_iou_loc_z(truth, predictions)
         
         accuracy_theta = self.get_accracy_diffs(truth, predictions)
    
