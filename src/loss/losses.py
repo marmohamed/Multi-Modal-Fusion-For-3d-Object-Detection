@@ -82,19 +82,19 @@ class LossCalculator(object):
         return iou, iou_2d
 
     def get_iou_loc(self, truth, predictions):
-        self.iou_helper.get_iou_loc(truth, predictions)
+        return self.iou_helper.get_iou_loc(truth, predictions)
 
     def get_iou_dim(self, truth, predictions):
-        self.iou_helper.get_iou_dim(truth, predictions)
+        return self.iou_helper.get_iou_dim(truth, predictions)
 
     def get_iou_loc_x(self, truth, predictions):
-        self.iou_helper.get_iou_loc_x(truth, predictions)
+        return self.iou_helper.get_iou_loc_x(truth, predictions)
 
     def get_iou_loc_y(self, truth, predictions):
-        self.iou_helper.get_iou_loc_y(truth, predictions)
+        return self.iou_helper.get_iou_loc_y(truth, predictions)
 
     def get_iou_loc_z(self, truth, predictions):
-        self.iou_helper.get_iou_loc_z(truth, predictions)
+        return self.iou_helper.get_iou_loc_z(truth, predictions)
 
 
 class Loss(object):
