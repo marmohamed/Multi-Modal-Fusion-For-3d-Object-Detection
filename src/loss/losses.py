@@ -69,7 +69,7 @@ class LossCalculator(object):
         precision, recall = self.metrics_helper.get_precision_recall(truth, predictions)
         return precision, recall
 
-    def macro_double_soft_f1(self, truth, predictions, i):
+    def macro_double_soft_f1(self, truth, predictions):
         macro_neg_cost_0, macro_pos_cost_0 = self.metrics_helper.macro_double_soft_f1(truth, predictions, 0)
         macro_neg_cost_1, macro_pos_cost_1 = self.metrics_helper.macro_double_soft_f1(truth, predictions, 1)
         return macro_neg_cost_0+macro_pos_cost_0, macro_neg_cost_1+macro_pos_cost_1
