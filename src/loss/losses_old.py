@@ -29,8 +29,8 @@ class LossCalculator(object):
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), reg_loss(t, p), tf.zeros_like(p))
 
         loc_ratios = np.array([2.4375, 1., 9.375*10 ])
-        reg_losses1 = [loss_fn(truth[:, :, :, :, i], tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(3)] 
-        reg_losses2 = [loss_fn(truth[:, :, :, :, i], tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(3, 6)] 
+        reg_losses1 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) * loc_ratios[i] for i in range(3)] 
+        reg_losses2 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3, 6)] 
         reg_losses3 = [loss_fn((truth[:, :, :, :, i] + np.pi/4) / (np.pi/2), tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(6, 7)]
 
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), tf.nn.sigmoid_cross_entropy_with_logits(labels=t, logits=p), tf.zeros_like(p))
@@ -42,12 +42,12 @@ class LossCalculator(object):
         dir_reg_loss = tf.reduce_sum(reg_losses4) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
 
 
-        iou, iou_2d = self.get_iou(truth, tf.math.sigmoid(predictions))
-        iou_dim = self.get_iou_dim(truth, tf.math.sigmoid(predictions))
-        iou_loc = self.get_iou_loc(truth, tf.math.sigmoid(predictions))
-        iou_loc_x = self.get_iou_loc_x(truth, tf.math.sigmoid(predictions))
-        iou_loc_y = self.get_iou_loc_y(truth, tf.math.sigmoid(predictions))
-        iou_loc_z = self.get_iou_loc_z(truth, tf.math.sigmoid(predictions))
+        iou, iou_2d = self.get_iou(truth, predictions)
+        iou_dim = self.get_iou_dim(truth, predictions)
+        iou_loc = self.get_iou_loc(truth, predictions)
+        iou_loc_x = self.get_iou_loc_x(truth, predictions)
+        iou_loc_y = self.get_iou_loc_y(truth, predictions)
+        iou_loc_z = self.get_iou_loc_z(truth, predictions)
         
         accuracy_theta = self.get_accracy_diffs(truth, predictions)
    

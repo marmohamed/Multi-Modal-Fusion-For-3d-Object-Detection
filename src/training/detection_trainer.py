@@ -523,7 +523,7 @@ class BEVDetectionTrainer(DetectionTrainer):
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,
-            'use_clr': False
+            'use_clr': True
         }
 
         

@@ -10,15 +10,15 @@ class IOUHelper:
 
     def get_iou(self, truth, predictions):
         anchors_size=self.anchors_size
-        size_true = truth[:, :, :, :, 3:6] * 3 * anchors_size
-        size_pred = predictions[:, :, :, :, 3:6] * 3 * anchors_size
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
-        x = truth[:, :, :, :, 0]
-        x_ = predictions[:, :, :, :, 0]
-        y = truth[:, :, :, :, 1]
-        y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
+        x_ = predictions[:, :, :, :, 0] * anchors_size[0] + 0.5
+        y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
+        y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 1.
 
 
         x1 = x + size_true[:, :, :, :, 0]/2
@@ -58,15 +58,15 @@ class IOUHelper:
 
     def get_iou_loc(self, truth, predictions):
         anchors_size=self.anchors_size
-        size_true = truth[:, :, :, :, 3:6] * 3 * anchors_size
-        size_pred = predictions[:, :, :, :, 3:6] * 3 * anchors_size
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
-        x = truth[:, :, :, :, 0]
-        x_ = predictions[:, :, :, :, 0]
-        y = truth[:, :, :, :, 1]
-        y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
+        x_ = predictions[:, :, :, :, 0]*anchors_size[0] + 0.5
+        y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
+        y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 1.
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
@@ -100,15 +100,15 @@ class IOUHelper:
 
     def get_iou_dim(self, truth, predictions):
         anchors_size=self.anchors_size
-        size_true = truth[:, :, :, :, 3:6] * 3 * anchors_size
-        size_pred = predictions[:, :, :, :, 3:6] * 3 * anchors_size
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
-        x = truth[:, :, :, :, 0]
-        x_ = predictions[:, :, :, :, 0]
-        y = truth[:, :, :, :, 1]
-        y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
+        y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
 
         x1 = x + size_true[:, :, :, :, 0]/2
@@ -143,14 +143,14 @@ class IOUHelper:
 
     def get_iou_loc_x(self, truth, predictions):
         anchors_size=self.anchors_size
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
-        size_true = truth[:, :, :, :, 3:6] * 3 * anchors_size
-
-        x = truth[:, :, :, :, 0]
-        x_ = predictions[:, :, :, :, 0]
-        y = truth[:, :, :, :, 1]
+        x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
+        x_ = predictions[:, :, :, :, 0] * anchors_size[0] + 0.5
+        y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = y
-        z = truth[:, :, :, :, 2] + 1. - 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
         z_ = z
 
         x1 = x + size_true[:, :, :, :, 0]/2
@@ -185,13 +185,14 @@ class IOUHelper:
 
     def get_iou_loc_y(self, truth, predictions):
         anchors_size=self.anchors_size
-        size_true = truth[:, :, :, :, 3:6] * 3 * anchors_size
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
-        x = truth[:, :, :, :, 0]
+        x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
         x_ = x
-        y = truth[:, :, :, :, 1]
-        y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
+        y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
+        y_ = predictions[:, :, :, :, 1]*anchors_size[1] + 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
         z_ = z
 
         x1 = x + size_true[:, :, :, :, 0]/2
@@ -225,14 +226,15 @@ class IOUHelper:
 
     def get_iou_loc_z(self, truth, predictions):
         anchors_size=self.anchors_size
-        size_true = truth[:, :, :, :, 3:6] * 3 * anchors_size
+        size_true = tf.math.exp(truth[:, :, :, :, 3:6])*anchors_size
+        size_pred = tf.math.exp(predictions[:, :, :, :, 3:6])*anchors_size
 
-        x = truth[:, :, :, :, 0]
+        x = truth[:, :, :, :, 0]*anchors_size[0] + 0.5
         x_ = x
-        y = truth[:, :, :, :, 1]
+        y = truth[:, :, :, :, 1]*anchors_size[1] + 0.5
         y_ = y
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        z = truth[:, :, :, :, 2]*anchors_size[2] + 1.
+        z_ = predictions[:, :, :, :, 2]*anchors_size[2] + 1.
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
