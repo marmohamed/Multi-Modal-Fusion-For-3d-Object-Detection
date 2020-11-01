@@ -18,7 +18,7 @@ def FPN(layers_outputs, scope, is_training=True, reuse=False):
             new_layer = conv(layers_outputs[i], new_features[i], kernel=1, stride=1, scope='conv0_' + str(i))
             new_layer = batch_norm(new_layer, is_training=is_training, scope='bn0_' + str(i))
             new_layer = relu(new_layer)
-            # new_layer = dropout(new_layer, rate=0.2, scope='new_layer_pre_fpn_' + str(i), training=is_training)
+            new_layer = dropout(new_layer, rate=0.3, scope='new_layer_pre_fpn_' + str(i), training=is_training)
 
             if i != len(layers_outputs)-1:
                 if new_layer.get_shape()[1] > prev_layer.get_shape()[1]:
@@ -51,7 +51,7 @@ def FPN(layers_outputs, scope, is_training=True, reuse=False):
             new_layer = conv(new_layer, channels[i], kernel=3, stride=1, scope='conv2_' + str(i))
             new_layer = batch_norm(new_layer, is_training=is_training, scope='bn2_' + str(i))
             new_layer = relu(new_layer)
-            # new_layer = dropout(new_layer, rate=0.2, scope='new_layer_post_fpn_' + str(i), training=is_training)
+            new_layer = dropout(new_layer, rate=0.3, scope='new_layer_post_fpn_' + str(i), training=is_training)
 
             new_layers.append(new_layer)
 

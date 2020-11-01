@@ -41,8 +41,9 @@ class PCGrad(optimizer.Optimizer):
           var_list = (
           tf.trainable_variables() +
           ops.get_collection(ops.GraphKeys.TRAINABLE_RESOURCE_VARIABLES))
-        else:
-          var_list = tf.nest.flatten(var_list)
+        # else:
+        #   var_list = tf.nest.flatten(var_list)
+        #   var_list = tf.squeeze(var_list)
 
 
         grads_flag = {0: [], 1: [], 2: [], 3: []}

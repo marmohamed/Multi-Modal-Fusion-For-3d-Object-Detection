@@ -118,6 +118,7 @@ class DetectionTrainer(Trainer):
                 self.weight_loc = 1
                 self.weight_dim = 1
                 self.weight_theta = 1
+                self.K = 4
 
                 with tf.Session(config=config) as sess:
                     if restore:
@@ -272,7 +273,8 @@ class DetectionTrainer(Trainer):
     def get_lr(self, epoch):
      
         if self.count_not_best % 4 == 0 and self.count_not_best > 0:
-            self.base_lr *= 0.8
+            # self.base_lr *= 0.8
+            self.K *= 0.8
 
         # if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
         #     self.weight_cls *= 0.8
@@ -295,7 +297,7 @@ class DetectionTrainer(Trainer):
           th = self.theta_losses[1] / self.theta_losses[0]
           
           T = 2
-          K = 4
+          K = self.K
 
           self.weight_cls = (K * np.exp(c/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
           self.weight_dim = (K * np.exp(d/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
@@ -399,7 +401,7 @@ class DetectionTrainer(Trainer):
                                 np.mean(np.array(recall).flatten()),\
                                 np.mean(np.array(iou_2d).flatten())
                                 ))
-            
+        # print('start images')
         # self.eval_dataset.reset_generator()
         # th=0.5
         # images = []
@@ -416,6 +418,34 @@ class DetectionTrainer(Trainer):
 
         # list_files= list_files[ln:final_sample]
         # # eval_anchors = prepare_anchors()
+
+        # def get_augmentation_parameters_eval():
+        #             image_translate_x = 0
+        #             image_translate_y = 0
+
+        #             translate_x = 0
+        #             translate_y = 0
+        #             translate_z = 0
+        #             ang = 0
+
+        #             r = R.from_rotvec(np.radians(0) * np.array([0, 0, 1]))
+        #             rot = r.as_dcm()
+        #             rot = np.append(rot, np.array([[0,0,0]]), axis=0)
+        #             rot = np.append(rot, np.array([[0],[0],[0],[1]]), axis=1)
+
+        #             tr_x = 0
+        #             tr_y = 0
+        #             tr_z = 0
+        #             tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
+
+        #             sc_x = 1
+        #             sc_y = 1
+        #             sc_z = 1
+        #             sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])
+
+        #             fliplr = False
+
+        #             return rot, tr, sc, image_translate_x, image_translate_y, ang, fliplr
         # for i in range(1, kwargs['num_summary_images']+1, 1):
                 
         #     feed_dict = self.__prepare_dataset_feed_dict(self.eval_dataset, 
@@ -428,9 +458,16 @@ class DetectionTrainer(Trainer):
         #     converted_points = convert_prediction_into_real_values(final_output[0, :, :, :, :], th=th)
         #     points = get_points(converted_points, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt', th=th)
         #     res = '\n'.join([' '.join([str(l) for l in points[i]]) for i in range(len(points))])
+
         #     _, labels, _, _, _, _ = read_label(res, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt', 0, 0, get_actual_dims=True, from_file=False)
 
-        #     img = np.clip(np.mean(feed_dict[self.model.train_inputs_lidar][0][:, :, 10:40], 2), 0, 1)                
+        #     rot, tr, sc, image_translate_x, image_translate_y, ang, fliplr = get_augmentation_parameters_eval()
+        #     data_reader_obj = DataReader(None, self.data_base_path + '/data_object_calib/training/calib/'+ current_file + '.txt',
+        #                          None, None, rot, sc, tr, ang, 0, 0, fliplr=False, get_actual_dims=True, from_file=False)
+        #     _, label, directions = data_reader_obj.label_reader.read_label()
+            
+
+        #     img = np.clip(np.mean(feed_dict[self.model.train_inputs_lidar][0][:, :, 15:35], 2), 0, 1)                
         #     plot_img_np = get_image(img, labels)
         #     images.append(plot_img_np)
 
@@ -523,7 +560,7 @@ class BEVDetectionTrainer(DetectionTrainer):
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,
-            'use_clr': True
+            'use_clr': False
         }
 
         

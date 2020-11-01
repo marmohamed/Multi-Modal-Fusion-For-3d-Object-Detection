@@ -121,7 +121,7 @@ def get_points(converted_points, calib_path,
                 size=(512, 448, 40), th=0.5):
     all_result = []
     for converted_points_ in converted_points:
-        if converted_points_[-1] >= th:
+        if sigmoid(converted_points_[-1]) >= th:
             result = [0] * 16
             result[0] = 'Car'
             result[1] = -1
@@ -224,7 +224,7 @@ def write_all_predictions(model, dir_name, training, augment=False, get_best=Fal
                     if i < len(list_files):
                         current_file = list_files[i]
 
-                        for th, th_str in zip([0.05, 0.1, 0.2, 0.3, 0.4, 0.5], ['05, 10, 20, 30, 40, 50']):
+                        for th, th_str in zip([0.05, 0.1, 0.2, 0.3, 0.4, 0.5], ['05', '10', '20', '30', '40', '50']):
                             new_file_path = '../prediction_files/' + dir_name + '/bev/th' + th_str + '_2/data/' + current_file + '.txt'
                             write_predictions(final_output, list_calib_paths[i], new_file_path, th=th)
                             

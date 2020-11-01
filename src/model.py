@@ -160,27 +160,27 @@ class Model(object):
                         fpn_lidar = tf.concat(fpn_lidar[:], 3)
 
                         fpn_lidar1 = fpn_lidar[:]
-                        fpn_lidar2 = fpn_lidar[:]
+                        # fpn_lidar2 = fpn_lidar[:]
 
-                        num_conv_blocks=2
+                        num_conv_blocks=1
                         for i in range(0, num_conv_blocks):
-                            temp = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
+                            temp = conv(fpn_lidar1, 256, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
                             temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
                             temp = relu(temp)
                             # fpn_lidar = fpn_lidar + temp
                             fpn_lidar1 = temp
-                            # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                            fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
                             self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar1
 
-                        num_conv_blocks=2
-                        for i in range(0, num_conv_blocks):
-                            temp = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
-                            temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
-                            temp = relu(temp)
-                            # fpn_lidar = fpn_lidar + temp
-                            fpn_lidar2 = temp
-                            # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
-                            self.debug_layers['fpn_lidar_output_post_conv_2_'+str(i)] = fpn_lidar2
+                        # num_conv_blocks=1
+                        # for i in range(0, num_conv_blocks):
+                        #     temp = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_2_'+str(i))
+                        #     temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_2_' + str(i))
+                        #     temp = relu(temp)
+                        #     # fpn_lidar = fpn_lidar + temp
+                        #     fpn_lidar2 = temp
+                        #     # fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                        #     self.debug_layers['fpn_lidar_output_post_conv_2_'+str(i)] = fpn_lidar2
 
                         # fpn_lidar = self.cnn_lidar.res_groups2[-1]                       
 
@@ -188,8 +188,8 @@ class Model(object):
                             final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
                             final_output_2_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
                             
-                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
-                            final_output_2_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
+                            final_output_1_8 = conv(fpn_lidar1, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
+                            final_output_2_8 = conv(fpn_lidar1, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'])
 
                             final_output_1 = tf.concat([final_output_1_7, final_output_1_8], -1)
                             final_output_2 = tf.concat([final_output_2_7, final_output_2_8], -1)
@@ -245,12 +245,12 @@ class Model(object):
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
                             # self.regression_loss_bev += 1000 * (1 - self.iou) * self.weight_loc * self.loc_reg_loss 
-                            self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
+                            self.regression_loss_bev += 10 * self.weight_loc * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
                             # self.regression_loss_bev += 50 * (1 - self.iou) * self.weight_dim * self.dim_reg_loss 
-                            self.regression_loss_bev += 1 * self.weight_dim * self.dim_reg_loss 
+                            self.regression_loss_bev += 100 * self.weight_dim * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
+                            self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
                             # self.model_loss_bev +=  10 * (2 - self.recall - self.precision) * self.weight_cls * self.classification_loss
@@ -262,10 +262,10 @@ class Model(object):
                         self.regression_loss = self.regression_loss_bev
                         self.model_loss = self.model_loss_bev
 
-                        self.losses = [ 1000 * self.weight_loc * self.loc_reg_loss , 
+                        self.losses = [ 10 * self.weight_loc * self.loc_reg_loss , 
                                         100 * self.weight_dim * self.dim_reg_loss, 
-                                        1000 * self.weight_theta * self.theta_reg_loss, 
-                                        10 * self.weight_cls * self.classification_loss]
+                                        100 * self.weight_theta * self.theta_reg_loss, 
+                                        1 * self.weight_cls * self.classification_loss]
                         
 
                        
@@ -295,10 +295,15 @@ class Model(object):
                                                             self.params['decay_rate'], self.params['staircase'])  
 
                 self.learning_rate_placeholder = tf.placeholder(tf.float32, [], name='learning_rate')
-                self.opt_lidar = tf.train.AdamOptimizer(self.learning_rate_placeholder)
-                self.train_op_lidar = self.opt_lidar.minimize(self.model_loss,\
+                self.opt_lidar = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder))
+                self.train_op_lidar = self.opt_lidar.minimize(self.losses,\
                                                                             var_list=self.lidar_only_vars,\
                                                                             global_step=self.global_step)
+
+                # self.opt_lidar = tf.train.AdamOptimizer(self.learning_rate_placeholder)
+                # self.train_op_lidar = self.opt_lidar.minimize(self.model_loss,\
+                #                                                             var_list=self.lidar_only_vars,\
+                #                                                             global_step=self.global_step)
               
 
                 if self.params['fusion']:

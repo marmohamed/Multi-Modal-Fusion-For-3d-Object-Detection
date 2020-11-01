@@ -17,8 +17,8 @@ class IOUHelper:
         x_ = predictions[:, :, :, :, 0]
         y = truth[:, :, :, :, 1]
         y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        z = truth[:, :, :, :, 2]
+        z_ = predictions[:, :, :, :, 2]
 
 
         x1 = x + size_true[:, :, :, :, 0]/2
@@ -65,8 +65,8 @@ class IOUHelper:
         x_ = predictions[:, :, :, :, 0]
         y = truth[:, :, :, :, 1]
         y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        z = truth[:, :, :, :, 2]
+        z_ = predictions[:, :, :, :, 2]
 
         x1 = x + size_true[:, :, :, :, 0]/2
         x2 = x - size_true[:, :, :, :, 0]/2
@@ -107,8 +107,8 @@ class IOUHelper:
         x_ = predictions[:, :, :, :, 0]
         y = truth[:, :, :, :, 1]
         y_ = predictions[:, :, :, :, 1]
-        z = truth[:, :, :, :, 2] + 1. - 0.5
-        z_ = predictions[:, :, :, :, 2]+ 1. - 0.5
+        z = truth[:, :, :, :, 2]
+        z_ = predictions[:, :, :, :, 2]
 
 
         x1 = x + size_true[:, :, :, :, 0]/2

@@ -224,32 +224,32 @@ class DetectionTrainerLRFind(Trainer):
                             pass
 
                         finally:
-                            # pass
-                            save_path = self.model.saver.save(sess, "./training_files2/tmp/model.ckpt", global_step=self.model.global_step)
+                            pass
+                            # save_path = self.model.saver.save(sess, "./training_files2/tmp/model.ckpt", global_step=self.model.global_step)
                            
-                            print("Model saved in path: %s" % save_path)
+                            # print("Model saved in path: %s" % save_path)
 
-                            self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch_dir_loss, e, True)
+                            # self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch_dir_loss, e, True)
                             
                          
-                            print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e,\
-                                np.mean(np.array(epoch_loss).flatten()),\
-                                np.mean(np.array(epoch_cls_loss).flatten()),\
-                                np.mean(np.array(epoch_reg_loss).flatten())
-                                ))
-                            print('Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}'.format(e,\
-                                np.mean(np.array(epoch_theta_loss).flatten()),\
-                                np.mean(np.array(epoch_loc_loss).flatten()),\
-                                np.mean(np.array(epoch_dim_loss).flatten())
-                                ))
-                            print('Epoch {0}: iou = {1}, iou_dim = {2}, iou_loc = {3}, theta_differences = {4}, precision = {5}, recall = {6}'.format(e,\
-                                np.mean(np.array(epoch_iou).flatten()),\
-                                np.mean(np.array(epoch_iou_dim).flatten()),\
-                                np.mean(np.array(epoch_iou_loc).flatten()),\
-                                np.mean(np.array(epoch_theta_diffs).flatten()),\
-                                np.mean(np.array(epoch_precision).flatten()),\
-                                np.mean(np.array(epoch_recall).flatten())
-                                ))
+                            # print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e,\
+                            #     np.mean(np.array(epoch_loss).flatten()),\
+                            #     np.mean(np.array(epoch_cls_loss).flatten()),\
+                            #     np.mean(np.array(epoch_reg_loss).flatten())
+                            #     ))
+                            # print('Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}'.format(e,\
+                            #     np.mean(np.array(epoch_theta_loss).flatten()),\
+                            #     np.mean(np.array(epoch_loc_loss).flatten()),\
+                            #     np.mean(np.array(epoch_dim_loss).flatten())
+                            #     ))
+                            # print('Epoch {0}: iou = {1}, iou_dim = {2}, iou_loc = {3}, theta_differences = {4}, precision = {5}, recall = {6}'.format(e,\
+                            #     np.mean(np.array(epoch_iou).flatten()),\
+                            #     np.mean(np.array(epoch_iou_dim).flatten()),\
+                            #     np.mean(np.array(epoch_iou_loc).flatten()),\
+                            #     np.mean(np.array(epoch_theta_diffs).flatten()),\
+                            #     np.mean(np.array(epoch_precision).flatten()),\
+                            #     np.mean(np.array(epoch_recall).flatten())
+                            #     ))
                             
 
                             # eval_batch_size=batch_size
