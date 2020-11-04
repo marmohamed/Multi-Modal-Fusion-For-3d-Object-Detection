@@ -242,10 +242,35 @@ class Model(object):
                         self.weight_theta = tf.placeholder(tf.float32, shape=())
 
 
+                        # self.regression_loss_bev = 0
+                        # if self.params['train_loc'] == 1:
+                        #     # self.regression_loss_bev += 1000 * (1 - self.iou) * self.weight_loc * self.loc_reg_loss 
+                        #     self.regression_loss_bev += 10 * self.weight_loc * self.loc_reg_loss 
+                        # if self.params['train_dim'] == 1:
+                        #     # self.regression_loss_bev += 50 * (1 - self.iou) * self.weight_dim * self.dim_reg_loss 
+                        #     self.regression_loss_bev += 100 * self.weight_dim * self.dim_reg_loss 
+                        # if self.params['train_theta'] == 1:
+                        #     self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
+                        # self.model_loss_bev = 0
+                        # if self.params['train_cls']:
+                        #     # self.model_loss_bev +=  10 * (2 - self.recall - self.precision) * self.weight_cls * self.classification_loss
+                        #     self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
+                        # if self.params['train_reg']:
+                        #     self.model_loss_bev +=  1 * self.regression_loss_bev
+
+                     
+                        # self.regression_loss = self.regression_loss_bev
+                        # self.model_loss = self.model_loss_bev
+
+                        # self.losses = [ 10 * self.weight_loc * self.loc_reg_loss , 
+                        #                 100 * self.weight_dim * self.dim_reg_loss, 
+                        #                 100 * self.weight_theta * self.theta_reg_loss, 
+                        #                 1 * self.weight_cls * self.classification_loss]
+
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
                             # self.regression_loss_bev += 1000 * (1 - self.iou) * self.weight_loc * self.loc_reg_loss 
-                            self.regression_loss_bev += 10 * self.weight_loc * self.loc_reg_loss 
+                            self.regression_loss_bev += 100 * self.weight_loc * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
                             # self.regression_loss_bev += 50 * (1 - self.iou) * self.weight_dim * self.dim_reg_loss 
                             self.regression_loss_bev += 100 * self.weight_dim * self.dim_reg_loss 
@@ -262,7 +287,7 @@ class Model(object):
                         self.regression_loss = self.regression_loss_bev
                         self.model_loss = self.model_loss_bev
 
-                        self.losses = [ 10 * self.weight_loc * self.loc_reg_loss , 
+                        self.losses = [ 100 * self.weight_loc * self.loc_reg_loss , 
                                         100 * self.weight_dim * self.dim_reg_loss, 
                                         100 * self.weight_theta * self.theta_reg_loss, 
                                         1 * self.weight_cls * self.classification_loss]
