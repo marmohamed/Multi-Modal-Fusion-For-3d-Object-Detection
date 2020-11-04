@@ -134,7 +134,7 @@ class DetectionDatasetLoader(DatasetLoader):
         return new_image
 
 
-    def apply_mask_lidar(self, image, size_x=5, size_y=5, size_z=10, n_squares=1):
+    def apply_mask_lidar(self, image, size_x=5, size_y=5, size_z=5, n_squares=1):
         w, l, h = image.shape
         new_image = image[:]
         for _ in range(n_squares):
@@ -288,8 +288,8 @@ class DetectionDatasetLoader(DatasetLoader):
 
                         lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 1), dtype=np.float)
 
-                    if np.random.random_sample() >= 0.7:
-                        lidar_image = self.apply_mask_lidar(lidar_image)
+                    # if np.random.random_sample() >= 0.7:
+                    #     lidar_image = self.apply_mask_lidar(lidar_image)
 
                 _, label, directions = data_reader_obj.label_reader.read_label()
                 label = get_target(label, directions,  anchors=anchors)
