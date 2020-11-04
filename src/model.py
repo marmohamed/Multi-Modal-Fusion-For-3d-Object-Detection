@@ -169,7 +169,7 @@ class Model(object):
                             temp = relu(temp)
                             # fpn_lidar = fpn_lidar + temp
                             fpn_lidar1 = temp
-                            fpn_lidar = dropout(fpn_lidar, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                            fpn_lidar1 = dropout(fpn_lidar1, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
                             self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar1
 
                         # num_conv_blocks=1
@@ -268,20 +268,11 @@ class Model(object):
                         #                 1 * self.weight_cls * self.classification_loss]
 
                         self.regression_loss_bev = 0
-                        if self.params['train_loc'] == 1:
-                            # self.regression_loss_bev += 1000 * (1 - self.iou) * self.weight_loc * self.loc_reg_loss 
-                            self.regression_loss_bev += 100 * self.weight_loc * self.loc_reg_loss 
-                        if self.params['train_dim'] == 1:
-                            # self.regression_loss_bev += 50 * (1 - self.iou) * self.weight_dim * self.dim_reg_loss 
-                            self.regression_loss_bev += 100 * self.weight_dim * self.dim_reg_loss 
-                        if self.params['train_theta'] == 1:
-                            self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
+                        self.regression_loss_bev += 1 * self.weight_loc * (1 - self.iou) 
+                        self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
-                        if self.params['train_cls']:
-                            # self.model_loss_bev +=  10 * (2 - self.recall - self.precision) * self.weight_cls * self.classification_loss
-                            self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
-                        if self.params['train_reg']:
-                            self.model_loss_bev +=  1 * self.regression_loss_bev
+                        self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
+                        self.model_loss_bev +=  1 * self.regression_loss_bev
 
                      
                         self.regression_loss = self.regression_loss_bev
@@ -320,8 +311,8 @@ class Model(object):
                                                             self.params['decay_rate'], self.params['staircase'])  
 
                 self.learning_rate_placeholder = tf.placeholder(tf.float32, [], name='learning_rate')
-                self.opt_lidar = PCGrad(tf.train.AdamOptimizer(self.learning_rate_placeholder))
-                self.train_op_lidar = self.opt_lidar.minimize(self.losses,\
+                self.opt_lidar = tf.train.AdamOptimizer(self.learning_rate_placeholder)
+                self.train_op_lidar = self.opt_lidar.minimize(self.model_loss,\
                                                                             var_list=self.lidar_only_vars,\
                                                                             global_step=self.global_step)
 

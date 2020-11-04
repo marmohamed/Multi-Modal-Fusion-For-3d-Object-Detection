@@ -272,9 +272,9 @@ class DetectionTrainer(Trainer):
 
     def get_lr(self, epoch):
      
-        if self.count_not_best % 4 == 0 and self.count_not_best > 0:
-            # self.base_lr *= 0.8
-            self.K *= 0.8
+        if self.count_not_best % 5 == 0 and self.count_not_best > 0:
+            self.base_lr *= 0.7
+            # self.K *= 0.8
 
         # if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
         #     self.weight_cls *= 0.8
@@ -285,24 +285,24 @@ class DetectionTrainer(Trainer):
         # if self.count_not_best_theta % 3 == 0 and self.count_not_best_theta > 0:
         #     self.weight_theta *= 0.8
 
-        if len(self.cls_losses) >= 2:
-          self.cls_losses = self.cls_losses[::-1][:2][::-1]
-          self.dim_losses = self.dim_losses[::-1][:2][::-1]
-          self.loc_losses = self.loc_losses[::-1][:2][::-1]
-          self.theta_losses = self.theta_losses[::-1][:2][::-1]
+        # if len(self.cls_losses) >= 2:
+        #   self.cls_losses = self.cls_losses[::-1][:2][::-1]
+        #   self.dim_losses = self.dim_losses[::-1][:2][::-1]
+        #   self.loc_losses = self.loc_losses[::-1][:2][::-1]
+        #   self.theta_losses = self.theta_losses[::-1][:2][::-1]
 
-          c = self.cls_losses[1] / self.cls_losses[0]
-          d = self.dim_losses[1] / self.dim_losses[0]
-          l = self.loc_losses[1] / self.loc_losses[0]
-          th = self.theta_losses[1] / self.theta_losses[0]
+        #   c = self.cls_losses[1] / self.cls_losses[0]
+        #   d = self.dim_losses[1] / self.dim_losses[0]
+        #   l = self.loc_losses[1] / self.loc_losses[0]
+        #   th = self.theta_losses[1] / self.theta_losses[0]
           
-          T = 2
-          K = self.K
+        #   T = 2
+        #   K = self.K
 
-          self.weight_cls = (K * np.exp(c/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
-          self.weight_dim = (K * np.exp(d/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
-          self.weight_loc = (K * np.exp(l/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
-          self.weight_theta = (K * np.exp(th/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
+        #   self.weight_cls = (K * np.exp(c/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
+        #   self.weight_dim = (K * np.exp(d/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
+        #   self.weight_loc = (K * np.exp(l/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
+        #   self.weight_theta = (K * np.exp(th/T)) / (np.exp(c/T) + np.exp(l/T) + np.exp(d/T) + np.exp(th/T))
      
         lr = max(self.base_lr, 1.e-9)
         lr = min(self.base_lr, 1.e-3)
