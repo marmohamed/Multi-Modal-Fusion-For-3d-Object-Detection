@@ -78,7 +78,7 @@ class Model(object):
 
                 img_size_1 = 512
                 img_size_2 = 448
-                c_dim = 41
+                c_dim = 40
                 self.train_inputs_lidar = tf.placeholder(tf.float32, 
                                     [None, img_size_1, img_size_2, c_dim], 
                                     name='train_inputs_lidar')
@@ -94,7 +94,7 @@ class Model(object):
                     self.cnn.build_model(self.train_inputs_rgb, is_training=self.is_training)
                     
                 with tf.variable_scope("lidar_branch"):
-                    self.cnn_lidar = ResNetBuilder().build(branch=self.CONST.BEV_BRANCH, img_height=512, img_width=448, img_channels=32)
+                    self.cnn_lidar = ResNetBuilder().build(branch=self.CONST.BEV_BRANCH, img_height=512, img_width=448, img_channels=40)
                     self.cnn_lidar.build_model(self.train_inputs_lidar, is_training=self.is_training)
                 
                 
@@ -129,11 +129,6 @@ class Model(object):
 
                 with tf.variable_scope("image_branch"):
 
-                    # print("self.cnn.res_groups")
-                    # print(self.cnn.res_groups)
-                    # print("self.cnn.res_groups2")
-                    # print(self.cnn.res_groups2)
-                    
                     if self.params['fusion']:
                         self.cnn.res_groups2.append(self.cnn.res_groups[3])
 
@@ -167,9 +162,8 @@ class Model(object):
                             temp = conv(fpn_lidar1, 256, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
                             temp = batch_norm(temp, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
                             temp = relu(temp)
-                            # fpn_lidar = fpn_lidar + temp
                             fpn_lidar1 = temp
-                            fpn_lidar1 = dropout(fpn_lidar1, rate=0.3, scope='fpn_lidar_dropout_'+str(i))
+                            fpn_lidar1 = dropout(fpn_lidar1, rate=0.2, scope='fpn_lidar_dropout_'+str(i), training=self.is_training)
                             self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar1
 
                         # num_conv_blocks=1
@@ -205,12 +199,7 @@ class Model(object):
 
                     self.final_output = tf.concat([final_output_1, final_output_2], 3)
 
-                    # self.anchors = tf.placeholder(tf.float32, [None, 128, 112, 2, 6])
-
-                    # self.use_nms = tf.placeholder(tf.bool, shape=[])
-                    # self.final_output = tf.cond(self.use_nms, lambda: nms(self.final_output, 0.5), lambda: self.final_output)
-
-
+                   
                     ############################
                     #  under lidar_branch scope
                     ############################
@@ -242,46 +231,44 @@ class Model(object):
                         self.weight_theta = tf.placeholder(tf.float32, shape=())
 
 
-                        # self.regression_loss_bev = 0
-                        # if self.params['train_loc'] == 1:
-                        #     # self.regression_loss_bev += 1000 * (1 - self.iou) * self.weight_loc * self.loc_reg_loss 
-                        #     self.regression_loss_bev += 10 * self.weight_loc * self.loc_reg_loss 
-                        # if self.params['train_dim'] == 1:
-                        #     # self.regression_loss_bev += 50 * (1 - self.iou) * self.weight_dim * self.dim_reg_loss 
-                        #     self.regression_loss_bev += 100 * self.weight_dim * self.dim_reg_loss 
-                        # if self.params['train_theta'] == 1:
-                        #     self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
-                        # self.model_loss_bev = 0
-                        # if self.params['train_cls']:
-                        #     # self.model_loss_bev +=  10 * (2 - self.recall - self.precision) * self.weight_cls * self.classification_loss
-                        #     self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
-                        # if self.params['train_reg']:
-                        #     self.model_loss_bev +=  1 * self.regression_loss_bev
-
-                     
-                        # self.regression_loss = self.regression_loss_bev
-                        # self.model_loss = self.model_loss_bev
-
-                        # self.losses = [ 10 * self.weight_loc * self.loc_reg_loss , 
-                        #                 100 * self.weight_dim * self.dim_reg_loss, 
-                        #                 100 * self.weight_theta * self.theta_reg_loss, 
-                        #                 1 * self.weight_cls * self.classification_loss]
-
                         self.regression_loss_bev = 0
-                        self.regression_loss_bev += 1 * self.weight_loc * (1 - self.iou) 
-                        self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
+                        if self.params['train_loc'] == 1:
+                            self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
+                        if self.params['train_dim'] == 1:
+                            self.regression_loss_bev += 1 * self.weight_dim * self.dim_reg_loss 
+                        if self.params['train_theta'] == 1:
+                            self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
-                        self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
-                        self.model_loss_bev +=  1 * self.regression_loss_bev
+                        if self.params['train_cls']:
+                            self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
+                            self.model_loss_bev +=  1 * self.weight_cls * self.dir_reg_loss
+                        if self.params['train_reg']:
+                            self.model_loss_bev +=  1 * self.regression_loss_bev
 
                      
                         self.regression_loss = self.regression_loss_bev
                         self.model_loss = self.model_loss_bev
 
-                        self.losses = [ 100 * self.weight_loc * self.loc_reg_loss , 
+                        self.losses = [ 10 * self.weight_loc * self.loc_reg_loss , 
                                         100 * self.weight_dim * self.dim_reg_loss, 
                                         100 * self.weight_theta * self.theta_reg_loss, 
                                         1 * self.weight_cls * self.classification_loss]
+
+                        # self.regression_loss_bev = 0
+                        # self.regression_loss_bev += 1 * self.weight_loc * (1 - self.iou) 
+                        # self.regression_loss_bev += 100 * self.weight_theta * self.theta_reg_loss 
+                        # self.model_loss_bev = 0
+                        # self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
+                        # self.model_loss_bev +=  1 * self.regression_loss_bev
+
+                     
+                        # self.regression_loss = self.regression_loss_bev
+                        # self.model_loss = self.model_loss_bev
+
+                        # self.losses = [ 100 * self.weight_loc * self.loc_reg_loss , 
+                        #                 100 * self.weight_dim * self.dim_reg_loss, 
+                        #                 100 * self.weight_theta * self.theta_reg_loss, 
+                        #                 1 * self.weight_cls * self.classification_loss]
                         
 
                        
@@ -316,11 +303,6 @@ class Model(object):
                                                                             var_list=self.lidar_only_vars,\
                                                                             global_step=self.global_step)
 
-                # self.opt_lidar = tf.train.AdamOptimizer(self.learning_rate_placeholder)
-                # self.train_op_lidar = self.opt_lidar.minimize(self.model_loss,\
-                #                                                             var_list=self.lidar_only_vars,\
-                #                                                             global_step=self.global_step)
-              
 
                 if self.params['fusion']:
                     self.fusion_only_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,

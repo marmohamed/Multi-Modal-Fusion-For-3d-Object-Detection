@@ -79,23 +79,23 @@ class LidarReader:
         i_lim = i_lim[(x_lim2>-self.size[0]) & (x_lim2<= 0) & (y_lim2>-self.size[1]) & (y_lim2 <= 0) & (z_lim2<self.size[2]) & (z_lim2 >= 0)]
         
 
-        d = dict()
-        for i in range(len(x_lim)):
-            if (x_lim[i], y_lim[i]) in d:
-                d[(x_lim[i], y_lim[i])].append(i_lim[i])
-            else:
-                d[(x_lim[i], y_lim[i])] = [i_lim[i]]
+        # d = dict()
+        # for i in range(len(x_lim)):
+        #     if (x_lim[i], y_lim[i]) in d:
+        #         d[(x_lim[i], y_lim[i])].append(i_lim[i])
+        #     else:
+        #         d[(x_lim[i], y_lim[i])] = [i_lim[i]]
         
         
-        d = dict()
-        for i in range(len(x_lim)):
-            if (x_lim[i], y_lim[i]) in d:
-                d[(x_lim[i], y_lim[i])].append(i_lim[i])
-            else:
-                d[(x_lim[i], y_lim[i])] = [i_lim[i]]
+        # d = dict()
+        # for i in range(len(x_lim)):
+        #     if (x_lim[i], y_lim[i]) in d:
+        #         d[(x_lim[i], y_lim[i])].append(i_lim[i])
+        #     else:
+        #         d[(x_lim[i], y_lim[i])] = [i_lim[i]]
         
         
-        img = np.zeros([self.size[0], self.size[1], self.size[2]+1], dtype=np.float32)
+        img = np.zeros([self.size[0], self.size[1], self.size[2]], dtype=np.float32)
         img[x_lim, y_lim, z_lim] = 255.
 
         if self.interpolate:
@@ -114,8 +114,8 @@ class LidarReader:
            
             img = np.maximum(img2, img)
 
-        for k in d:
-            img[k[0], k[1], -1] = max(d[k])*255.
+        # for k in d:
+        #     img[k[0], k[1], -1] = max(d[k])*255.
              
         img = img[:,:, ::-1]
         img = img / 255.

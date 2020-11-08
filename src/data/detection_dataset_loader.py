@@ -269,10 +269,10 @@ class DetectionDatasetLoader(DatasetLoader):
                 camera_image = data_reader_obj.read_image()
                 lidar_image = data_reader_obj.lidar_reader.read_lidar()
 
-                if self.augment:
+                if False:
                     if np.random.random_sample() >= 0.7:
-                        noise = np.random.rand(512, 448, 41)
-                        noise2 = np.random.rand(512, 448, 41)
+                        noise = np.random.rand(512, 448, 40)
+                        noise2 = np.random.rand(512, 448, 40)
 
                         noise = np.array(noise>=0.99, dtype=np.int)
                         noise2 = np.array(noise2>=0.99, dtype=np.int)
@@ -280,8 +280,8 @@ class DetectionDatasetLoader(DatasetLoader):
                         lidar_image = np.array(np.clip(lidar_image + noise*noise2, 0, 1), dtype=np.float)
 
                     if np.random.random_sample() >= 0.7:
-                        noise = np.random.rand(512, 448, 41)
-                        noise2 = np.random.rand(512, 448, 41)
+                        noise = np.random.rand(512, 448, 40)
+                        noise2 = np.random.rand(512, 448, 40)
 
                         noise = np.array(noise>=0.1, dtype=np.int)
                         noise2 = np.array(noise2>=0.1, dtype=np.int)

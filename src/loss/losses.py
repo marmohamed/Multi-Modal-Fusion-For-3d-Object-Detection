@@ -36,10 +36,15 @@ class LossCalculator(object):
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), tf.nn.sigmoid_cross_entropy_with_logits(labels=t, logits=p), tf.zeros_like(p))
         reg_losses4 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(7, 8)]
 
-        loc_reg_loss = tf.reduce_sum(reg_losses1) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
-        dim_reg_loss = tf.reduce_sum(reg_losses2) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
-        theta_reg_loss = tf.reduce_sum(reg_losses3) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
-        dir_reg_loss = tf.reduce_sum(reg_losses4) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
+        # loc_reg_loss = tf.reduce_sum(reg_losses1) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
+        # dim_reg_loss = tf.reduce_sum(reg_losses2) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
+        # theta_reg_loss = tf.reduce_sum(reg_losses3) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
+        # dir_reg_loss = tf.reduce_sum(reg_losses4) / (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
+
+        loc_reg_loss = tf.reduce_sum(reg_losses1) 
+        dim_reg_loss = tf.reduce_sum(reg_losses2)
+        theta_reg_loss = tf.reduce_sum(reg_losses3)
+        dir_reg_loss = tf.reduce_sum(reg_losses4)
 
 
         iou, iou_2d = self.get_iou(truth, tf.math.sigmoid(predictions))

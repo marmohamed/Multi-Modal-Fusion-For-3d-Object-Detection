@@ -9,14 +9,14 @@ def AttentionFusionLayerFunc3(original_rgb_features, fv_lidar_features, train_fu
         lidar_features = conv(original_lidar_feats, 64, kernel=kernel_lidar, stride=stride_lidar, scope=scope+'conv_bev', reuse=reuse)
         lidar_features = batch_norm(lidar_features, is_training=is_training, scope='bn_fusion_lidar')
         lidar_features = relu(lidar_features)
-        lidar_features = dropout(lidar_features, rate=0.5, scope='dropout_lidar_feats')
+        lidar_features = dropout(lidar_features, rate=0.2, scope='dropout_lidar_feats', is_training=is_training)
 
         # print('lidar_features', lidar_features)
 
         rgb_features = conv(original_rgb_features, 64,  kernel=kernel_rgb, stride=stride_rgb, scope=scope+'conv_rgb', reuse=reuse)
         rgb_features = batch_norm(rgb_features, is_training=is_training, scope='bn_fusion_rgb')
         rgb_features = relu(rgb_features)
-        rgb_features = dropout(rgb_features, rate=0.5, scope='dropout_lidar_feats')
+        rgb_features = dropout(rgb_features, rate=0.2, scope='dropout_lidar_feats', is_training=is_training)
 
         # print('rgb_features', rgb_features)
 
