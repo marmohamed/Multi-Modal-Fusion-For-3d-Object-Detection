@@ -231,12 +231,11 @@ def batch_norm(x, is_training=True, scope='batch_norm'):
     #                                     is_training=is_training, scope=scope)
     # with tf.variable_scope(scope) :
     #     return tf.layers.BatchNormalization(renorm=True)(x, training=is_training)
-    return group_norm(x, G=32, eps=1e-5, scope=scope)
+    return group_norm(x, G=4, eps=1e-5, scope=scope)
 
-def group_norm(x, G=32, eps=1e-5, scope='group_norm') :
+def group_norm(x, G=4, eps=1e-5, scope='group_norm') :
     with tf.variable_scope(scope) :
         N, H, W, C = x.get_shape().as_list()
-        # print(N, H, W, C)
         G = min(G, C)
 
         x = tf.reshape(x, [-1, H, W, G, C // G])

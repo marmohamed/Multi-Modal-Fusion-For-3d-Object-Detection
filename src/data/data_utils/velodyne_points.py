@@ -8,10 +8,10 @@ class LidarReader:
 
 
     def __init__(self, lidar_path, calib_path, image_path, rot, tr, sc, fliplr=False, interpolate=False,
-                        x_range=(0, 71), 
+                        x_range=(0, 70), 
                         y_range=(-40, 40), 
-                        z_range=(-3.0, 1), 
-                        size=(512, 448, 40)):
+                        z_range=(-2.5, 1), 
+                        size=(800, 700, 36)):
         self.lidar_path = lidar_path
         self.calib_path = calib_path
         self.image_path = image_path

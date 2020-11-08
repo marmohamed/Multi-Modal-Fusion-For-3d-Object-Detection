@@ -101,7 +101,7 @@ from data.data_utils.data_reader import *
 
 
 
-def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(512, 448), output_size=(128, 112)):
+def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(800, 700), output_size=(200, 175)):
     # ASSUMPTION: I will assume that the anchors contain a record for the height
     """
     - calculate the ratio = input size / final output size
@@ -126,7 +126,7 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
             continue
 
         label_i[0:2] = label_i[0:2] / (ratio*1.0)
-        label_i[2] = label_i[2] / 40.
+        label_i[2] = label_i[2] / 36.
 
         temp = label_i[6]
         angle = temp * 57.2958

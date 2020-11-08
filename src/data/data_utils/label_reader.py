@@ -14,10 +14,10 @@ from data.data_utils.fv_utils import *
 class LabelReader:
 
     def __init__(self, label_path, calib_path, rot, tr, sc, ang, calib_reader,
-                    x_range=(0, 71), 
+                    x_range=(0, 70), 
                     y_range=(-40, 40), 
-                    z_range=(-3.0, 1), 
-                    size=(512, 448, 40), 
+                    z_range=(-2.5, 1), 
+                    size=(800, 700, 36), 
                     get_actual_dims=False, 
                     from_file=True, fliplr=False):
         self.label_path = label_path
@@ -128,11 +128,11 @@ class LabelReader:
                 x2 = b[2][0]
                 y2 = b[2][1]
                 u0 = -(x0) * x_fac + self.size[0]
-                v0 = -(y0 + 40) * y_fac + self.size[1]
+                v0 = -(y0 + 36) * y_fac + self.size[1]
                 u1 = -(x1) * x_fac + self.size[0]
-                v1 = -(y1 + 40) * y_fac + self.size[1]
+                v1 = -(y1 + 36) * y_fac + self.size[1]
                 u2 = -(x2) * x_fac + self.size[0]
-                v2 = -(y2 + 40) * y_fac + self.size[1]
+                v2 = -(y2 + 36) * y_fac + self.size[1]
                 dimension_length[i] = math.sqrt((v1-v2)**2 + (u1-u2)**2)
                 dimension_width[i] = math.sqrt((v1-v0)**2 + (u1-u0)**2)
                 dimension_height[i] = math.sqrt((-(b[0][2]+(-1*self.z_range[1]))*z_fac-(-b[4][2]+self.z_range[1])*z_fac)**2)

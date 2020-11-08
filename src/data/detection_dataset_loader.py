@@ -19,7 +19,7 @@ class DetectionDatasetLoader(DatasetLoader):
     def _defaults(self, **kwargs):
         defaults = {
             'image_size': (370, 1224),
-            'lidar_size': (512, 448, 40), 
+            'lidar_size': (800, 700, 36), 
             'anchors': np.array([3.9, 1.6, 1.5])
         }
         for k in kwargs:
@@ -165,11 +165,11 @@ class DetectionDatasetLoader(DatasetLoader):
                         image_translate_y = 0
 
                     if np.random.random_sample() >= 0.0:
-                        translate_x = random.randint(-20, 20)
+                        translate_x = random.randint(-10, 10)
                     else:
                         translate_x = 0
                     if np.random.random_sample() >= 0.0:
-                        translate_y = random.randint(-20, 20)
+                        translate_y = random.randint(-10, 10)
                     else:
                         translate_y = 0
 
@@ -179,7 +179,7 @@ class DetectionDatasetLoader(DatasetLoader):
                         translate_z = 0
 
                     if np.random.random_sample() >= 0.0:
-                        ang = random.randint(-20, 20)
+                        ang = random.randint(-10, 10)
                     else:
                         ang = 0
 
