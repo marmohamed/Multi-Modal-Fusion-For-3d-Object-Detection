@@ -149,13 +149,18 @@ class LabelReader:
 
         if self.ang != 0:
             for i in range(len(locations)):
-              output[i][6] = output[i][6] - self.ang / 57.2958
+              output[i][6] = output[i][6] - self.ang / (180/np.pi)
+              if output[i][6] < -np.pi:
+                  output[i][6] = output[i][6] + 2 * np.pi
+
 
         if self.fliplr:
             for i in range(len(locations)):
                 h = self.size[1]
                 output[i][1] = h - output[i][1]
-                output[i][6] = ((-output[i][6]*57.2958) + 180) / 57.2958
+                output[i][6] = ((-output[i][6]*(180/np.pi)) + 180) / (180/np.pi)
+                if output[i][6] < -np.pi:
+                  output[i][6] = output[i][6] + 2 * np.pi
 
         output = list(filter(lambda point: 0 <= point[0] < self.size[0] and 0 <= point[1] < self.size[1] and 0 <= point[2] < self.size[2] , output))
         output = np.array(output)
