@@ -12,9 +12,10 @@ class IOUHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 3.0, 2.3, 2.4, 0, -1])
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
         mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.array([0.5, 0.5, 1, 4.1, 3.1, 3.3, 1, 1])
         maxs = np.expand_dims(maxs, [0, 1, 2])
         
         truth = (truth + 1) / 2
@@ -72,9 +73,10 @@ class IOUHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 3.0, 2.3, 2.4, 0, -1])
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
         mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.array([0.5, 0.5, 1, 4.1, 3.1, 3.3, 1, 1])
         maxs = np.expand_dims(maxs, [0, 1, 2])
         
         truth = (truth + 1) / 2
@@ -126,11 +128,12 @@ class IOUHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 3.0, 2.3, 2.4, 0, -1])
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
         mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.array([0.5, 0.5, 1, 4.1, 3.1, 3.3, 1, 1])
         maxs = np.expand_dims(maxs, [0, 1, 2])
-        
+
         truth = (truth + 1) / 2
         truth = truth * (maxs - mins) + mins 
         predictions = (predictions + 1) / 2
@@ -181,11 +184,12 @@ class IOUHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 3.0, 2.3, 2.4, 0, -1])
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
         mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.array([0.5, 0.5, 1, 4.1, 3.1, 3.3, 1, 1])
         maxs = np.expand_dims(maxs, [0, 1, 2])
-        
+
         truth = (truth + 1) / 2
         truth = truth * (maxs - mins) + mins 
         predictions = (predictions + 1) / 2
@@ -235,10 +239,12 @@ class IOUHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 3.0, 2.3, 2.4, 0, -1])
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
         mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.array([0.5, 0.5, 1, 4.1, 3.1, 3.3, 1, 1])
         maxs = np.expand_dims(maxs, [0, 1, 2])
+
         
         truth = (truth + 1) / 2
         truth = truth * (maxs - mins) + mins 
@@ -288,9 +294,10 @@ class IOUHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 3.0, 2.3, 2.4, 0, -1])
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
         mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.array([0.5, 0.5, 1, 4.1, 3.1, 3.3, 1, 1])
         maxs = np.expand_dims(maxs, [0, 1, 2])
         
         truth = (truth + 1) / 2

@@ -77,12 +77,26 @@ class MetricsHelper:
        
         return macro_cost_0, macro_cost_1
 
-    def get_accracy_diffs(self, truth, predictions):
+    def get_accracy_diffs(self, truth2, predictions2):
+        truth = truth2[:, :, :, :8]
+        predictions = predictions2[:, :, :, :8]
+
+        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+
+        mins = np.expand_dims(mins, [0, 1, 2])
+        maxs = np.expand_dims(maxs, [0, 1, 2])
+        
+        truth = (truth + 1) / 2
+        truth = truth * (maxs - mins) + mins 
+        predictions = (predictions + 1) / 2
+        predictions = predictions * (maxs - mins) + mins 
+
         theta_pred = tf.math.atan2(predictions[:, :, :, 6:7], predictions[:, :, :, 7:8]) * 180 / np.pi
         theta_truth = tf.math.atan2(truth[:, :, :, 6:7], truth[:, :, :, 7:8]) * 180 / np.pi
         theta_diff = tf.abs(theta_pred-theta_truth)
-        theta_diff = tf.where(tf.greater_equal(truth[:, :, :, 8:9],0.5), theta_diff, tf.zeros_like(truth[:, :, :, 8:9]))
-        true_count_theta = tf.math.count_nonzero(truth[:, :, :, -1], dtype=tf.float32)
+        theta_diff = tf.where(tf.greater_equal(truth2[:, :, :, 8:9],0.5), theta_diff, tf.zeros_like(truth2[:, :, :, 8:9]))
+        true_count_theta = tf.math.count_nonzero(truth2[:, :, :, -1], dtype=tf.float32)
         accuracy_theta = tf.reduce_sum(theta_diff) / (true_count_theta + 1e-8)
         return accuracy_theta
 

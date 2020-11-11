@@ -76,14 +76,14 @@ class Model(object):
                                                     [None, img_size_1, img_size_2, c_dim], 
                                                     name='train_inputs_rgb')
 
-                img_size_1 = 800
-                img_size_2 = 700
-                c_dim = 36
+                img_size_1 = 700
+                img_size_2 = 800
+                c_dim = 35
                 self.train_inputs_lidar = tf.placeholder(tf.float32, 
                                     [None, img_size_1, img_size_2, c_dim], 
                                     name='train_inputs_lidar')
 
-                self.y_true = tf.placeholder(tf.float32, shape=(None, 200, 175, 9)) # target
+                self.y_true = tf.placeholder(tf.float32, shape=(None, 175, 200, 9)) # target
 
                 self.y_true_img = tf.placeholder(tf.float32, shape=(None, 24, 78, 2)) # target
                 self.train_fusion_rgb = tf.placeholder(tf.bool, shape=())
@@ -167,7 +167,7 @@ class Model(object):
                         fpn_lidar = upsample(fpn_lidar, scope='fpn_upsample_0_' + str(1), filters=96, use_deconv=True, kernel_size=3)
                         fpn_lidar = batch_norm(fpn_lidar, is_training=self.is_training, scope='bn_fpn_' + str(4))
                         fpn_lidar = relu(fpn_lidar)
-                        fpn_lidar = crop(fpn_lidar, ((0, 0), (1, 0)), scope="crop_fpn_0")
+                        fpn_lidar = crop(fpn_lidar, ((1, 0), (0, 0)), scope="crop_fpn_0")
                         
 
                         temp = conv(self.cnn_lidar.res_groups2[-3], 96, kernel=1, stride=1, padding='SAME', use_bias=True, scope="fpn_"+str(2))

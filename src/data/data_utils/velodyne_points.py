@@ -11,7 +11,7 @@ class LidarReader:
                         x_range=(0, 70), 
                         y_range=(-40, 40), 
                         z_range=(-2.5, 1), 
-                        size=(800, 700, 36)):
+                        size=(700, 800, 35)):
         self.lidar_path = lidar_path
         self.calib_path = calib_path
         self.image_path = image_path

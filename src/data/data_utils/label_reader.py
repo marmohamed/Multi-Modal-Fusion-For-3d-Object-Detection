@@ -17,7 +17,7 @@ class LabelReader:
                     x_range=(0, 70), 
                     y_range=(-40, 40), 
                     z_range=(-2.5, 1), 
-                    size=(800, 700, 36), 
+                    size=(700, 800, 35), 
                     get_actual_dims=False, 
                     from_file=True, fliplr=False):
         self.label_path = label_path
@@ -128,19 +128,19 @@ class LabelReader:
                 x2 = b[2][0]
                 y2 = b[2][1]
                 u0 = -(x0) * x_fac + self.size[0]
-                v0 = -(y0 + 36) * y_fac + self.size[1]
+                v0 = -(y0 + self.size[2]) * y_fac + self.size[1]
                 u1 = -(x1) * x_fac + self.size[0]
-                v1 = -(y1 + 36) * y_fac + self.size[1]
+                v1 = -(y1 + self.size[2]) * y_fac + self.size[1]
                 u2 = -(x2) * x_fac + self.size[0]
-                v2 = -(y2 + 36) * y_fac + self.size[1]
+                v2 = -(y2 + self.size[2]) * y_fac + self.size[1]
                 dimension_length[i] = math.sqrt((v1-v2)**2 + (u1-u2)**2)
                 dimension_width[i] = math.sqrt((v1-v0)**2 + (u1-u0)**2)
                 dimension_height[i] = math.sqrt((-(b[0][2]+(-1*self.z_range[1]))*z_fac-(-b[4][2]+self.z_range[1])*z_fac)**2)
 
         
-        for i in range(len(locations)):
-            if angles[i] < 0:
-                angles[i] += np.pi
+        # for i in range(len(locations)):
+        #     if angles[i] < 0:
+        #         angles[i] += np.pi
 
         output = [[-(locations[i][0] + -1*self.x_range[0]) * x_fac + self.size[0], -(locations[i][1] + -1*self.y_range[0]) * y_fac + self.size[1], -(locations[i][2] + -1*self.z_range[0]) * z_fac + self.size[2], 
                     dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
@@ -152,6 +152,8 @@ class LabelReader:
               output[i][6] = output[i][6] - self.ang / (180/np.pi)
               if output[i][6] < -np.pi:
                   output[i][6] = output[i][6] + 2 * np.pi
+              if output[i][6] > np.pi:
+                  output[i][6] = output[i][6] - 2 * np.pi
 
 
         if self.fliplr:
@@ -161,6 +163,8 @@ class LabelReader:
                 output[i][6] = ((-output[i][6]*(180/np.pi)) + 180) / (180/np.pi)
                 if output[i][6] < -np.pi:
                   output[i][6] = output[i][6] + 2 * np.pi
+                if output[i][6] > np.pi:
+                  output[i][6] = output[i][6] - 2 * np.pi
 
         output = list(filter(lambda point: 0 <= point[0] < self.size[0] and 0 <= point[1] < self.size[1] and 0 <= point[2] < self.size[2] , output))
         output = np.array(output)

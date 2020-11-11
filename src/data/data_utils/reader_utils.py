@@ -294,9 +294,9 @@ def read_label(rot, tr, sc, label_path, calib_path, shift_h, shift_w, x_range=(0
             dimension_height[i] = math.sqrt((-(b[0][2]+(-1*z_range[1]))*z_fac-(-b[4][2]+z_range[1])*z_fac)**2)
 
       
-    for i in range(len(locations)):
-        if angles[i] < 0:
-            angles[i] += 3.14
+    # for i in range(len(locations)):
+    #     if angles[i] < 0:
+    #         angles[i] += 3.14
 
     x_range = (x_range[0] + translate_x, x_range[1] + translate_x)
     y_range = (y_range[0] + translate_y, y_range[1] + translate_y)
