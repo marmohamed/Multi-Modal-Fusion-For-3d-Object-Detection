@@ -39,7 +39,7 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
         label_i[3:6] = np.log(label_i[3:6])
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
         
         label_i = ((label_i - mins) / (maxs-mins)) * 2 - 1
 

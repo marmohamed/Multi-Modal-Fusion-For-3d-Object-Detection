@@ -13,7 +13,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -74,7 +74,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -129,7 +129,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -185,7 +185,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -240,7 +240,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -295,7 +295,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.95, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
