@@ -141,7 +141,6 @@ class DetectionTrainerLRFind(Trainer):
                             epoch_dim_loss = []
                             epoch_loc_loss = []
                             epoch_theta_loss = []
-                            epoch_dir_loss = []
                             epoch_iou = []
                             epoch_iou_dim = []
                             epoch_iou_loc = []
@@ -176,7 +175,7 @@ class DetectionTrainerLRFind(Trainer):
                                 feed_dict[self.model.weight_theta] = self.weight_theta
 
                                 loss, _, classification_loss, regression_loss, loc_loss, dim_loss,\
-                                    theta_loss, dir_loss, summary, theta_accuracy,\
+                                    theta_loss, summary, theta_accuracy,\
                                         iou, iou_dim, iou_loc, precision, recall = sess.run([self.model.model_loss, 
                                                                                                     self.branch_params['opt'], 
                                                                                                     self.model.classification_loss, 
@@ -184,7 +183,6 @@ class DetectionTrainerLRFind(Trainer):
                                                                                                     self.model.loc_reg_loss,
                                                                                                     self.model.dim_reg_loss,
                                                                                                     self.model.theta_reg_loss,
-                                                                                                    self.model.dir_reg_loss,
                                                                                                     self.model.merged,
                                                                                                     self.model.theta_accuracy,
                                                                                                     self.model.iou,
@@ -200,7 +198,6 @@ class DetectionTrainerLRFind(Trainer):
                                 epoch_cls_loss.append(classification_loss)
                                 epoch_reg_loss.append(regression_loss)
                                 epoch_theta_loss.append(theta_loss)
-                                epoch_dir_loss.append(dir_loss)
                                 epoch_loc_loss.append(loc_loss)
                                 epoch_dim_loss.append(dim_loss)
                                 epoch_iou.append(iou)
@@ -298,7 +295,6 @@ class DetectionTrainerLRFind(Trainer):
             dim_loss = []
             loc_loss = []
             theta_loss = []
-            dir_loss = []
             iou = []
             iou_dim = []
             iou_loc = []
@@ -316,14 +312,13 @@ class DetectionTrainerLRFind(Trainer):
                 feed_dict[self.model.weight_dim] = 1
                 feed_dict[self.model.weight_theta] = 1
                 
-                all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_, dir_loss_,\
+                all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_,\
                     iou_, iou_dim_, iou_loc_, precision_, recall_, theta_diff = sess.run([self.model.model_loss, 
                                                                         self.model.classification_loss,
                                                                         self.model.regression_loss,
                                                                         self.model.loc_reg_loss,
                                                                         self.model.dim_reg_loss,
                                                                         self.model.theta_reg_loss,
-                                                                        self.model.dir_reg_loss,
                                                                         self.model.iou,
                                                                         self.model.iou_dim,
                                                                         self.model.iou_loc,
@@ -338,7 +333,6 @@ class DetectionTrainerLRFind(Trainer):
                 dim_loss.append(dim_loss_)
                 loc_loss.append(loc_loss_)
                 theta_loss.append(theta_loss_)
-                dir_loss.append(dir_loss_)
                 iou.append(iou_)
                 iou_dim.append(iou_dim_)
                 iou_loc.append(iou_loc_)
@@ -350,7 +344,7 @@ class DetectionTrainerLRFind(Trainer):
         except (tf.errors.OutOfRangeError, StopIteration):
             pass
         finally:
-            self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, theta_loss, dir_loss, epoch, False)
+            self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, theta_loss, epoch, False)
 
             print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch,\
                                 np.mean(np.array(loss).flatten()),\
@@ -417,18 +411,17 @@ class DetectionTrainerLRFind(Trainer):
         
 
 
-    def __save_summary(self, sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch_dir_loss, epoch, training=True, **kwargs):
-        model_loss_summary, cls_loss_summary, reg_loss_summary, dim_loss_summary, loc_loss_summary, theta_loss_summary, dir_loss_summary = sess.run([self.model.model_loss_summary,\
+    def __save_summary(self, sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch, training=True, **kwargs):
+        model_loss_summary, cls_loss_summary, reg_loss_summary, dim_loss_summary, loc_loss_summary, theta_loss_summary = sess.run([self.model.model_loss_summary,\
                                                                          self.model.cls_loss_summary, self.model.reg_loss_summary,
                                                                          self.model.dim_loss_summary, self.model.loc_loss_summary,
-                                                                         self.model.theta_loss_summary, self.model.dir_loss_summary], 
+                                                                         self.model.theta_loss_summary], 
                                                                         {self.model.model_loss_placeholder: np.mean(np.array(epoch_loss).flatten()),
                                                                          self.model.cls_loss_placeholder: np.mean(np.array(epoch_cls_loss).flatten()),
                                                                          self.model.reg_loss_placeholder: np.mean(np.array(epoch_reg_loss).flatten()),
                                                                          self.model.dim_loss_placeholder: np.mean(np.array(epoch_dim_loss).flatten()),
                                                                          self.model.loc_loss_placeholder: np.mean(np.array(epoch_loc_loss).flatten()),
-                                                                         self.model.theta_loss_placeholder: np.mean(np.array(epoch_theta_loss).flatten()),
-                                                                         self.model.dir_loss_placeholder: np.mean(np.array(epoch_dir_loss).flatten())})
+                                                                         self.model.theta_loss_placeholder: np.mean(np.array(epoch_theta_loss).flatten())})
 
         if training:
             writer = self.model.train_writer
@@ -441,7 +434,6 @@ class DetectionTrainerLRFind(Trainer):
         writer.add_summary(dim_loss_summary, epoch)
         writer.add_summary(loc_loss_summary, epoch)
         writer.add_summary(theta_loss_summary, epoch)
-        writer.add_summary(dir_loss_summary, epoch)
 
         if not training:
             if self.last_loss > np.mean(np.array(epoch_loss)):
