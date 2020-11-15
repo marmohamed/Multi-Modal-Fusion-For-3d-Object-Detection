@@ -17,7 +17,7 @@ class LabelReader:
                     x_range=(0, 70), 
                     y_range=(-40, 40), 
                     z_range=(-2.5, 1), 
-                    size=(700, 800, 35), 
+                    size=(448, 512, 35), 
                     get_actual_dims=False, 
                     from_file=True, fliplr=False):
         self.label_path = label_path

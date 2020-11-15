@@ -19,7 +19,7 @@ class DetectionDatasetLoader(DatasetLoader):
     def _defaults(self, **kwargs):
         defaults = {
             'image_size': (370, 1224),
-            'lidar_size': (700, 800, 35), 
+            'lidar_size': (448, 512, 35), 
             'anchors': np.array([3.9, 1.6, 1.5])
         }
         for k in kwargs:
@@ -165,11 +165,11 @@ class DetectionDatasetLoader(DatasetLoader):
                         image_translate_y = 0
 
                     if np.random.random_sample() >= 0.0:
-                        translate_x = random.randint(-5, 5)
+                        translate_x = random.randint(-25, 25)
                     else:
                         translate_x = 0
                     if np.random.random_sample() >= 0.0:
-                        translate_y = random.randint(-5, 5)
+                        translate_y = random.randint(-25, 25)
                     else:
                         translate_y = 0
 
@@ -179,7 +179,7 @@ class DetectionDatasetLoader(DatasetLoader):
                         translate_z = 0
 
                     if np.random.random_sample() >= 0.0:
-                        ang = random.randint(-5, 5)
+                        ang = random.randint(-25, 25)
                     else:
                         ang = 0
 
@@ -210,12 +210,14 @@ class DetectionDatasetLoader(DatasetLoader):
 
                     sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])
 
-                    if np.random.random_sample() >= 0.5:
-                        fliplr = True
-                    else:
-                        fliplr = False
+                    # if np.random.random_sample() >= 0.5:
+                    #     fliplr = True
+                    # else:
+                    #     fliplr = False
                     
-                    fliplr = np.random.random_sample() >= 0.5
+                    # fliplr = np.random.random_sample() >= 0.5
+
+                    fliplr = False
 
         else:
                     image_translate_x = 0
@@ -271,8 +273,8 @@ class DetectionDatasetLoader(DatasetLoader):
 
                 if False:
                     if np.random.random_sample() >= 0.7:
-                        noise = np.random.rand(512, 448, 40)
-                        noise2 = np.random.rand(512, 448, 40)
+                        noise = np.random.rand(448, 512, 35)
+                        noise2 = np.random.rand(448, 512, 35)
 
                         noise = np.array(noise>=0.99, dtype=np.int)
                         noise2 = np.array(noise2>=0.99, dtype=np.int)
@@ -280,8 +282,8 @@ class DetectionDatasetLoader(DatasetLoader):
                         lidar_image = np.array(np.clip(lidar_image + noise*noise2, 0, 1), dtype=np.float)
 
                     if np.random.random_sample() >= 0.7:
-                        noise = np.random.rand(512, 448, 40)
-                        noise2 = np.random.rand(512, 448, 40)
+                        noise = np.random.rand(448, 512, 35)
+                        noise2 = np.random.rand(448, 512, 35)
 
                         noise = np.array(noise>=0.1, dtype=np.int)
                         noise2 = np.array(noise2>=0.1, dtype=np.int)

@@ -13,7 +13,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.91, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -38,15 +38,15 @@ class IOUHelper:
         x2 = x - size_true[:, :, :, 0]/2
         y1 = y + size_true[:, :, :, 1]/2
         y2 = y - size_true[:, :, :, 1]/2
-        z1 = z
-        z2 = z - size_true[:, :, :, 2]
+        z1 = z + size_true[:, :, :, 2]
+        z2 = z
 
         x1_ = x_ + size_pred[:, :, :, 0]/2
         x2_ = x_ - size_pred[:, :, :, 0]/2
         y1_ = y_ + size_pred[:, :, :, 1]/2
         y2_ = y_ - size_pred[:, :, :, 1]/2
-        z1_ = z_
-        z2_ = z_ - size_pred[:, :, :, 2]
+        z1_ = z_ + size_pred[:, :, :, 2]
+        z2_ = z_ 
 
         area_g = size_true[:, :, :, 0] * size_true[:, :, :, 1]
         area_d = size_pred[:, :, :, 0] * size_pred[:, :, :, 1]
@@ -74,7 +74,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.91, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -98,15 +98,15 @@ class IOUHelper:
         x2 = x - size_true[:, :, :, 0]/2
         y1 = y + size_true[:, :, :, 1]/2
         y2 = y - size_true[:, :, :, 1]/2
-        z1 = z
-        z2 = z - size_true[:, :, :, 2]
+        z1 = z + size_true[:, :, :, 2]
+        z2 = z 
 
         x1_ = x_ + size_true[:, :, :, 0]/2
         x2_ = x_ - size_true[:, :, :, 0]/2
         y1_ = y_ + size_true[:, :, :, 1]/2
         y2_ = y_ - size_true[:, :, :, 1]/2
-        z1_ = z_
-        z2_ = z_ - size_true[:, :, :, 2]
+        z1_ = z_ + size_true[:, :, :, 2]
+        z2_ = z_ 
 
         area_g = size_true[:, :, :, 0] * size_true[:, :, :, 1]
         area_d = size_true[:, :, :, 0] * size_true[:, :, :, 1]
@@ -129,7 +129,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.91, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
@@ -154,15 +154,15 @@ class IOUHelper:
         x2 = x - size_true[:, :, :, 0]/2
         y1 = y + size_true[:, :, :, 1]/2
         y2 = y - size_true[:, :, :, 1]/2
-        z1 = z
-        z2 = z - size_true[:, :, :, 2]
+        z1 = z + size_true[:, :, :, 2]
+        z2 = z 
 
         x1_ = x + size_pred[:, :, :, 0]/2
         x2_ = x - size_pred[:, :, :, 0]/2
         y1_ = y + size_pred[:, :, :, 1]/2
         y2_ = y - size_pred[:, :, :, 1]/2
-        z1_ = z
-        z2_ = z - size_pred[:, :, :, 2]
+        z1_ = z + size_pred[:, :, :, 2]
+        z2_ = z 
 
         area_g = size_true[:, :, :, 0] * size_true[:, :, :, 1]
         area_d = size_pred[:, :, :, 0] * size_pred[:, :, :, 1]
@@ -185,7 +185,7 @@ class IOUHelper:
         predictions = predictions2[:, :, :, :8]
 
         mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.85, 1.1, 1.1])
+        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.91, 1.1, 1.1])
 
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
