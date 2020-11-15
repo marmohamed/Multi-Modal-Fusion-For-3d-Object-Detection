@@ -102,12 +102,22 @@ class LabelReader:
             classes = classes[indx]
             directions = directions[indx]
 
-        points = [self.project_point_from_camera_coor_to_velo_coor2(self.rot, self.tr, self.sc, [location_x[i], location_y[i], location_z[i]], 
+        points = []
+        sl = []
+        sw = []
+        sh = []
+        for i in range(len(locations)):
+            temp = self.project_point_from_camera_coor_to_velo_coor2(self.rot, self.tr, self.sc, [location_x[i], location_y[i], location_z[i]], 
                                                             [dimension_height[i], dimension_width[i], dimension_length[i]],
                                                             angles[i],
                                                             calib_data)
-                    for i in range(len(locations))]
-     
+                    
+        
+        
+            points.append(temp[0])
+            sl.append(temp[1])
+            sw.append(temp[2])
+            sh.append(temp[3])
         
         x_size = (self.x_range[1] - self.x_range[0])
         y_size = (self.y_range[1] - self.y_range[0])
@@ -141,9 +151,13 @@ class LabelReader:
         # for i in range(len(locations)):
         #     if angles[i] < 0:
         #         angles[i] += np.pi
-
-        output = [[-(locations[i][0] + -1*self.x_range[0]) * x_fac + self.size[0], -(locations[i][1] + -1*self.y_range[0]) * y_fac + self.size[1], -(locations[i][2] + -1*self.z_range[0]) * z_fac + self.size[2], 
+        if self.get_actual_dims:
+            output = [[-(locations[i][0] + -1*self.x_range[0]) * x_fac + self.size[0], -(locations[i][1] + -1*self.y_range[0]) * y_fac + self.size[1], -(locations[i][2] + -1*self.z_range[0]) * z_fac + self.size[2], 
                     dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
+                    for i in range(len(locations))]
+        else:
+            output = [[-(locations[i][0] + -1*self.x_range[0]) * x_fac + self.size[0], -(locations[i][1] + -1*self.y_range[0]) * y_fac + self.size[1], -(locations[i][2] + -1*self.z_range[0]) * z_fac + self.size[2], 
+                    dimension_length[i]*sl[i], dimension_width[i]*sw[i], dimension_height[i]*sh[i], angles[i]] 
                     for i in range(len(locations))]
        
 
@@ -223,23 +237,60 @@ class LabelReader:
         corners_3d[0,:] = corners_3d[0,:] + x;
         corners_3d[1,:] = corners_3d[1,:] + y;
         corners_3d[2,:] = corners_3d[2,:] + z;
-        #print 'cornsers_3d: ', corners_3d
-        # only draw 3d bounding box for objs in front of the camera
-    #     if np.any(corners_3d[2,:]<0.1):
-    #         corners_2d = None
-    #         return corners_2d, np.transpose(corners_3d)
 
-        # project the 3d bounding box into the image plane
-    #     corners_2d = project_to_image(np.transpose(corners_3d), calib_data['P3'].reshape((3, 4)));
         box3d_pts_3d = np.transpose(corners_3d)
 
         pts_3d_ref = project_rect_to_ref(box3d_pts_3d, calib_data['R0_rect'])
         result = project_ref_to_velo(pts_3d_ref, calib_data['Tr_velo_to_cam'])
-        # print('before')
-        # print(result)
+        
         temp = result
+        
+        
+        x_size = (self.x_range[1] - self.x_range[0])
+        y_size = (self.y_range[1] - self.y_range[0])
+        z_size = (self.z_range[1] - self.z_range[0])
+                
+        x_fac = (self.size[0]-1) / x_size
+        y_fac = (self.size[1]-1) / y_size
+        z_fac = (self.size[2]-1) / z_size
+        
+        b = temp
+        x0 = b[0][0]
+        y0 = b[0][1]
+        x1 = b[1][0]
+        y1 = b[1][1]
+        x2 = b[2][0]
+        y2 = b[2][1]
+        u0 = -(x0) * x_fac + self.size[0]
+        v0 = -(y0 + self.size[2]) * y_fac + self.size[1]
+        u1 = -(x1) * x_fac + self.size[0]
+        v1 = -(y1 + self.size[2]) * y_fac + self.size[1]
+        u2 = -(x2) * x_fac + self.size[0]
+        v2 = -(y2 + self.size[2]) * y_fac + self.size[1]
+        dimension_length = math.sqrt((v1-v2)**2 + (u1-u2)**2)
+        dimension_width = math.sqrt((v1-v0)**2 + (u1-u0)**2)
+        dimension_height = math.sqrt((-(b[0][2]+(-1*self.z_range[1]))*z_fac-(-b[4][2]+self.z_range[1])*z_fac)**2)
+        
         temp = temp.transpose() + tr[:3, :1]
         temp = np.dot(sc[:3, :3], np.dot(rot[:3, :3], temp)).transpose()
-        # print('after')
-        # print(temp)
-        return temp
+        
+        b = temp
+        x0 = b[0][0]
+        y0 = b[0][1]
+        x1 = b[1][0]
+        y1 = b[1][1]
+        x2 = b[2][0]
+        y2 = b[2][1]
+        u0 = -(x0) * x_fac + self.size[0]
+        v0 = -(y0 + self.size[2]) * y_fac + self.size[1]
+        u1 = -(x1) * x_fac + self.size[0]
+        v1 = -(y1 + self.size[2]) * y_fac + self.size[1]
+        u2 = -(x2) * x_fac + self.size[0]
+        v2 = -(y2 + self.size[2]) * y_fac + self.size[1]
+        dimension_length2 = math.sqrt((v1-v2)**2 + (u1-u2)**2)
+        dimension_width2 = math.sqrt((v1-v0)**2 + (u1-u0)**2)
+        dimension_height2 = math.sqrt((-(b[0][2]+(-1*self.z_range[1]))*z_fac-(-b[4][2]+self.z_range[1])*z_fac)**2)
+        
+                
+        return temp, dimension_length2/dimension_length, dimension_width2/dimension_width, dimension_height2/dimension_height
+    

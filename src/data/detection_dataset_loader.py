@@ -201,23 +201,16 @@ class DetectionDatasetLoader(DatasetLoader):
                     sc_y = 1
                     sc_z = 1
 
-                    # if np.random.random_sample() >= 0.5:
-                    #    sc_x += ((random.random() * 2) - 1.) / 10.
+                    if np.random.random_sample() >= 0.5:
+                       sc_x += ((random.random() * 2) - 1.) / 10.
 
-                    # if np.random.random_sample() >= 0.5:
-                    #    sc_y += ((random.random() * 2) - 1.) / 10.
+                    if np.random.random_sample() >= 0.5:
+                       sc_y += ((random.random() * 2) - 1.) / 10.
 
 
                     sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])
 
-                    # if np.random.random_sample() >= 0.5:
-                    #     fliplr = True
-                    # else:
-                    #     fliplr = False
-                    
-                    # fliplr = np.random.random_sample() >= 0.5
-
-                    fliplr = False
+                    fliplr = np.random.random_sample() >= 0.5
 
         else:
                     image_translate_x = 0
@@ -271,7 +264,7 @@ class DetectionDatasetLoader(DatasetLoader):
                 camera_image = data_reader_obj.read_image()
                 lidar_image = data_reader_obj.lidar_reader.read_lidar()
 
-                if False:
+                if self.augment:
                     if np.random.random_sample() >= 0.7:
                         noise = np.random.rand(448, 512, 35)
                         noise2 = np.random.rand(448, 512, 35)
@@ -290,8 +283,8 @@ class DetectionDatasetLoader(DatasetLoader):
 
                         lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 1), dtype=np.float)
 
-                    # if np.random.random_sample() >= 0.7:
-                    #     lidar_image = self.apply_mask_lidar(lidar_image)
+                    if np.random.random_sample() >= 0.7:
+                        lidar_image = self.apply_mask_lidar(lidar_image)
 
                 _, label, directions = data_reader_obj.label_reader.read_label()
                 label = get_target(label, directions,  anchors=anchors)
@@ -299,50 +292,6 @@ class DetectionDatasetLoader(DatasetLoader):
                 yield(camera_image, lidar_image, label)
 
 
-
-
-
-                # if False:
-                #     if np.random.random_sample() >= 0.5:
-                #         noise = np.random.rand(370, 1224, 3)
-                #         ones = np.ones_like(camera_image)
-                #         ones[noise > 0.8] = 1
-                #         ones[noise <= 0.8] = 0
-                #         camera_image = np.clip(camera_image + ones, 0, 1)
-
-                #     if np.random.random_sample() >= 0.5:
-                #         noise = np.random.rand(370, 1224, 3)
-                #         zeros = np.zeros_like(camera_image)
-                #         zeros[noise > 0.8] = 0
-                #         zeros[noise <= 0.8] = 1
-                #         camera_image = np.clip(camera_image * zeros, 0, 1)
-
-                #     if np.random.random_sample() >= 0.5:
-                #         camera_image = self.apply_mask(camera_image)
-
-                # if False:
-                #     if np.random.random_sample() >= 0.5:
-                #         noise = np.random.rand(512, 448, 41)
-                #         noise2 = np.random.rand(512, 448, 41)
-
-                #         noise = np.array(noise>=0.99, dtype=np.int)
-                #         noise2 = np.array(noise2>=0.99, dtype=np.int)
-
-                #         lidar_image = np.array(np.clip(lidar_image + noise*noise2*255, 0, 255), dtype=np.int)
-
-                #     if np.random.random_sample() >= 0.5:
-                #         noise = np.random.rand(512, 448, 41)
-                #         noise2 = np.random.rand(512, 448, 41)
-
-                #         noise = np.array(noise>=0.1, dtype=np.int)
-                #         noise2 = np.array(noise2>=0.1, dtype=np.int)
-
-                #         lidar_image = np.array(np.clip(lidar_image * noise*noise2, 0, 255), dtype=np.int)
-
-                #     if np.random.random_sample() >= 0.5:
-                #         lidar_image = self.apply_mask_lidar(lidar_image)
-
-                
 
 
            
