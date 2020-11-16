@@ -201,10 +201,10 @@ class DetectionDatasetLoader(DatasetLoader):
                     sc_y = 1
                     sc_z = 1
 
-                    if np.random.random_sample() >= 0.5:
+                    if np.random.random_sample() >= 0.0:
                        sc_x += ((random.random() * 2) - 1.) / 10.
 
-                    if np.random.random_sample() >= 0.5:
+                    if np.random.random_sample() >= 0.0:
                        sc_y += ((random.random() * 2) - 1.) / 10.
 
 
