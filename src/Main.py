@@ -6,7 +6,7 @@ def main(args):
     print('Building the model')
 
     params = {
-        'fusion': True,
+        'fusion': False,
         # 'train_loc': 1,
         # 'train_dim': 0,
         # 'train_theta': 0,
