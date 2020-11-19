@@ -32,21 +32,23 @@ class ResNetLidarBEV(ResNet):
                 x = resblock(x, channels=128, is_training=is_training, downsample=downsample_arg, scope='resblock2_' + str(i))
             res_groups.append(x)
 
-            x = upsample(x, scope='resnet_upsample_' + str(0), filters=128, use_deconv=True, kernel_size=3)
+            # x = upsample(x, scope='resnet_upsample_' + str(0), filters=128, use_deconv=True, kernel_size=3)
+            # x = x + res_groups[-2]
 
             for i in range(residual_list[3]) :
                 downsample_arg = (i == 0)
                 x = resblock(x, channels=192, is_training=is_training, downsample=downsample_arg, scope='resblock3_' + str(i))
             res_groups.append(x)
 
-            x = upsample(x, scope='resnet_upsample_' + str(1), filters=192, use_deconv=True, kernel_size=3)
+            # x = upsample(x, scope='resnet_upsample_' + str(1), filters=128, use_deconv=True, kernel_size=3)
+            # x = x + res_groups[-2]
 
-            for i in range(residual_list[4]) :
-                downsample_arg = (i == 0)
-                x = resblock(x, channels=256, is_training=is_training, downsample=downsample_arg, scope='resblock4_' + str(i))
+            # for i in range(residual_list[4]) :
+            #     downsample_arg = (i == 0)
+            #     x = resblock(x, channels=256, is_training=is_training, downsample=downsample_arg, scope='resblock4_' + str(i))
 
 
-            res_groups.append(x)
+            # res_groups.append(x)
 
             return x, res_groups
 

@@ -69,7 +69,7 @@ if [ "$train_bev" = true ]; then
                 --epochs $epochs_bev \
                 --start_epoch $start_epoch_bev \
                 --num_summary_images $num_summary_images_detection \
-                --batch_size 1 \
+                --batch_size 2 \
                 --train_fusion False \
                 --train_images_seg False \
                 --augment True
