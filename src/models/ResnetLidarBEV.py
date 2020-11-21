@@ -15,7 +15,7 @@ class ResNetLidarBEV(ResNet):
             residual_list = [2, 4, 8, 12, 12]
 
             for i in range(residual_list[0]) :
-                x = conv(x, 32, kernel=3, stride=1, use_bias=True, scope='conv0_'+str(i))
+                x = conv(x, 64, kernel=3, stride=1, use_bias=True, scope='conv0_'+str(i))
                 x = batch_norm(x, is_training=is_training, scope='bn_res0_'+str(i))
                 x = relu(x)
             
@@ -32,23 +32,41 @@ class ResNetLidarBEV(ResNet):
                 x = resblock(x, channels=128, is_training=is_training, downsample=downsample_arg, scope='resblock2_' + str(i))
             res_groups.append(x)
 
-            # x = upsample(x, scope='resnet_upsample_' + str(0), filters=128, use_deconv=True, kernel_size=3)
-            # x = x + res_groups[-2]
+       
 
             for i in range(residual_list[3]) :
                 downsample_arg = (i == 0)
                 x = resblock(x, channels=192, is_training=is_training, downsample=downsample_arg, scope='resblock3_' + str(i))
+
+            x = upsample(x, size=(2, 2), scope='resnet_bev_upsample_2', use_deconv=True, filters=128, kernel_size=4)
+           
+            res_groups[-1] = conv(res_groups[-1], 128, kernel=1, stride=1, scope='conv2_' + str(i))
+            res_groups[-1] = batch_norm(res_groups[-1], is_training=is_training, scope='bn2_' + str(i))
+            res_groups[-1] = relu(res_groups[-1])
+
+            x = x + res_groups[-1]
+            x = conv(x, 128, kernel=3, stride=1, scope='conv22_' + str(i))
+            x = batch_norm(x, is_training=is_training, scope='bn22_' + str(i))
+            x = relu(x)
+
             res_groups.append(x)
 
-            # x = upsample(x, scope='resnet_upsample_' + str(1), filters=128, use_deconv=True, kernel_size=3)
-            # x = x + res_groups[-2]
+            for i in range(residual_list[4]) :
+                downsample_arg = (i == 0)
+                x = resblock(x, channels=256, is_training=is_training, downsample=downsample_arg, scope='resblock4_' + str(i))
 
-            # for i in range(residual_list[4]) :
-            #     downsample_arg = (i == 0)
-            #     x = resblock(x, channels=256, is_training=is_training, downsample=downsample_arg, scope='resblock4_' + str(i))
+            x = upsample(x, size=(2, 2), scope='resnet_bev_upsample_3', use_deconv=True, filters=128, kernel_size=4)
 
+            res_groups[-1] = conv(res_groups[-1], 128, kernel=1, stride=1, scope='conv3_' + str(i))
+            res_groups[-1] = batch_norm(res_groups[-1], is_training=is_training, scope='bn3_' + str(i))
+            res_groups[-1] = relu(res_groups[-1])
 
-            # res_groups.append(x)
+            x = x + res_groups[-1]
+            x = conv(x, 128, kernel=3, stride=1, scope='conv32_' + str(i))
+            x = batch_norm(x, is_training=is_training, scope='bn32_' + str(i))
+            x = relu(x)
+
+            res_groups.append(x)
 
             return x, res_groups
 

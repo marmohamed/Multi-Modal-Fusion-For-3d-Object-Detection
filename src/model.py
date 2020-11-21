@@ -78,7 +78,7 @@ class Model(object):
 
                 img_size_1 = 448
                 img_size_2 = 512
-                c_dim = 35
+                c_dim = 36
                 self.train_inputs_lidar = tf.placeholder(tf.float32, 
                                     [None, img_size_1, img_size_2, c_dim], 
                                     name='train_inputs_lidar')
@@ -190,22 +190,32 @@ class Model(object):
 
                         fpn_lidar = FPN(self.cnn_lidar.res_groups2, scope="fpn_lidar", is_training=self.is_training)
                         fpn_lidar[0] = maxpool2d(fpn_lidar[0], scope="fpn_lidar_maxpool_0")
-                        fpn_lidar[-1] = upsample(fpn_lidar[-1], scope="fpn_lidar_upsample_0", filters=128, use_deconv=True, kernel_size=4)
+                        # fpn_lidar[-1] = upsample(fpn_lidar[-1], scope="fpn_lidar_upsample_0", filters=128, use_deconv=True, kernel_size=4)
 
                         fpn_lidar = tf.concat(fpn_lidar, axis=-1)
 
-                        num_conv_blocks=1
+                        fpn_lidar1 = fpn_lidar[:]
+                        fpn_lidar2 = fpn_lidar[:]
+
+                        num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
-                            fpn_lidar = conv(fpn_lidar, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_1_'+str(i))
-                            fpn_lidar = batch_norm(fpn_lidar, is_training=self.is_training, scope='bn_post_fpn_1_' + str(i))
-                            fpn_lidar = relu(fpn_lidar)
-                            self.debug_layers['fpn_lidar_output_post_conv_1_'+str(i)] = fpn_lidar
+                            fpn_lidar1 = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i))
+                            fpn_lidar1 = batch_norm(fpn_lidar1, is_training=self.is_training, scope='bn_post_fpn_11_' + str(i))
+                            fpn_lidar1 = relu(fpn_lidar1)
+                            self.debug_layers['fpn_lidar1_output_post_conv_1_'+str(i)] = fpn_lidar1
+
+                        num_conv_blocks=2
+                        for i in range(0, num_conv_blocks):
+                            fpn_lidar2 = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_12_'+str(i))
+                            fpn_lidar2 = batch_norm(fpn_lidar2, is_training=self.is_training, scope='bn_post_fpn_12_' + str(i))
+                            fpn_lidar2 = relu(fpn_lidar2)
+                            self.debug_layers['fpn_lidar2_output_post_conv_1_'+str(i)] = fpn_lidar2
                      
 
                         if self.params['focal_loss']:
-                            final_output_1_7 = conv(fpn_lidar, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
+                            final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
                             
-                            final_output_1_8 = conv(fpn_lidar, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
+                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
 
                             self.final_output = tf.concat([final_output_1_7, final_output_1_8], -1)
                         else:
