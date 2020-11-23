@@ -122,7 +122,7 @@ class DetectionTrainer(Trainer):
 
                 with tf.Session(config=config) as sess:
                     if restore:
-                        self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp/'))
+                        self.model.saver.restore(sess, tf.train.latest_checkpoint('./training_files/tmp_best2/'))
                     else:
                         sess.run(tf.global_variables_initializer())
 
@@ -549,7 +549,7 @@ class BEVDetectionTrainer(DetectionTrainer):
         self.branch_params = {
             'opt': self.model.train_op_lidar,
             'train_fusion_rgb': False,
-            'lr': 5e-5,
+            'lr': 1e-5,
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,

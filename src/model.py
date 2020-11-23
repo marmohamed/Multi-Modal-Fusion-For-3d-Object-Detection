@@ -260,22 +260,22 @@ class Model(object):
                         if self.params['train_loc'] == 1:
                             self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_dim * self.dim_reg_loss 
+                            self.regression_loss_bev += 3 * self.weight_dim * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
+                            self.regression_loss_bev += 2 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
                             self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
-                            self.model_loss_bev +=  1 * self.regression_loss_bev
+                            self.model_loss_bev +=  5 * self.regression_loss_bev
 
                      
                         self.regression_loss = self.regression_loss_bev
                         self.model_loss = self.model_loss_bev
 
-                        self.losses = [ 10 * self.weight_loc * self.loc_reg_loss , 
-                                        100 * self.weight_dim * self.dim_reg_loss, 
-                                        100 * self.weight_theta * self.theta_reg_loss, 
+                        self.losses = [ 1 * self.weight_loc * self.loc_reg_loss , 
+                                        3 * self.weight_dim * self.dim_reg_loss, 
+                                        2 * self.weight_theta * self.theta_reg_loss, 
                                         1 * self.weight_cls * self.classification_loss]
 
                         # self.regression_loss_bev = 0

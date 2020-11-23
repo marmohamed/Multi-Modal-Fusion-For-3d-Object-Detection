@@ -29,9 +29,11 @@ class LossCalculator(object):
         reg_losses2 = [loss_fn(truth[:, :, :, i], predictions[:, :, :, i]) for i in range(3, 6)] 
         reg_losses3 = [loss_fn(truth[:, :, :, i] , predictions[:, :, :, i]) for i in range(6, 8)]
 
-        loc_reg_loss = tf.reduce_sum(reg_losses1) 
-        dim_reg_loss = tf.reduce_sum(reg_losses2)
-        theta_reg_loss = tf.reduce_sum(reg_losses3)
+        c = (tf.math.count_nonzero(truth[:, :, :, 8], dtype=tf.float32)+1e-8)
+
+        loc_reg_loss = tf.reduce_sum(reg_losses1)  / c
+        dim_reg_loss = tf.reduce_sum(reg_losses2) / c
+        theta_reg_loss = tf.reduce_sum(reg_losses3) / c
 
         iou, iou_2d = self.get_iou(truth, predictions)
         iou_dim = self.get_iou_dim(truth, predictions)
