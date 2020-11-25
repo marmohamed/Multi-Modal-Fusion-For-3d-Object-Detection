@@ -549,7 +549,7 @@ class BEVDetectionTrainer(DetectionTrainer):
         self.branch_params = {
             'opt': self.model.train_op_lidar,
             'train_fusion_rgb': False,
-            'lr': 1e-5,
+            'lr': 5e-4,
             'step_size': 2 * 1841,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,

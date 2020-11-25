@@ -16,7 +16,7 @@ class ResNetLidarBEV(ResNet):
 
             for i in range(residual_list[0]) :
                 x = conv(x, 64, kernel=3, stride=1, use_bias=True, scope='conv0_'+str(i))
-                x = batch_norm(x, is_training=is_training, scope='bn_res0_'+str(i))
+                x = batch_norm(x, is_training=is_training, scope='bn_res0_'+str(i), G=8)
                 x = relu(x)
             
             res_groups = []

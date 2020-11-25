@@ -25,16 +25,23 @@ def ws_reg(kernel):
     kernel_std = tf.keras.backend.std(kernel, axis=[0, 1, 2], keepdims=True)
     kernel = kernel / (kernel_std + 1e-5)
 
-def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='conv_0', reuse=False, focal_init=None, separable=False):
+def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='conv_0', reuse=False, focal_init=None, separable=False, use_ws_reg=True):
     with tf.variable_scope(scope, reuse=reuse):
         if focal_init is not None:
             np_arr = np.zeros([kernel])
             np_arr[0] = focal_init
-            x = tf.layers.conv2d(inputs=x, filters=channels,
+            if use_ws_reg:
+                x = tf.layers.conv2d(inputs=x, filters=channels,
+                                    kernel_size=kernel, kernel_initializer=weight_init,
+                                    bias_initializer=tf.constant_initializer(np_arr),
+                                    # kernel_regularizer=weight_regularizer,
+                                    kernel_regularizer=ws_reg,
+                                    strides=stride, use_bias=use_bias, padding=padding)
+            else:
+                x = tf.layers.conv2d(inputs=x, filters=channels,
                                 kernel_size=kernel, kernel_initializer=weight_init,
                                 bias_initializer=tf.constant_initializer(np_arr),
                                 # kernel_regularizer=weight_regularizer,
-                                kernel_regularizer=ws_reg,
                                 strides=stride, use_bias=use_bias, padding=padding)
             return x
         else:
@@ -51,10 +58,16 @@ def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='
                         depthwise_regularizer=weight_regularizer,
                         pointwise_regularizer=weight_regularizer)
             else:
-                x = tf.layers.conv2d(inputs=x, filters=channels,
+                if use_ws_reg:
+                    x = tf.layers.conv2d(inputs=x, filters=channels,
                                 kernel_size=kernel, kernel_initializer=weight_init,
                                 # kernel_regularizer=weight_regularizer,
                                 kernel_regularizer=ws_reg,
+                                strides=stride, use_bias=use_bias, padding=padding)
+                else:
+                    x = tf.layers.conv2d(inputs=x, filters=channels,
+                                kernel_size=kernel, kernel_initializer=weight_init,
+                                # kernel_regularizer=weight_regularizer,
                                 strides=stride, use_bias=use_bias, padding=padding)
 
         return x
@@ -223,7 +236,7 @@ def leaky_relu(x):
 # Normalization function
 ##################################################################################
 
-def batch_norm(x, is_training=True, scope='batch_norm'):
+def batch_norm(x, is_training=True, scope='batch_norm', G=8):
     
     # return tf_contrib.layers.batch_norm(x,
     #                                     decay=0.9, epsilon=1e-05,
@@ -231,7 +244,7 @@ def batch_norm(x, is_training=True, scope='batch_norm'):
     #                                     is_training=is_training, scope=scope)
     # with tf.variable_scope(scope) :
     #     return tf.layers.BatchNormalization(renorm=True)(x, training=is_training)
-    return group_norm(x, G=32, eps=1e-5, scope=scope)
+    return group_norm(x, G=G, eps=1e-5, scope=scope)
 
 def group_norm(x, G=32, eps=1e-5, scope='group_norm') :
     with tf.variable_scope(scope) :

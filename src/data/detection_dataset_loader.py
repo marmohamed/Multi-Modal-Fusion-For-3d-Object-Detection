@@ -153,7 +153,8 @@ class DetectionDatasetLoader(DatasetLoader):
 
 
     def get_augmentation_parameters(self):
-        if self.augment:
+        # if self.augment:
+        if False:
 
                     if np.random.random_sample() >= 0.0:
                         image_translate_x = random.randint(-50, 50)
@@ -165,12 +166,12 @@ class DetectionDatasetLoader(DatasetLoader):
                         image_translate_y = 0
 
                     if np.random.random_sample() >= 0.0:
-                        translate_x = np.random.random_sample() * 40 - 20
+                        translate_x = np.random.random_sample() * 10 - 5
                     else:
                         translate_x = 0
                     if np.random.random_sample() >= 0.0:
                         # translate_y = random.randint(-15, 15)
-                        translate_y = np.random.random_sample() * 40 - 20
+                        translate_y = np.random.random_sample() * 10 - 5
                     else:
                         translate_y = 0
 
@@ -180,7 +181,7 @@ class DetectionDatasetLoader(DatasetLoader):
                         translate_z = 0
 
                     if np.random.random_sample() >= 0.0:
-                        ang = np.random.random_sample() * 90 - 45
+                        ang = np.random.random_sample() * 10 - 5
                     else:
                         ang = 0
 
@@ -245,16 +246,16 @@ class DetectionDatasetLoader(DatasetLoader):
                         list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths, 
                         training=True):
 
-        if training and self.augment:
-            value = random.randint(0, 50)
-            random.seed(value)
-            random.shuffle(list_camera_paths)
-            random.seed(value)
-            random.shuffle(list_lidar_paths)
-            random.seed(value)
-            random.shuffle(list_label_paths)
-            random.seed(value)
-            random.shuffle(list_calib_paths)
+        # if training and self.augment:
+        #     value = random.randint(0, 50)
+        #     random.seed(value)
+        #     random.shuffle(list_camera_paths)
+        #     random.seed(value)
+        #     random.shuffle(list_lidar_paths)
+        #     random.seed(value)
+        #     random.shuffle(list_label_paths)
+        #     random.seed(value)
+        #     random.shuffle(list_calib_paths)
 
         for camera_path, lidar_path, label_path, calib_path in zip(list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths):
                 
@@ -265,7 +266,8 @@ class DetectionDatasetLoader(DatasetLoader):
                 camera_image = data_reader_obj.read_image()
                 lidar_image = data_reader_obj.lidar_reader.read_lidar()
 
-                if self.augment:
+                # if self.augment:
+                if False:
                     if np.random.random_sample() >= 0.7:
                         noise = np.random.rand(448, 512, 35)
                         noise2 = np.random.rand(448, 512, 35)

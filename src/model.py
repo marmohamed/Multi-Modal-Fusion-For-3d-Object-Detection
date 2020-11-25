@@ -199,23 +199,24 @@ class Model(object):
 
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
-                            fpn_lidar1 = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i))
-                            fpn_lidar1 = batch_norm(fpn_lidar1, is_training=self.is_training, scope='bn_post_fpn_11_' + str(i))
+                            fpn_lidar1 = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i), use_ws_reg=False)
                             fpn_lidar1 = relu(fpn_lidar1)
+                            fpn_lidar1 = batch_norm(fpn_lidar1, is_training=self.is_training, scope='bn_post_fpn_11_' + str(i), G=8)
                             self.debug_layers['fpn_lidar1_output_post_conv_1_'+str(i)] = fpn_lidar1
 
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
-                            fpn_lidar2 = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_12_'+str(i))
-                            fpn_lidar2 = batch_norm(fpn_lidar2, is_training=self.is_training, scope='bn_post_fpn_12_' + str(i))
+                            fpn_lidar2 = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_12_'+str(i), use_ws_reg=False)
                             fpn_lidar2 = relu(fpn_lidar2)
+                            fpn_lidar2 = batch_norm(fpn_lidar2, is_training=self.is_training, scope='bn_post_fpn_12_' + str(i), G=8)
+
                             self.debug_layers['fpn_lidar2_output_post_conv_1_'+str(i)] = fpn_lidar2
                      
 
                         if self.params['focal_loss']:
-                            final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
+                            final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1', use_ws_reg=False)
                             
-                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'])
+                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'], use_ws_reg=False)
 
                             self.final_output = tf.concat([final_output_1_7, final_output_1_8], -1)
                         else:
@@ -258,9 +259,9 @@ class Model(object):
 
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
+                            self.regression_loss_bev += 10 * self.weight_loc * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 3 * self.weight_dim * self.dim_reg_loss 
+                            self.regression_loss_bev += 10 * self.weight_dim * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
                             self.regression_loss_bev += 2 * self.weight_theta * self.theta_reg_loss 
                         self.model_loss_bev = 0
