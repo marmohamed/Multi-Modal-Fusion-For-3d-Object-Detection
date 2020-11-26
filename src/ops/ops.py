@@ -11,7 +11,7 @@ import numpy as np
 # weight_init = tf_contrib.layers.variance_scaling_initializer()
 weight_init = tf.contrib.layers.xavier_initializer()
 # weight_regularizer = tf_contrib.layers.l2_regularizer(0.0005)
-weight_regularizer = tf_contrib.layers.l2_regularizer(0.005)
+weight_regularizer = tf_contrib.layers.l2_regularizer(5e-4)
 
 
 ##################################################################################
@@ -34,8 +34,8 @@ def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='
                 x = tf.layers.conv2d(inputs=x, filters=channels,
                                     kernel_size=kernel, kernel_initializer=weight_init,
                                     bias_initializer=tf.constant_initializer(np_arr),
-                                    # kernel_regularizer=weight_regularizer,
-                                    kernel_regularizer=ws_reg,
+                                    kernel_regularizer=weight_regularizer,
+                                    # kernel_regularizer=ws_reg,
                                     strides=stride, use_bias=use_bias, padding=padding)
             else:
                 x = tf.layers.conv2d(inputs=x, filters=channels,
@@ -61,8 +61,8 @@ def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='
                 if use_ws_reg:
                     x = tf.layers.conv2d(inputs=x, filters=channels,
                                 kernel_size=kernel, kernel_initializer=weight_init,
-                                # kernel_regularizer=weight_regularizer,
-                                kernel_regularizer=ws_reg,
+                                kernel_regularizer=weight_regularizer,
+                                # kernel_regularizer=ws_reg,
                                 strides=stride, use_bias=use_bias, padding=padding)
                 else:
                     x = tf.layers.conv2d(inputs=x, filters=channels,
@@ -81,6 +81,9 @@ def upsample(x, size=(2, 2), is_training=True, scope='upsample_0', use_deconv=Fa
                                                 kernel_size,
                                                 strides=size,
                                                 padding='SAME',
+                                                kernel_initializer=weight_init,
+                                                kernel_regularizer=weight_regularizer,
+                                                # kernel_regularizer=ws_reg,
                                                 dilation_rate=1)(x)
             x = batch_norm(x, is_training, scope='bn_' + scope)
             x = relu(x)
@@ -246,7 +249,7 @@ def batch_norm(x, is_training=True, scope='batch_norm', G=8):
     #     return tf.layers.BatchNormalization(renorm=True)(x, training=is_training)
     return group_norm(x, G=G, eps=1e-5, scope=scope)
 
-def group_norm(x, G=32, eps=1e-5, scope='group_norm') :
+def group_norm(x, G=4, eps=1e-5, scope='group_norm') :
     with tf.variable_scope(scope) :
         N, H, W, C = x.get_shape().as_list()
         G = min(G, C)

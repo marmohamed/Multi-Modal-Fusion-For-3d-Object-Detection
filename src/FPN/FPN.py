@@ -22,7 +22,7 @@ def FPN(layers_outputs, scope, is_training=True, reuse=False):
 
             if i != len(layers_outputs)-1:
                 if new_layer.get_shape()[1] > prev_layer.get_shape()[1]:
-                    prev_layer = upsample(prev_layer, scope='prev_layer' + str(i), filters=64, use_deconv=True, kernel_size=4)
+                    prev_layer = upsample(prev_layer, scope='prev_layer' + str(i), filters=128, use_deconv=True, kernel_size=4)
                     # prev_layer = dropout(prev_layer, rate=0.2, scope='prev_layer_fpn_' + str(i), training=is_training)
                     # prev_layer = conv(prev_layer, 128, kernel=1, stride=1, scope='prev_layer_conv_' + str(i))
                     # prev_layer = batch_norm(prev_layer, is_training=is_training, scope='prev_layer_bn_' + str(i))
