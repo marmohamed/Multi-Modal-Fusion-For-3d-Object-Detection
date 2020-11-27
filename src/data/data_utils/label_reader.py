@@ -17,7 +17,7 @@ class LabelReader:
                     x_range=(0, 70), 
                     y_range=(-40, 40), 
                     z_range=(-2.5, 1), 
-                    size=(448, 512, 35), 
+                    size=(448//4, 512//4, 35//35), 
                     get_actual_dims=False, 
                     from_file=True, fliplr=False):
         self.label_path = label_path
@@ -123,9 +123,9 @@ class LabelReader:
         y_size = (self.y_range[1] - self.y_range[0])
         z_size = (self.z_range[1] - self.z_range[0])
                 
-        x_fac = (self.size[0]-1) / x_size
-        y_fac = (self.size[1]-1) / y_size
-        z_fac = (self.size[2]-1) / z_size
+        x_fac = (self.size[0]) / x_size
+        y_fac = (self.size[1]) / y_size
+        z_fac = (self.size[2]) / z_size
 
         if self.get_actual_dims:
             import math
@@ -250,9 +250,9 @@ class LabelReader:
         y_size = (self.y_range[1] - self.y_range[0])
         z_size = (self.z_range[1] - self.z_range[0])
                 
-        x_fac = (self.size[0]-1) / x_size
-        y_fac = (self.size[1]-1) / y_size
-        z_fac = (self.size[2]-1) / z_size
+        x_fac = (self.size[0]) / x_size
+        y_fac = (self.size[1]) / y_size
+        z_fac = (self.size[2]) / z_size
         
         b = temp
         x0 = b[0][0]
