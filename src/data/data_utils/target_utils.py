@@ -27,7 +27,7 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
             continue
 
         # label_i[0:2] = label_i[0:2] / (ratio*1.0)
-        # label_i[2] = label_i[2] / (output_size[2]*1.)
+        label_i[2] = label_i[2] / (output_size[2]*1.)
 
         ang = label_i[6]
         label_i = np.append(label_i, [0])
