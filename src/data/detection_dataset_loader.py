@@ -166,12 +166,12 @@ class DetectionDatasetLoader(DatasetLoader):
                         image_translate_y = 0
 
                     if np.random.random_sample() >= 0.0:
-                        translate_x = np.random.random_sample() * 20 - 10
+                        translate_x = np.random.random_sample() * 10 - 5
                     else:
                         translate_x = 0
                     if np.random.random_sample() >= 0.0:
                         # translate_y = random.randint(-15, 15)
-                        translate_y = np.random.random_sample() * 20 - 10
+                        translate_y = np.random.random_sample() * 10 - 5
                     else:
                         translate_y = 0
 

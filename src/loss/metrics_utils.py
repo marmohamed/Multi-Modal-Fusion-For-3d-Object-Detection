@@ -81,16 +81,16 @@ class MetricsHelper:
         truth = truth2[:, :, :, :8]
         predictions = predictions2[:, :, :, :8]
 
-        mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.91, 1.1, 1.1])
+        # mins = np.array([-0.5, -0.5, 0, 0.7, 0.1, 0.1, -1.1, -1.1])
+        # maxs = np.array([0.5, 0.5, 1, 1.9, 0.75, 0.91, 1.1, 1.1])
 
-        mins = np.expand_dims(mins, [0, 1, 2])
-        maxs = np.expand_dims(maxs, [0, 1, 2])
+        # mins = np.expand_dims(mins, [0, 1, 2])
+        # maxs = np.expand_dims(maxs, [0, 1, 2])
         
-        truth = (truth + 1) / 2
-        truth = truth * (maxs - mins) + mins 
-        predictions = (predictions + 1) / 2
-        predictions = predictions * (maxs - mins) + mins 
+        # truth = (truth + 1) / 2
+        # truth = truth * (maxs - mins) + mins 
+        # predictions = (predictions + 1) / 2
+        # predictions = predictions * (maxs - mins) + mins 
 
         theta_pred = tf.math.atan2(predictions[:, :, :, 6:7], predictions[:, :, :, 7:8]) * 180 / np.pi
         theta_truth = tf.math.atan2(truth[:, :, :, 6:7], truth[:, :, :, 7:8]) * 180 / np.pi
