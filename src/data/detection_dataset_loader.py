@@ -246,16 +246,16 @@ class DetectionDatasetLoader(DatasetLoader):
                         list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths, 
                         training=True):
 
-        # if training and self.augment:
-        #     value = random.randint(0, 50)
-        #     random.seed(value)
-        #     random.shuffle(list_camera_paths)
-        #     random.seed(value)
-        #     random.shuffle(list_lidar_paths)
-        #     random.seed(value)
-        #     random.shuffle(list_label_paths)
-        #     random.seed(value)
-        #     random.shuffle(list_calib_paths)
+        if training and self.augment:
+            value = random.randint(0, 50)
+            random.seed(value)
+            random.shuffle(list_camera_paths)
+            random.seed(value)
+            random.shuffle(list_lidar_paths)
+            random.seed(value)
+            random.shuffle(list_label_paths)
+            random.seed(value)
+            random.shuffle(list_calib_paths)
 
         for camera_path, lidar_path, label_path, calib_path in zip(list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths):
                 

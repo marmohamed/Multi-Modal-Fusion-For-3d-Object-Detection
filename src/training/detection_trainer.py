@@ -269,9 +269,12 @@ class DetectionTrainer(Trainer):
 
     def get_lr(self, epoch):
      
-        if self.count_not_best % 5 == 0 and self.count_not_best > 0:
+        if self.count_not_best % 3 == 0 and self.count_not_best > 0:
             self.base_lr *= 0.7
             # self.K *= 0.8
+
+        if epoch >= 25:
+            self.base_lr *= 0.1
 
         # if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
         #     self.weight_cls *= 0.8

@@ -30,6 +30,7 @@ class ResNetLidarBEV(ResNet):
             for i in range(residual_list[2]) :
                 downsample_arg = (i == 0)
                 x = resblock(x, channels=128, is_training=is_training, downsample=downsample_arg, scope='resblock2_' + str(i))
+            
             res_groups.append(x)
 
        
@@ -39,7 +40,7 @@ class ResNetLidarBEV(ResNet):
                 x = resblock(x, channels=192, is_training=is_training, downsample=downsample_arg, scope='resblock3_' + str(i))
 
             x = upsample(x, size=(2, 2), scope='resnet_bev_upsample_2', use_deconv=True, filters=128, kernel_size=4)
-           
+            
             res_groups[-1] = conv(res_groups[-1], 128, kernel=1, stride=1, scope='conv2_' + str(i))
             res_groups[-1] = batch_norm(res_groups[-1], is_training=is_training, scope='bn2_' + str(i))
             res_groups[-1] = relu(res_groups[-1])
