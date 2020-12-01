@@ -166,12 +166,12 @@ class DetectionDatasetLoader(DatasetLoader):
                         image_translate_y = 0
 
                     if np.random.random_sample() >= 0.0:
-                        translate_x = np.random.random_sample() * 10 - 5
+                        translate_x = np.random.random_sample() * 20 - 10
                     else:
                         translate_x = 0
                     if np.random.random_sample() >= 0.0:
                         # translate_y = random.randint(-15, 15)
-                        translate_y = np.random.random_sample() * 10 - 5
+                        translate_y = np.random.random_sample() * 20 - 10
                     else:
                         translate_y = 0
 
@@ -181,7 +181,7 @@ class DetectionDatasetLoader(DatasetLoader):
                         translate_z = 0
 
                     if np.random.random_sample() >= 0.0:
-                        ang = np.random.random_sample() * 10 - 5
+                        ang = np.random.random_sample() * 90 - 45
                     else:
                         ang = 0
 
@@ -203,11 +203,11 @@ class DetectionDatasetLoader(DatasetLoader):
                     sc_y = 1
                     sc_z = 1   
 
-                    if np.random.random_sample() >= 0.0:
-                       sc_x += ((random.random() * 2) - 1.) / 10.
+                    # if np.random.random_sample() >= 0.0:
+                    #    sc_x += ((random.random() * 2) - 1.) / 10.
 
-                    if np.random.random_sample() >= 0.0:
-                       sc_y  += ((random.random() * 2) - 1.) / 10.
+                    # if np.random.random_sample() >= 0.0:
+                    #    sc_y  += ((random.random() * 2) - 1.) / 10.
                     
 
                     sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])

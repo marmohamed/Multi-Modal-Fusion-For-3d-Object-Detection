@@ -268,7 +268,7 @@ class Model(object):
                         if self.params['train_cls']:
                             self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
-                            self.model_loss_bev +=  5 * self.regression_loss_bev
+                            self.model_loss_bev +=  1 * self.regression_loss_bev
 
                      
                         self.regression_loss = self.regression_loss_bev
