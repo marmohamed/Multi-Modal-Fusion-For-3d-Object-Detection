@@ -103,7 +103,7 @@ class DetectionTrainer(Trainer):
         self.dim_losses = []
         self.loc_losses = []
         self.theta_losses = []
-
+        debug = False
         
        
         with self.model.graph.as_default():
@@ -220,6 +220,30 @@ class DetectionTrainer(Trainer):
       
 
                                 counter += 1
+
+                                if debug and counter % 100 == 0:
+                                    print('counter = ', counter)
+                                    print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e,\
+                                        np.mean(np.array(epoch_loss).flatten()),\
+                                        np.mean(np.array(epoch_cls_loss).flatten()),\
+                                        np.mean(np.array(epoch_reg_loss).flatten())
+                                        ))
+                                    print('Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}, dir_loss = {4}'.format(e,\
+                                        np.mean(np.array(epoch_theta_loss).flatten()),\
+                                        np.mean(np.array(epoch_loc_loss).flatten()),\
+                                        np.mean(np.array(epoch_dim_loss).flatten()),
+                                        np.mean(np.array(epoch_dir_loss).flatten())
+                                        ))
+                                    print('Epoch {0}: iou = {1}, iou_2d = {7}, iou_dim = {2}, iou_loc = {3}, theta_differences = {4}, precision = {5}, recall = {6}'.format(e,\
+                                        np.mean(np.array(epoch_iou).flatten()),\
+                                        np.mean(np.array(epoch_iou_dim).flatten()),\
+                                        np.mean(np.array(epoch_iou_loc).flatten()),\
+                                        np.mean(np.array(epoch_theta_diffs).flatten()),\
+                                        np.mean(np.array(epoch_precision).flatten()),\
+                                        np.mean(np.array(epoch_recall).flatten()),\
+                                        np.mean(np.array(epoch_iou_2d).flatten())
+                                        ))
+
 
                         except (tf.errors.OutOfRangeError, StopIteration):
                             pass
