@@ -199,7 +199,7 @@ class Model(object):
 
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
-                            fpn_lidar1 = conv(fpn_lidar1, 96, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i))
+                            fpn_lidar1 = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i))
                             fpn_lidar1 = batch_norm(fpn_lidar1, is_training=self.is_training, scope='bn_post_fpn_11_' + str(i))
                             fpn_lidar1 = relu(fpn_lidar1)
                             self.debug_layers['fpn_lidar1_output_post_conv_1_'+str(i)] = fpn_lidar1
@@ -209,7 +209,6 @@ class Model(object):
                             fpn_lidar2 = conv(fpn_lidar2, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_12_'+str(i))
                             fpn_lidar2 = batch_norm(fpn_lidar2, is_training=self.is_training, scope='bn_post_fpn_12_' + str(i))
                             fpn_lidar2 = relu(fpn_lidar2)
-
                             self.debug_layers['fpn_lidar2_output_post_conv_1_'+str(i)] = fpn_lidar2
                      
 
