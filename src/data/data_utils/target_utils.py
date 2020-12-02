@@ -8,7 +8,7 @@ import tensorflow as tf
 from data.data_utils.data_reader import *
 
 
-def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(448, 512), output_size=(112, 128, 35)):
+def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(448, 512), output_size=(112, 128, 40)):
     ratio = input_size[0] // output_size[0]
     ratio = 1
     y_target = np.zeros((output_size[0], output_size[1], 2, 9), np.float32)

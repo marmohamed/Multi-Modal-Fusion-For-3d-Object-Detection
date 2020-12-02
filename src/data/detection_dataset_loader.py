@@ -19,7 +19,7 @@ class DetectionDatasetLoader(DatasetLoader):
     def _defaults(self, **kwargs):
         defaults = {
             'image_size': (370, 1224),
-            'lidar_size': (448, 512, 35), 
+            'lidar_size': (448, 512, 40), 
             'anchors': np.array([3.9, 1.6, 1.5])
         }
         for k in kwargs:

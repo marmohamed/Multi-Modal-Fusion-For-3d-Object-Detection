@@ -78,7 +78,7 @@ class Model(object):
 
                 img_size_1 = 448
                 img_size_2 = 512
-                c_dim = 36
+                c_dim = 41
                 self.train_inputs_lidar = tf.placeholder(tf.float32, 
                                     [None, img_size_1, img_size_2, c_dim], 
                                     name='train_inputs_lidar')
