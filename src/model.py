@@ -83,7 +83,7 @@ class Model(object):
                                     [None, img_size_1, img_size_2, c_dim], 
                                     name='train_inputs_lidar')
 
-                self.y_true = tf.placeholder(tf.float32, shape=(None, 112, 128, 9)) # target
+                self.y_true = tf.placeholder(tf.float32, shape=(None, 112, 128, 2, 9)) # target
 
                 self.y_true_img = tf.placeholder(tf.float32, shape=(None, 24, 78, 2)) # target
                 self.train_fusion_rgb = tf.placeholder(tf.bool, shape=())
@@ -199,7 +199,7 @@ class Model(object):
 
                         num_conv_blocks=2
                         for i in range(0, num_conv_blocks):
-                            fpn_lidar1 = conv(fpn_lidar1, 128, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i))
+                            fpn_lidar1 = conv(fpn_lidar1, 96, kernel=3, stride=1, padding='SAME', use_bias=True, scope='conv_post_fpn_11_'+str(i))
                             fpn_lidar1 = batch_norm(fpn_lidar1, is_training=self.is_training, scope='bn_post_fpn_11_' + str(i))
                             fpn_lidar1 = relu(fpn_lidar1)
                             self.debug_layers['fpn_lidar1_output_post_conv_1_'+str(i)] = fpn_lidar1
@@ -215,10 +215,20 @@ class Model(object):
 
                         if self.params['focal_loss']:
                             final_output_1_7 = conv(fpn_lidar1, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1', use_ws_reg=False)
-                            
-                            final_output_1_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'], use_ws_reg=False)
+                            final_output_1_8 = conv(fpn_lidar1, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1_8', focal_init=self.params['focal_init'], use_ws_reg=False)
 
-                            self.final_output = tf.concat([final_output_1_7, final_output_1_8], -1)
+                            final_output_2_7 = conv(fpn_lidar2, 8, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2', use_ws_reg=False)
+                            final_output_2_8 = conv(fpn_lidar2, 1, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2_8', focal_init=self.params['focal_init'], use_ws_reg=False)
+
+
+                            final_output_1 = tf.concat([final_output_1_7, final_output_1_8], -1)
+                            final_output_2 = tf.concat([final_output_2_7, final_output_2_8], -1)
+
+                            final_output_1 = tf.expand_dims(final_output_1, 3)
+                            final_output_2 = tf.expand_dims(final_output_2, 3)
+
+                            self.final_output = tf.concat([final_output_1, final_output_2], 3)
+                        
                         else:
                             final_output_1 = conv(fpn_lidar, 9, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_1')
                             final_output_2 = conv(fpn_lidar, 9, kernel=1, stride=1, padding='SAME', use_bias=True, scope='conv_out_2')
@@ -243,7 +253,7 @@ class Model(object):
                         loss_calculator = LossCalculator()
                         loss_params = {'focal_loss': self.params['focal_loss'], 'weight': self.params['weight_loss'], 'mse': self.params['mse_loss']}
                         self.classification_loss, self.loc_reg_loss, self.dim_reg_loss,\
-                                    self.theta_reg_loss,\
+                                    self.theta_reg_loss, self.dir_reg_loss,\
                                     self.precision, self.recall, self.iou, self.iou_2d, self.iou_loc, self.iou_dim, self.theta_accuracy = loss_calculator(
                                                             self.y_true,
                                                             self.final_output, 
@@ -264,11 +274,30 @@ class Model(object):
                             self.regression_loss_bev += 10 * self.weight_dim * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
                             self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
+                        if self.params['train_theta'] == 1:
+                            self.regression_loss_bev += 1 * self.weight_theta * self.dir_reg_loss 
+                        
                         self.model_loss_bev = 0
                         if self.params['train_cls']:
                             self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
+
+
+                        # self.regression_loss_bev = 0
+                        # if self.params['train_loc'] == 1:
+                        #     self.regression_loss_bev += 10 * (2 - self.iou_loc - self.iou) * self.loc_reg_loss 
+                        # if self.params['train_dim'] == 1:
+                        #     self.regression_loss_bev += 10 * (2 - self.iou_dim - self.iou) * self.dim_reg_loss 
+                        # if self.params['train_theta'] == 1:
+                        #     self.regression_loss_bev += 1 * self.theta_reg_loss 
+                        # self.model_loss_bev = 0
+                        # if self.params['train_cls']:
+                        #     self.model_loss_bev +=  1 * (2 - self.recall - self.precision)  * self.classification_loss
+                        # if self.params['train_reg']:
+                        #     self.model_loss_bev +=  1 * self.regression_loss_bev
+
+
 
                      
                         self.regression_loss = self.regression_loss_bev
@@ -357,6 +386,7 @@ class Model(object):
                 self.loc_reg_loss_batches_summary = tf.summary.scalar('loc_regression_loss_batches', self.loc_reg_loss)
                 self.dim_reg_loss_batches_summary = tf.summary.scalar('dim_regression_loss_batches', self.dim_reg_loss)
                 self.theta_reg_loss_batches_summary = tf.summary.scalar('theta_regression_loss_batches', self.theta_reg_loss)
+                self.dir_reg_loss_batches_summary = tf.summary.scalar('dir_regression_loss_batches', self.dir_reg_loss)
 
                 self.precision_summary = tf.summary.scalar('precision_batches', self.precision)
                 self.recall_summary = tf.summary.scalar('recall_batches', self.recall)
@@ -384,6 +414,7 @@ class Model(object):
                                             self.iou_summary, self.iou_2d_summary, self.iou_loc_summary, self.iou_dim_summary,\
                                             self.theta_accuracy_summary,\
                                             self.cls_weight_summary, self.loc_weight_summary, self.dim_weight_summary,self.theta_weight_summary,\
+                                            self.dir_reg_loss_batches_summary
                                             ])
 
 
@@ -430,7 +461,3 @@ class Model(object):
                 self.validation_writer = tf.summary.FileWriter('./training_files/test')
                 
 
-
-
-
-   

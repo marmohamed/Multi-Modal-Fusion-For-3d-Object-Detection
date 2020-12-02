@@ -153,6 +153,7 @@ class DetectionTrainer(Trainer):
                             epoch_precision = []
                             epoch_recall = []
                             epoch_theta_diffs = []
+                            epoch_dir_loss = []
 
                             if not self.use_clr:
                                 s1 = sess.run(self.model.lr_summary2, feed_dict={self.model.learning_rate_placeholder: min_lr })
@@ -181,7 +182,7 @@ class DetectionTrainer(Trainer):
                                 feed_dict[self.model.weight_theta] = self.weight_theta
 
                                 loss, _, classification_loss, regression_loss, loc_loss, dim_loss,\
-                                    theta_loss, summary, theta_accuracy,\
+                                    theta_loss, summary, theta_accuracy, dir_loss,\
                                         iou, iou_2d, iou_dim, iou_loc, precision, recall = sess.run([self.model.model_loss, 
                                                                                                     self.branch_params['opt'], 
                                                                                                     self.model.classification_loss, 
@@ -191,6 +192,7 @@ class DetectionTrainer(Trainer):
                                                                                                     self.model.theta_reg_loss,
                                                                                                     self.model.merged,
                                                                                                     self.model.theta_accuracy,
+                                                                                                    self.model.dir_reg_loss,
                                                                                                     self.model.iou,
                                                                                                     self.model.iou_2d,
                                                                                                     self.model.iou_dim,
@@ -214,6 +216,7 @@ class DetectionTrainer(Trainer):
                                 epoch_precision.append(precision)
                                 epoch_recall.append(recall)
                                 epoch_theta_diffs.append(theta_accuracy)
+                                epoch_dir_loss.append(dir_loss)
       
 
                                 counter += 1
@@ -235,10 +238,11 @@ class DetectionTrainer(Trainer):
                                 np.mean(np.array(epoch_cls_loss).flatten()),\
                                 np.mean(np.array(epoch_reg_loss).flatten())
                                 ))
-                            print('Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}'.format(e,\
+                            print('Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}, dir_loss = {4}'.format(e,\
                                 np.mean(np.array(epoch_theta_loss).flatten()),\
                                 np.mean(np.array(epoch_loc_loss).flatten()),\
-                                np.mean(np.array(epoch_dim_loss).flatten())
+                                np.mean(np.array(epoch_dim_loss).flatten()),
+                                np.mean(np.array(epoch_dir_loss).flatten())
                                 ))
                             print('Epoch {0}: iou = {1}, iou_2d = {7}, iou_dim = {2}, iou_loc = {3}, theta_differences = {4}, precision = {5}, recall = {6}'.format(e,\
                                 np.mean(np.array(epoch_iou).flatten()),\
@@ -327,6 +331,7 @@ class DetectionTrainer(Trainer):
             precision = []
             recall = []
             theta_diffs = []
+            dir_loss = []
             while True:
                 
                 feed_dict = self.__prepare_dataset_feed_dict(self.eval_dataset, 
@@ -339,7 +344,7 @@ class DetectionTrainer(Trainer):
                 feed_dict[self.model.weight_theta] = 1
                 
                 all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_,\
-                    iou_, iou_2d_, iou_dim_, iou_loc_, precision_, recall_, theta_diff = sess.run([self.model.model_loss, 
+                    iou_, iou_2d_, iou_dim_, iou_loc_, precision_, recall_, theta_diff, dir_loss_ = sess.run([self.model.model_loss, 
                                                                         self.model.classification_loss,
                                                                         self.model.regression_loss,
                                                                         self.model.loc_reg_loss,
@@ -351,7 +356,8 @@ class DetectionTrainer(Trainer):
                                                                         self.model.iou_loc,
                                                                         self.model.precision,
                                                                         self.model.recall,
-                                                                        self.model.theta_accuracy], 
+                                                                        self.model.theta_accuracy,
+                                                                        self.model.dir_reg_loss], 
                                                                         feed_dict=feed_dict)
 
                 loss.append(all_loss)
@@ -367,6 +373,7 @@ class DetectionTrainer(Trainer):
                 precision.append(precision_)
                 recall.append(recall_)
                 theta_diffs.append(theta_diff)
+                dir_loss.append(dir_loss_)
 
                 
         except (tf.errors.OutOfRangeError, StopIteration):
@@ -384,10 +391,11 @@ class DetectionTrainer(Trainer):
                                 np.mean(np.array(cls_loss).flatten()),\
                                 np.mean(np.array(reg_loss).flatten())
                                 ))
-            print('Validation - Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}'.format(epoch,\
+            print('Validation - Epoch {0}: theta_loss = {1}, loc_loss = {2}, dim_loss = {3}, dir_loss = {4}'.format(epoch,\
                                 np.mean(np.array(theta_loss).flatten()),\
                                 np.mean(np.array(loc_loss).flatten()),\
-                                np.mean(np.array(dim_loss).flatten())
+                                np.mean(np.array(dim_loss).flatten()),\
+                                np.mean(np.array(dir_loss).flatten())
                                 ))
             print('Validation - Epoch {0}: iou = {1}, iou_2d = {7}, iou_dim = {2}, iou_loc = {3}, theta_differences = {4}, precision = {5}, recall = {6}'.format(epoch,\
                                 np.mean(np.array(iou).flatten()),\

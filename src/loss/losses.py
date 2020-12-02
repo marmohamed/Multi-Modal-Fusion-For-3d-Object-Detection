@@ -17,23 +17,27 @@ class LossCalculator(object):
     def __call__(self, truth, predictions, cls_loss, reg_loss, **params):
 
         # Classification
-        classification_loss = cls_loss(truth[:, :, :, 8], predictions[:, :, :, 8], **params)
+        classification_loss = cls_loss(truth[:, :, :, :, 8], predictions[:, :, :, :, 8], **params)
 
         precision, recall = self.get_precision_recall(truth, predictions)
 
         #regression
 
-        loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, 8],0.5), reg_loss(t, p), tf.zeros_like(p))
+        loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), reg_loss(t, p), tf.zeros_like(p))
 
-        reg_losses1 = [loss_fn(truth[:, :, :, i], predictions[:, :, :, i]) for i in range(3)] 
-        reg_losses2 = [loss_fn(truth[:, :, :, i], predictions[:, :, :, i]) for i in range(3, 6)] 
-        reg_losses3 = [loss_fn(truth[:, :, :, i] , predictions[:, :, :, i]) for i in range(6, 8)]
+        reg_losses1 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3)] 
+        reg_losses2 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3, 6)] 
+        # reg_losses3 = [loss_fn(truth[:, :, :, :, i] , predictions[:, :, :, :, i]) for i in range(6, 8)]
+        reg_losses3 = [loss_fn((truth[:, :, :, :, i] + np.pi/4) / (np.pi/2), tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(6, 7)]
+        loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), tf.nn.sigmoid_cross_entropy_with_logits(labels=t, logits=p), tf.zeros_like(p))
+        reg_losses4 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(7, 8)]
 
-        c = (tf.math.count_nonzero(truth[:, :, :, 8], dtype=tf.float32)+1e-8)
+        c = (tf.math.count_nonzero(truth[:, :, :, :, 8], dtype=tf.float32)+1e-8)
 
         loc_reg_loss = tf.reduce_sum(reg_losses1)  / c
         dim_reg_loss = tf.reduce_sum(reg_losses2) / c
         theta_reg_loss = tf.reduce_sum(reg_losses3) / c
+        dir_reg_loss = tf.reduce_sum(reg_losses4) / c
 
         iou, iou_2d = self.get_iou(truth, predictions)
         iou_dim = self.get_iou_dim(truth, predictions)
@@ -45,6 +49,7 @@ class LossCalculator(object):
                 loc_reg_loss,\
                 dim_reg_loss,\
                 theta_reg_loss,\
+                dir_reg_loss,\
                 precision, recall, iou, iou_2d, iou_loc, iou_dim, accuracy_theta
 
 
@@ -124,4 +129,3 @@ class ClsLoss(Loss):
             temp = tf.nn.sigmoid_cross_entropy_with_logits(labels=truth, logits=predictions)
             temp = tf.reduce_mean(temp)
             return temp
-
