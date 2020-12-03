@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod, ABCMeta
 from loss.focal_loss import *
 from loss.metrics_utils import *
 from loss.iou_utils import *
+from loss.corners_loss import *
 
 
 
@@ -25,8 +26,8 @@ class LossCalculator(object):
 
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), reg_loss(t, p), tf.zeros_like(p))
 
-        reg_losses1 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3)] 
-        reg_losses2 = [loss_fn(truth[:, :, :, :, i], predictions[:, :, :, :, i]) for i in range(3, 6)] 
+        reg_losses1 = [loss_fn(truth[:, :, :, :, i], tf.math.sigmoid(predictions[:, :, :, :, i])-0.5) for i in range(3)] 
+        reg_losses2 = [loss_fn(truth[:, :, :, :, i], tf.nn.tanh(predictions[:, :, :, :, i])) for i in range(3, 6)] 
         # reg_losses3 = [loss_fn(truth[:, :, :, :, i] , predictions[:, :, :, :, i]) for i in range(6, 8)]
         reg_losses3 = [loss_fn((truth[:, :, :, :, i] + np.pi/4) / (np.pi/2), tf.math.sigmoid(predictions[:, :, :, :, i])) for i in range(6, 7)]
         loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), tf.nn.sigmoid_cross_entropy_with_logits(labels=t, logits=p), tf.zeros_like(p))
@@ -44,12 +45,25 @@ class LossCalculator(object):
         iou_loc = self.get_iou_loc(truth, predictions)
 
         accuracy_theta = self.get_accracy_diffs(truth, predictions)
+        
+        corners_losses = get_corners_loss(truth, predictions)
+        corners_loss = tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), corners_losses, tf.zeros_like(truth[:, :, :, :, 8]))
+        corners_loss = tf.reduce_sum(corners_loss) / c
+
+        # truth_height = tf.expand_dims(tf.math.reduce_max(truth[:, :, :, :, 8], axis=1), axis=1)
+        # corners_losses_height = get_corners_loss_height(truth, predictions)
+        # corners_loss_height = tf.where(tf.greater_equal(truth_height,0.5), corners_losses_height, tf.zeros_like(truth_height))
+        
+        # corners_loss_height = tf.reduce_sum(corners_loss_height) / c
+
+        # corners_loss_all = corners_loss + corners_loss_height
    
         return classification_loss,\
                 loc_reg_loss,\
                 dim_reg_loss,\
                 theta_reg_loss,\
                 dir_reg_loss,\
+                corners_loss,\
                 precision, recall, iou, iou_2d, iou_loc, iou_dim, accuracy_theta
 
 

@@ -78,7 +78,7 @@ class Model(object):
 
                 img_size_1 = 448
                 img_size_2 = 512
-                c_dim = 41
+                c_dim = 36
                 self.train_inputs_lidar = tf.placeholder(tf.float32, 
                                     [None, img_size_1, img_size_2, c_dim], 
                                     name='train_inputs_lidar')
@@ -252,7 +252,7 @@ class Model(object):
                         loss_calculator = LossCalculator()
                         loss_params = {'focal_loss': self.params['focal_loss'], 'weight': self.params['weight_loss'], 'mse': self.params['mse_loss']}
                         self.classification_loss, self.loc_reg_loss, self.dim_reg_loss,\
-                                    self.theta_reg_loss, self.dir_reg_loss,\
+                                    self.theta_reg_loss, self.dir_reg_loss, self.corners_loss,\
                                     self.precision, self.recall, self.iou, self.iou_2d, self.iou_loc, self.iou_dim, self.theta_accuracy = loss_calculator(
                                                             self.y_true,
                                                             self.final_output, 
@@ -281,6 +281,8 @@ class Model(object):
                             self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
+
+                        self.model_loss_bev += 10 * self.corners_loss
 
 
                         # self.regression_loss_bev = 0
@@ -386,6 +388,7 @@ class Model(object):
                 self.dim_reg_loss_batches_summary = tf.summary.scalar('dim_regression_loss_batches', self.dim_reg_loss)
                 self.theta_reg_loss_batches_summary = tf.summary.scalar('theta_regression_loss_batches', self.theta_reg_loss)
                 self.dir_reg_loss_batches_summary = tf.summary.scalar('dir_regression_loss_batches', self.dir_reg_loss)
+                self.corners_loss_batches_summary = tf.summary.scalar('corners_regression_loss_batches', self.corners_loss)
 
                 self.precision_summary = tf.summary.scalar('precision_batches', self.precision)
                 self.recall_summary = tf.summary.scalar('recall_batches', self.recall)
@@ -413,7 +416,7 @@ class Model(object):
                                             self.iou_summary, self.iou_2d_summary, self.iou_loc_summary, self.iou_dim_summary,\
                                             self.theta_accuracy_summary,\
                                             self.cls_weight_summary, self.loc_weight_summary, self.dim_weight_summary,self.theta_weight_summary,\
-                                            self.dir_reg_loss_batches_summary
+                                            self.dir_reg_loss_batches_summary, self.corners_loss_batches_summary
                                             ])
 
 

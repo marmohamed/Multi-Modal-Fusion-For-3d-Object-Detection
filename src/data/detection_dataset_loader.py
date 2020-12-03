@@ -61,12 +61,12 @@ class DetectionDatasetLoader(DatasetLoader):
                 self.list_calib_paths = calib_paths[ln:final_sample]
         else:
             if self.training:
-                file_name = '/trainsplit.txt'
+                file_name = '/train.txt'
             else:
-                file_name = '/valsplit.txt'
+                file_name = '/val.txt'
             with open(self.base_path + file_name, 'r') as f:
                 list_file_nums = f.readlines()
-            list_files = ['0'*(6-len(l.strip())) + l.strip() for l in list_file_nums]
+            list_files = [ l.strip() for l in list_file_nums]
 
             if self.num_samples is None:
                 ln = int(len(list_files))
@@ -153,8 +153,8 @@ class DetectionDatasetLoader(DatasetLoader):
 
 
     def get_augmentation_parameters(self):
-        # if self.augment:
-        if False:
+        if self.augment:
+        # if False:
 
                     if np.random.random_sample() >= 0.0:
                         image_translate_x = random.randint(-50, 50)
@@ -181,7 +181,7 @@ class DetectionDatasetLoader(DatasetLoader):
                         translate_z = 0
 
                     if np.random.random_sample() >= 0.0:
-                        ang = np.random.random_sample() * 90 - 45
+                        ang = np.random.random_sample() * 60 - 30
                     else:
                         ang = 0
 

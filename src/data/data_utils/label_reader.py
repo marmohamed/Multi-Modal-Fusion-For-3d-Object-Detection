@@ -17,7 +17,7 @@ class LabelReader:
                     x_range=(0, 70), 
                     y_range=(-40, 40), 
                     z_range=(-2.5, 1), 
-                    size=(448//4, 512//4, 40//1), 
+                    size=(448//4, 512//4, 35//1), 
                     get_actual_dims=False, 
                     from_file=True, fliplr=False):
         self.label_path = label_path
@@ -180,17 +180,17 @@ class LabelReader:
                     dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
                     for i in range(len(locations))]
 
-            output = [[output[i][0], output[i][1], output[i][2] - dimension_width[i] - dimension_height[i]/2, 
-                    dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
-                    for i in range(len(locations))]
+            # output = [[output[i][0], output[i][1], output[i][2] - dimension_width[i] - dimension_height[i]/2, 
+            #         dimension_length[i], dimension_width[i], dimension_height[i], angles[i]] 
+            #         for i in range(len(locations))]
         else:
             output = [[-(locations[i][0] + -1*self.x_range[0]) * x_fac + self.size[0], -(locations[i][1] + -1*self.y_range[0]) * y_fac + self.size[1], -(locations[i][2] + -1*self.z_range[0]) * z_fac + self.size[2], 
                     dimension_length[i]*sl[i], dimension_width[i]*sw[i], dimension_height[i]*sh[i], angles[i]] 
                     for i in range(len(locations))]
 
-            output = [[output[i][0], output[i][1], output[i][2] - output[i][4] - output[i][5]/2, 
-                    output[i][3], output[i][4], output[i][5], output[i][6]] 
-                    for i in range(len(locations))]
+            # output = [[output[i][0], output[i][1], output[i][2] - output[i][4] - output[i][5]/2, 
+            #         output[i][3], output[i][4], output[i][5], output[i][6]] 
+            #         for i in range(len(locations))]
        
 
         if self.ang != 0:

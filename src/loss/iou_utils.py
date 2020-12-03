@@ -9,21 +9,21 @@ class IOUHelper:
 
     def get_iou(self, truth2, predictions2):
         truth = truth2[:, :, :, :, :8]
-        predictions = predictions2[:, :, :, :, :8]
+        predictions3 = predictions2[:, :, :, :, :8]
 
-        # mins = np.array([-0.5, -0.5, -.5, 0.7, 0.1, 0.1, -1.1, -1.1])
-        # maxs = np.array([0.5, 0.5, 0.5, 1.9, 0.75, 0.91, 1.1, 1.1])
-
-        # mins = np.expand_dims(mins, [0, 1, 2])
-        # maxs = np.expand_dims(maxs, [0, 1, 2])
+        mins = np.array([-0.5, -0.5, 0, 0.8, 0.3, 0.13, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
+        mins = np.expand_dims(mins, [0, 1, 2])
+        maxs = np.expand_dims(maxs, [0, 1, 2])
         
-        # truth = (truth + 1) / 2
-        # truth = truth * (maxs - mins) + mins 
-        # predictions = (predictions + 1) / 2
-        # predictions = predictions * (maxs - mins) + mins 
+        
+        truth3 = ((truth + 1) / 2) * (maxs - mins) + mins 
+        predictions4 = ((tf.nn.tanh(predictions3) + 1) / 2) * (maxs - mins) + mins 
 
-        size_true = tf.exp(truth[:, :, :, :, 3:6])
-        size_pred = tf.exp(predictions[:, :, :, :, 3:6])
+        size_true = tf.exp(truth3[:, :, :, :, 3:6])
+        size_pred = tf.exp(predictions4[:, :, :, :, 3:6])
+
+        predictions = tf.math.sigmoid(predictions3)-0.5
 
         x = truth[:, :, :, :, 0]
         x_ = predictions[:, :, :, :, 0]
@@ -70,21 +70,21 @@ class IOUHelper:
 
     def get_iou_loc(self, truth2, predictions2):
         truth = truth2[:, :, :, :, :8]
-        predictions = predictions2[:, :, :, :, :8]
+        predictions3 = predictions2[:, :, :, :, :8]
 
-        # mins = np.array([-0.5, -0.5, -.5, 0.7, 0.1, 0.1, -1.1, -1.1])
-        # maxs = np.array([0.5, 0.5, 0.5, 1.9, 0.75, 0.91, 1.1, 1.1])
-
-        # mins = np.expand_dims(mins, [0, 1, 2])
-        # maxs = np.expand_dims(maxs, [0, 1, 2])
+        mins = np.array([-0.5, -0.5, 0, 0.8, 0.3, 0.13, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
+        mins = np.expand_dims(mins, [0, 1, 2])
+        maxs = np.expand_dims(maxs, [0, 1, 2])
         
-        # truth = (truth + 1) / 2
-        # truth = truth * (maxs - mins) + mins 
-        # predictions = (predictions + 1) / 2
-        # predictions = predictions * (maxs - mins) + mins 
+        
+        truth3 = ((truth + 1) / 2) * (maxs - mins) + mins 
+        predictions4 = ((tf.nn.tanh(predictions3) + 1) / 2) * (maxs - mins) + mins 
 
-        size_true = tf.exp(truth[:, :, :, :, 3:6])
-        size_pred = tf.exp(predictions[:, :, :, :, 3:6])
+        size_true = tf.exp(truth3[:, :, :, :, 3:6])
+        size_pred = tf.exp(predictions4[:, :, :, :, 3:6])
+
+        predictions = tf.math.sigmoid(predictions3)-0.5
 
         x = truth[:, :, :, :, 0]
         x_ = predictions[:, :, :, :, 0]
@@ -125,21 +125,21 @@ class IOUHelper:
 
     def get_iou_dim(self, truth2, predictions2):
         truth = truth2[:, :, :, :, :8]
-        predictions = predictions2[:, :, :, :, :8]
+        predictions3 = predictions2[:, :, :, :, :8]
 
-        # mins = np.array([-0.5, -0.5, -.5, 0.7, 0.1, 0.1, -1.1, -1.1])
-        # maxs = np.array([0.5, 0.5, 0.5, 1.9, 0.75, 0.91, 1.1, 1.1])
+        mins = np.array([-0.5, -0.5, 0, 0.8, 0.3, 0.13, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
+        mins = np.expand_dims(mins, [0, 1, 2])
+        maxs = np.expand_dims(maxs, [0, 1, 2])
+        
+        
+        truth3 = ((truth + 1) / 2) * (maxs - mins) + mins 
+        predictions4 = ((tf.nn.tanh(predictions3) + 1) / 2) * (maxs - mins) + mins 
 
-        # mins = np.expand_dims(mins, [0, 1, 2])
-        # maxs = np.expand_dims(maxs, [0, 1, 2])
+        size_true = tf.exp(truth3[:, :, :, :, 3:6])
+        size_pred = tf.exp(predictions4[:, :, :, :, 3:6])
 
-        # truth = (truth + 1) / 2
-        # truth = truth * (maxs - mins) + mins 
-        # predictions = (predictions + 1) / 2
-        # predictions = predictions * (maxs - mins) + mins 
-
-        size_true = tf.exp(truth[:, :, :, :, 3:6])
-        size_pred = tf.exp(predictions[:, :, :, :, 3:6])
+        predictions = tf.math.sigmoid(predictions3)-0.5
 
         x = truth[:, :, :, :, 0]
         x_ = predictions[:, :, :, :, 0]

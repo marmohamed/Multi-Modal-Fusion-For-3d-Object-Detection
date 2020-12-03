@@ -10,7 +10,7 @@ import numpy as np
 
 # weight_init = tf_contrib.layers.variance_scaling_initializer()
 weight_init = tf.contrib.layers.xavier_initializer()
-weight_regularizer = tf_contrib.layers.l2_regularizer(5e-4)
+# weight_regularizer = tf_contrib.layers.l2_regularizer(5e-4)
 
 
 ##################################################################################
@@ -23,6 +23,8 @@ def ws_reg(kernel):
     # kernel_std = tf.math.reduce_std(kernel, axis=[0, 1, 2], keepdims=True, name='kernel_std')
     kernel_std = tf.keras.backend.std(kernel, axis=[0, 1, 2], keepdims=True)
     kernel = kernel / (kernel_std + 1e-5)
+
+weight_regularizer = ws_reg
 
 def conv(x, channels, kernel=4, stride=2, padding='SAME', use_bias=True, scope='conv_0', reuse=False, focal_init=None, separable=False, use_ws_reg=True):
     with tf.variable_scope(scope, reuse=reuse):

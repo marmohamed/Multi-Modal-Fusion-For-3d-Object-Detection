@@ -8,7 +8,7 @@ import tensorflow as tf
 from data.data_utils.data_reader import *
 
 
-def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(448, 512), output_size=(112, 128, 40)):
+def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size=(448, 512), output_size=(112, 128, 35)):
     ratio = input_size[0] // output_size[0]
     ratio = 1
     y_target = np.zeros((output_size[0], output_size[1], 2, 9), np.float32)
@@ -51,11 +51,10 @@ def get_target(labels, directions, anchors=np.array([3.9, 1.6, 1.5]), input_size
         label_i[:3] = (label_i[:3] - anchor[:3]) 
         label_i[3:6] = np.log(label_i[3:6])
 
+        mins = np.array([-0.5, -0.5, 0, 0.8, 0.3, 0.13, -1.1, -1.1])
+        maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
         
-        # mins = np.array([-0.5, -0.5, -0.5, 0.7, 0.1, 0.1, -1.1, -1.1])
-        # maxs = np.array([0.5, 0.5, 0.5, 1.9, 0.75, 0.91, 1.1, 1.1])
-        
-        # label_i = ((label_i - mins) / (maxs-mins)) * 2 - 1
+        label_i[3:6] = ((label_i[3:6] - mins[3:6]) / (maxs[3:6]-mins[3:6])) * 2 - 1
 
         y_target[x, y, k, :8] = label_i
         y_target[x, y, k, 8:9] = [1]
