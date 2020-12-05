@@ -21,15 +21,17 @@ def generate_corners(truth2, predictions2):
 
         predictions = tf.math.sigmoid(predictions3)-0.5
 
-        theta_pred = (tf.math.sigmoid(predictions[:, :, :, :, 6]) * np.pi/2) 
-        theta_truth = (truth[:, :, :, :, 6] + np.pi/4) 
+        theta_pred = (tf.math.sigmoid(predictions[:, :, :, :, 6]) * np.pi/2) + np.array([-np.pi/4, np.pi/4])
+        theta_truth = (truth[:, :, :, :, 6] + np.pi/4)  + np.array([-np.pi/4, np.pi/4])
 
        
        
         dx = predictions[:, :, :, :, 0]
         dy = predictions[:, :, :, :, 1]
-        cos_t = tf.math.cos(theta_pred)
-        sin_t = tf.math.sin(theta_pred)
+        # cos_t = tf.math.cos(theta_pred)
+        # sin_t = tf.math.sin(theta_pred)
+        cos_t = 1
+        sin_t = 0
         l = size_pred[:, :, :, :, 0]
         w = size_pred[:, :, :, :, 1]
 
@@ -65,10 +67,12 @@ def generate_corners(truth2, predictions2):
 
         dx = truth[:, :, :, :, 0]
         dy = truth[:, :, :, :, 1]
-        cos_t = tf.math.cos(theta_truth)
-        sin_t = tf.math.sin(theta_truth)
-        l = size_true[:, :, :, :, 0]
-        w = size_true[:, :, :, :, 1]
+        # cos_t = tf.math.cos(theta_truth)
+        # sin_t = tf.math.sin(theta_truth)
+        cos_t = 1
+        sin_t = 0
+        # l = size_true[:, :, :, :, 0]
+        # w = size_true[:, :, :, :, 1]
 
         x = tf.range(0, 70, 0.625)
         y = tf.range(-40, 40, 0.625)
@@ -103,7 +107,6 @@ def generate_corners(truth2, predictions2):
 
 
 def generate_corners_height(truth2, predictions2):
-
         truth = truth2[:, :, :, :, :8]
         predictions3 = predictions2[:, :, :, :, :8]
 
@@ -111,75 +114,34 @@ def generate_corners_height(truth2, predictions2):
         maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
         mins = np.expand_dims(mins, [0, 1, 2])
         maxs = np.expand_dims(maxs, [0, 1, 2])
-        
-        
+         
         truth3 = ((truth + 1) / 2) * (maxs - mins) + mins 
         predictions4 = ((tf.nn.tanh(predictions3) + 1) / 2) * (maxs - mins) + mins 
-
+        
         size_true = tf.exp(truth3[:, :, :, :, 3:6])
         size_pred = tf.exp(predictions4[:, :, :, :, 3:6])
 
         predictions = tf.math.sigmoid(predictions3)-0.5
 
-        theta_pred = (tf.math.sigmoid(predictions[:, :, :, :, 6]) * np.pi/2) 
-        theta_truth = (truth[:, :, :, :, 6] + np.pi/4) 
-
-       
        
         dx = predictions[:, :, :, :, 2]
-
         l = size_pred[:, :, :, :, 2]
-        # l = tf.expand_dims(l, -1)
-
-        x = np.arange(-2.5, 1, 0.1)
-        x = np.expand_dims(x, 0)
-        x = np.expand_dims(x, 1)
-        x = np.repeat(x, 112, 1)
-        x = np.expand_dims(x, 2)
-        x = np.repeat(x, 128, 2)
-        x = np.expand_dims(x, 3)
-        x = np.repeat(x, 2, 3)
-        # x = np.expand_dims(x, 4)
-        # dx = tf.expand_dims(dx, -1)
-        # centre_y = x + dx
         centre_y = 0.5 + dx
 
         down_z = centre_y - l/2 
         down_z = tf.expand_dims(down_z, axis=-1)
-        
         up_z = centre_y + l/2
         up_z = tf.expand_dims(up_z, axis=-1)
-       
-
         decoded_reg_pred = tf.concat([down_z, up_z], axis=-1)
 
-
         dx = truth[:, :, :, :, 2]
-        dy = truth[:, :, :, :, 1]
-        cos_t = 1
-        sin_t = 0
         l = size_true[:, :, :, :, 2]
-        # l = tf.expand_dims(l, -1)
-
-        x = np.arange(-2.5, 1, 0.1)
-        x = np.expand_dims(x, 0)
-        x = np.expand_dims(x, 1)
-        x = np.repeat(x, 112, 1)
-        x = np.expand_dims(x, 2)
-        x = np.repeat(x, 128, 2)
-        x = np.expand_dims(x, 3)
-        x = np.repeat(x, 2, 3)
-        # dx = tf.expand_dims(dx, -1)
-        # centre_y = x + dx
         centre_y = 0.5 + dx
 
         down_z = centre_y - l/2 
         down_z = tf.expand_dims(down_z, axis=-1)
-        
         up_z = centre_y + l/2
         up_z = tf.expand_dims(up_z, axis=-1)
-       
-
         decoded_reg_truth = tf.concat([down_z, up_z], axis=-1)
 
         return decoded_reg_truth, decoded_reg_pred

@@ -50,13 +50,18 @@ class LossCalculator(object):
         corners_loss = tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5), corners_losses, tf.zeros_like(truth[:, :, :, :, 8]))
         corners_loss = tf.reduce_sum(corners_loss) / c
 
-        # truth_height = tf.expand_dims(tf.math.reduce_max(truth[:, :, :, :, 8], axis=1), axis=1)
-        # corners_losses_height = get_corners_loss_height(truth, predictions)
-        # corners_loss_height = tf.where(tf.greater_equal(truth_height,0.5), corners_losses_height, tf.zeros_like(truth_height))
-        
-        # corners_loss_height = tf.reduce_sum(corners_loss_height) / c
 
-        # corners_loss_all = corners_loss + corners_loss_height
+        oclussion_loss_fn = lambda t, p: tf.where(tf.greater_equal(truth[:, :, :, :, 8],0.5),  tf.nn.softmax_cross_entropy_with_logits(labels=t, logits=p), tf.zeros_like(truth[:, :, :, :, 8]))
+        oclussion_loss = oclussion_loss_fn(truth[:, :, :, :, 9:13], predictions[:, :, :, :, 9:13])
+        oclussion_loss = tf.reduce_sum(oclussion_loss)/c
+
+        truth_height = tf.expand_dims(tf.math.reduce_max(truth[:, :, :, :, 8], axis=1), axis=1)
+        corners_losses_height = get_corners_loss_height(truth, predictions)
+        corners_loss_height = tf.where(tf.greater_equal(truth_height,0.5), corners_losses_height, tf.zeros_like(truth_height))
+        
+        corners_loss_height = tf.reduce_sum(corners_loss_height) / c
+
+        corners_loss_all = corners_loss + corners_loss_height
    
         return classification_loss,\
                 loc_reg_loss,\
@@ -64,6 +69,7 @@ class LossCalculator(object):
                 theta_reg_loss,\
                 dir_reg_loss,\
                 corners_loss,\
+                corners_loss_all,\
                 precision, recall, iou, iou_2d, iou_loc, iou_dim, accuracy_theta
 
 

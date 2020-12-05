@@ -181,7 +181,7 @@ class DetectionDatasetLoader(DatasetLoader):
                         translate_z = 0
 
                     if np.random.random_sample() >= 0.0:
-                        ang = np.random.random_sample() * 60 - 30
+                        ang = np.random.random_sample() * 10 - 5
                     else:
                         ang = 0
 
@@ -296,8 +296,8 @@ class DetectionDatasetLoader(DatasetLoader):
                     if np.random.random_sample() >= 0.5:
                         lidar_image = self.apply_mask_lidar(lidar_image)
 
-                _, label, directions = data_reader_obj.label_reader.read_label()
-                label = get_target(label, directions,  anchors=anchors)
+                _, label, truncated, occlusion = data_reader_obj.label_reader.read_label()
+                label = get_target(label, truncated, occlusion, anchors=anchors)
                  
                 yield(camera_image, lidar_image, label)
 

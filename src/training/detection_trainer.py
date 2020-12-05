@@ -43,6 +43,7 @@ class DetectionTrainer(Trainer):
         self.base_lr = 0.0001
         self.count_not_best_cls = 0
         self.count_not_best_loc = 0
+        self.count_not_best_dir = 0
         self.count_not_best_dim = 0
         self.count_not_best_theta = 0
         
@@ -97,12 +98,14 @@ class DetectionTrainer(Trainer):
         self.last_loss_loc = float('inf')
         self.last_loss_dim = float('inf')
         self.last_loss_theta = float('inf')
+        self.last_loss_dir = float('inf')
         self.use_clr = self.branch_params['use_clr']
 
         self.cls_losses = []
         self.dim_losses = []
         self.loc_losses = []
         self.theta_losses = []
+        self.dir_losses = []
         debug = False
         
        
@@ -116,6 +119,7 @@ class DetectionTrainer(Trainer):
 
                 self.weight_cls = 1
                 self.weight_loc = 1
+                self.weight_dir = 1
                 self.weight_dim = 1
                 self.weight_theta = 1
                 self.K = 4
@@ -180,6 +184,7 @@ class DetectionTrainer(Trainer):
                                 feed_dict[self.model.weight_loc] = self.weight_loc
                                 feed_dict[self.model.weight_dim] = self.weight_dim
                                 feed_dict[self.model.weight_theta] = self.weight_theta
+                                feed_dict[self.model.weight_dir] = self.weight_dir
 
                                 loss, _, classification_loss, regression_loss, loc_loss, dim_loss,\
                                     theta_loss, summary, theta_accuracy, dir_loss,\
@@ -254,7 +259,7 @@ class DetectionTrainer(Trainer):
                            
                             print("Model saved in path: %s" % save_path)
 
-                            self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, e, True)
+                            self.__save_summary(sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_dir_loss, epoch_theta_loss, e, True)
                             
                          
                             print('Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(e,\
@@ -297,21 +302,23 @@ class DetectionTrainer(Trainer):
 
     def get_lr(self, epoch):
      
-        if self.count_not_best % 3 == 0 and self.count_not_best > 0:
-            self.base_lr *= 0.7
+        # if self.count_not_best % 3 == 0 and self.count_not_best > 0:
+        #     self.base_lr *= 0.7
             # self.K *= 0.8
 
-        if epoch >= 25:
-            self.base_lr *= 0.1
+        # if epoch == 25:
+        #     self.base_lr *= 0.1
 
-        # if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
-        #     self.weight_cls *= 0.8
-        # if self.count_not_best_dim % 3 == 0 and self.count_not_best_dim > 0:
-        #     self.weight_dim *= 0.8
-        # if self.count_not_best_loc % 3 == 0 and self.count_not_best_loc > 0:
-        #     self.weight_loc *= 0.8
-        # if self.count_not_best_theta % 3 == 0 and self.count_not_best_theta > 0:
-        #     self.weight_theta *= 0.8
+        if self.count_not_best_cls % 3 == 0 and self.count_not_best_cls > 0:
+            self.weight_cls *= 0.5
+        if self.count_not_best_dim % 3 == 0 and self.count_not_best_dim > 0:
+            self.weight_dim *= 0.5
+        if self.count_not_best_loc % 3 == 0 and self.count_not_best_loc > 0:
+            self.weight_loc *= 0.5
+        if self.count_not_best_dir % 3 == 0 and self.count_not_best_dir > 0:
+            self.weight_dir *= 0.5
+        if self.count_not_best_theta % 3 == 0 and self.count_not_best_theta > 0:
+            self.weight_theta *= 0.5
 
         # if len(self.cls_losses) >= 2:
         #   self.cls_losses = self.cls_losses[::-1][:2][::-1]
@@ -366,6 +373,7 @@ class DetectionTrainer(Trainer):
                 feed_dict[self.model.weight_loc] = 1
                 feed_dict[self.model.weight_dim] = 1
                 feed_dict[self.model.weight_theta] = 1
+                feed_dict[self.model.weight_dir] = 1
                 
                 all_loss, classification_loss, regression_loss, loc_loss_, dim_loss_, theta_loss_,\
                     iou_, iou_2d_, iou_dim_, iou_loc_, precision_, recall_, theta_diff, dir_loss_ = sess.run([self.model.model_loss, 
@@ -403,12 +411,13 @@ class DetectionTrainer(Trainer):
         except (tf.errors.OutOfRangeError, StopIteration):
             pass
         finally:
-            self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, theta_loss, epoch, False)
+            self.__save_summary(sess, loss, cls_loss, reg_loss, dim_loss, loc_loss, dir_loss, theta_loss, epoch, False)
 
             self.cls_losses.append(np.mean(np.array(cls_loss).flatten()))
             self.dim_losses.append(np.mean(np.array(dim_loss).flatten()))
             self.loc_losses.append(np.mean(np.array(loc_loss).flatten()))
             self.theta_losses.append(np.mean(np.array(theta_loss).flatten()))
+            self.dir_losses.append(np.mean(np.array(dir_loss).flatten()))
 
             print('Validation - Epoch {0}: Loss = {1}, classification loss = {2}, regression_loss = {3}'.format(epoch,\
                                 np.mean(np.array(loss).flatten()),\
@@ -512,16 +521,17 @@ class DetectionTrainer(Trainer):
         
 
 
-    def __save_summary(self, sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_theta_loss, epoch, training=True, **kwargs):
-        model_loss_summary, cls_loss_summary, reg_loss_summary, dim_loss_summary, loc_loss_summary, theta_loss_summary = sess.run([self.model.model_loss_summary,\
+    def __save_summary(self, sess, epoch_loss, epoch_cls_loss, epoch_reg_loss, epoch_dim_loss, epoch_loc_loss, epoch_dir_loss, epoch_theta_loss, epoch, training=True, **kwargs):
+        model_loss_summary, cls_loss_summary, reg_loss_summary, dim_loss_summary, loc_loss_summary, dir_loss_summary, theta_loss_summary = sess.run([self.model.model_loss_summary,\
                                                                          self.model.cls_loss_summary, self.model.reg_loss_summary,
                                                                          self.model.dim_loss_summary, self.model.loc_loss_summary,
-                                                                         self.model.theta_loss_summary], 
+                                                                         self.model.dir_loss_summary, self.model.theta_loss_summary], 
                                                                         {self.model.model_loss_placeholder: np.mean(np.array(epoch_loss).flatten()),
                                                                          self.model.cls_loss_placeholder: np.mean(np.array(epoch_cls_loss).flatten()),
                                                                          self.model.reg_loss_placeholder: np.mean(np.array(epoch_reg_loss).flatten()),
                                                                          self.model.dim_loss_placeholder: np.mean(np.array(epoch_dim_loss).flatten()),
                                                                          self.model.loc_loss_placeholder: np.mean(np.array(epoch_loc_loss).flatten()),
+                                                                         self.model.dir_loss_placeholder: np.mean(np.array(epoch_dir_loss).flatten()),
                                                                          self.model.theta_loss_placeholder: np.mean(np.array(epoch_theta_loss).flatten()),
                                                                          })
 
@@ -535,6 +545,7 @@ class DetectionTrainer(Trainer):
         writer.add_summary(reg_loss_summary, epoch)
         writer.add_summary(dim_loss_summary, epoch)
         writer.add_summary(loc_loss_summary, epoch)
+        writer.add_summary(dir_loss_summary, epoch)
         writer.add_summary(theta_loss_summary, epoch)
 
         if not training:
@@ -565,6 +576,11 @@ class DetectionTrainer(Trainer):
                 self.count_not_best_loc = 0
             else:
                 self.count_not_best_loc += 1
+            if self.last_loss_dir > np.mean(np.array(epoch_dir_loss)):
+                self.last_loss_dir = np.mean(np.array(epoch_dir_loss).flatten())
+                self.count_not_best_dir = 0
+            else:
+                self.count_not_best_dir += 1
 
             if self.last_loss_theta > np.mean(np.array(epoch_theta_loss)):
                 self.last_loss_theta = np.mean(np.array(epoch_theta_loss).flatten())

@@ -8,8 +8,8 @@ class MetricsHelper:
 
     def get_precision_recall_loss(self, truth, predictions):
 
-        target_tensor = truth[:, :, :, :, -1]
-        pred_sigmoid = tf.math.sigmoid(predictions[:, :, :, :, -1])
+        target_tensor = truth[:, :, :, :, 8]
+        pred_sigmoid = tf.math.sigmoid(predictions[:, :, :, :, 8])
 
         
         tp = tf.reduce_sum(pred_sigmoid * target_tensor)
@@ -29,10 +29,10 @@ class MetricsHelper:
         return recall_neg, recall_pos
 
     def get_precision_recall(self, truth, predictions):
-        mask_true = tf.cast(tf.greater_equal(truth[:, :, :, :, -1],0.5), tf.int8)
-        mask_not_true = tf.cast(tf.less(truth[:, :, :, :, -1],0.5), tf.int8)
-        mask_pred = tf.cast(tf.greater_equal(tf.math.sigmoid(predictions[:, :, :, :, -1]),0.5), tf.int8)
-        mask_not_pred = tf.cast(tf.less(tf.math.sigmoid(predictions[:, :, :, :, -1]),0.5), tf.int8)
+        mask_true = tf.cast(tf.greater_equal(truth[:, :, :, :, 8],0.5), tf.int8)
+        mask_not_true = tf.cast(tf.less(truth[:, :, :, :, 8],0.5), tf.int8)
+        mask_pred = tf.cast(tf.greater_equal(tf.math.sigmoid(predictions[:, :, :, :, 8]),0.5), tf.int8)
+        mask_not_pred = tf.cast(tf.less(tf.math.sigmoid(predictions[:, :, :, :, 8]),0.5), tf.int8)
 
         masks_and = tf.cast(tf.bitwise.bitwise_and(mask_true, mask_pred), tf.float32)
         tp = tf.math.count_nonzero(masks_and, dtype=tf.float32)
@@ -60,8 +60,8 @@ class MetricsHelper:
         Returns:
             cost (scalar Tensor): value of the cost function for the batch
         """
-        y = truth[:, :, :, :, -1]
-        y_hat = tf.math.sigmoid(predictions[:, :, :, :, -1])
+        y = truth[:, :, :, :, 8]
+        y_hat = tf.math.sigmoid(predictions[:, :, :, :, 8])
         y = tf.cast(y, tf.float32)
         y_hat = tf.cast(y_hat, tf.float32)
         tp = tf.reduce_sum(y_hat * y)
@@ -102,7 +102,7 @@ class MetricsHelper:
         theta_truth = (truth[:, :, :, :, 6] + np.pi/4) * 57.2958
         theta_diff = tf.abs(theta_pred-theta_truth)
         theta_diff = tf.where(tf.greater_equal(truth2[:, :, :, :, 8],0.5), theta_diff, tf.zeros_like(truth2[:, :, :, :, 8]))
-        true_count_theta = tf.math.count_nonzero(truth2[:, :, :, :, -1], dtype=tf.float32)
+        true_count_theta = tf.math.count_nonzero(truth2[:, :, :, :, 8], dtype=tf.float32)
         accuracy_theta = tf.reduce_sum(theta_diff) / (true_count_theta + 1e-8)
         
         

@@ -60,6 +60,8 @@ class LabelReader:
             return list(map(lambda x: x[index], lines))
         
         classes = np.array(get_parameter(0))
+        truncated = np.array(get_parameter(1)).astype(float)
+        occlusion = np.array(get_parameter(2)).astype(int)
         dimension_height = np.array(get_parameter(8)).astype(float)
         dimension_width = np.array(get_parameter(9)).astype(float)
         dimension_length = np.array(get_parameter(10)).astype(float)
@@ -67,7 +69,6 @@ class LabelReader:
         location_y = np.array(get_parameter(12)).astype(float)
         location_z = np.array(get_parameter(13)).astype(float)
         angles = np.array(get_parameter(14)).astype(float)
-        directions = np.array(angles>= 0).astype(float)
         
         calib_data = self.calib_reader.read_calib()
 
@@ -100,7 +101,8 @@ class LabelReader:
             location_z = location_z[indx]
             angles = angles[indx]
             classes = classes[indx]
-            directions = directions[indx]
+            truncated = truncated[indx]
+            occlusion = occlusion[indx]
 
         points = []
         sl = []
@@ -215,7 +217,7 @@ class LabelReader:
         output = list(filter(lambda point: 0 <= point[0] < self.size[0] and 0 <= point[1] < self.size[1] and 0 <= point[2] < self.size[2] , output))
         output = np.array(output)
 
-        return points, output, directions
+        return points, output, truncated, occlusion
 
 
     def project_rect_to_velo2(self, rot, tr, sc, pts_3d_rect, RO, Tr_velo_to_cam):
