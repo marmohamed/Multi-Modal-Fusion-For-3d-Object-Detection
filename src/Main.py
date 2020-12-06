@@ -1,4 +1,4 @@
-from model import *
+from model_fusion import *
 from Trainer import *
 import argparse
 
@@ -6,7 +6,7 @@ def main(args):
     print('Building the model')
 
     params = {
-        'fusion': False,
+        'fusion': True,
         # 'train_loc': 1,
         # 'train_dim': 0,
         # 'train_theta': 0,

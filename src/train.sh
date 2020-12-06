@@ -25,9 +25,9 @@ num_summary_images_detection=5
 
 train_kitti=false
 train_city=false
-train_bev=true
+train_bev=false
 train_fusion=false
-train_end_to_end=false
+train_end_to_end=true
 train_bev_lr_find=false
 
 
