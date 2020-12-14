@@ -314,13 +314,32 @@ class Model(object):
                         self.weight_dir = tf.placeholder(tf.float32, shape=())
 
 
+                        # self.regression_loss_bev = 0
+                        # if self.params['train_loc'] == 1:
+                        #     self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
+                        # if self.params['train_dim'] == 1:
+                        #     self.regression_loss_bev += 1 * self.weight_dim * self.dim_reg_loss 
+                        # if self.params['train_theta'] == 1:
+                        #     self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
+
+                        
+                        # self.model_loss_bev = 0
+                        # if self.params['train_cls']:
+                        #     self.model_loss_bev +=  1 * self.weight_cls * self.classification_loss
+                        # if self.params['train_reg']:
+                        #     self.model_loss_bev +=  1 * self.regression_loss_bev
+
+                        # self.model_loss_bev += 1 * (self.weight_loc + self.weight_dim)  * self.corners_loss
+                        # self.model_loss_bev += 0.1 * self.weight_dir * self.dir_reg_loss
+                        # self.model_loss_bev += 0.5 * self.oclussion_loss
+
                         self.regression_loss_bev = 0
                         if self.params['train_loc'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_loc * self.loc_reg_loss 
+                            self.regression_loss_bev += 10 * self.weight_loc * self.loc_reg_loss 
                         if self.params['train_dim'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_dim * self.dim_reg_loss 
+                            self.regression_loss_bev += 10 * self.weight_dim * self.dim_reg_loss 
                         if self.params['train_theta'] == 1:
-                            self.regression_loss_bev += 1 * self.weight_theta * self.theta_reg_loss 
+                            self.regression_loss_bev += 5 * self.weight_theta * self.theta_reg_loss 
 
                         
                         self.model_loss_bev = 0
@@ -329,8 +348,8 @@ class Model(object):
                         if self.params['train_reg']:
                             self.model_loss_bev +=  1 * self.regression_loss_bev
 
-                        self.model_loss_bev += 1 * (self.weight_loc + self.weight_dim)  * self.corners_loss
-                        self.model_loss_bev += 0.1 * self.weight_dir * self.dir_reg_loss
+                        self.model_loss_bev += 5 * (self.weight_loc + self.weight_dim)  * self.corners_loss
+                        self.model_loss_bev += self.weight_dir * self.dir_reg_loss
                         self.model_loss_bev += 0.5 * self.oclussion_loss
 
 
