@@ -628,7 +628,7 @@ class EndToEndDetectionTrainer(DetectionTrainer):
         self.branch_params = {
             'opt': self.model.train_op,
             'train_fusion_rgb': True,
-            'lr': 1e-4,
+            'lr': 5e-4,
             'step_size': 2 * 3682,
             'learning_rate': 1e-6,
             'max_lr': 1e-4,
