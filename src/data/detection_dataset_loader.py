@@ -153,8 +153,8 @@ class DetectionDatasetLoader(DatasetLoader):
 
 
     def get_augmentation_parameters(self):
-        # if self.augment:
-        if False:
+        if self.augment:
+        # if False:
 
                     if np.random.random_sample() >= 0.0:
                         image_translate_x = random.randint(-50, 50)
