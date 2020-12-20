@@ -51,8 +51,10 @@ def get_target(labels, truncated, occlusion, anchors=np.array([3.9, 1.6, 1.5]), 
         label_i[:3] = (label_i[:3] - anchor[:3]) 
         label_i[3:6] = np.log(label_i[3:6])
 
-        mins = np.array([-0.5, -0.5, 0, 0.8, 0.3, 0.13, -1.1, -1.1])
-        maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
+        # mins = np.array([-0.5, -0.5, 0, 0.8, 0.3, 0.13, -1.1, -1.1])
+        # maxs = np.array([0.5, 0.5, 1, 2.6, 1.4, 0.82, 1.1, 1.1])
+        mins = np.array([0, 0, 0, -0.1, -0.1, -0.1, -1.1, -1.1])
+        maxs = np.array([0, 0, 0, 3, 2, 2, 1.1, 1.1])
         
         label_i[3:6] = ((label_i[3:6] - mins[3:6]) / (maxs[3:6]-mins[3:6])) * 2 - 1
         z = [0, 0, 0, 0]
