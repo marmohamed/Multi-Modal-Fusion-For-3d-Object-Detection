@@ -446,7 +446,7 @@ class Model(object):
                 self.loc_loss_placeholder = tf.placeholder(dtype=tf.float32, shape=[])
                 self.dir_loss_placeholder = tf.placeholder(dtype=tf.float32, shape=[])
                 self.loc_loss_summary = tf.summary.scalar('loc_loss', self.loc_loss_placeholder)
-                self.dir_loss_summary = tf.summary.scalar('loc_loss', self.dir_loss_placeholder)
+                self.dir_loss_summary = tf.summary.scalar('dir_loss', self.dir_loss_placeholder)
                 self.dim_loss_placeholder = tf.placeholder(dtype=tf.float32, shape=[])
                 self.dim_loss_summary = tf.summary.scalar('dim_loss', self.dim_loss_placeholder)
 
