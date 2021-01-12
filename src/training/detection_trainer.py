@@ -121,7 +121,7 @@ class DetectionTrainer(Trainer):
                 self.weight_loc = 1
                 self.weight_dir = 1
                 self.weight_dim = 1
-                self.weight_theta = 1
+                self.weight_theta =1
                 self.K = 4
 
                 with tf.Session(config=config) as sess:
