@@ -242,6 +242,91 @@ class DetectionDatasetLoader(DatasetLoader):
 
         return rot, tr, sc, image_translate_x, image_translate_y, ang, fliplr
 
+
+
+    def get_augmentation_parameters_aligned(self):
+        if self.augment:
+        # if False:
+
+                    if np.random.random_sample() >= 0.0:
+                        translate_x = np.random.random_sample() * 20 - 10
+                    else:
+                        translate_x = 0
+                    if np.random.random_sample() >= 0.0:
+                        # translate_y = random.randint(-15, 15)
+                        translate_y = np.random.random_sample() * 20 - 10
+                    else:
+                        translate_y = 0
+
+                    if np.random.random_sample() >= 0.0:
+                        translate_z = random.random() - 0.5
+                    else:
+                        translate_z = 0
+
+                    if np.random.random_sample() >= 0.0:
+                        ang = np.random.random_sample() * 10 - 5
+                    else:
+                        ang = 0
+
+                    r = R.from_rotvec(np.radians(ang) * np.array([0, 0, 1]))
+                    rot = r.as_dcm()
+                    rot = np.append(rot, np.array([[0,0,0]]), axis=0)
+                    rot = np.append(rot, np.array([[0],[0],[0],[1]]), axis=1)
+
+                    tr_x = translate_x
+                    tr_y = translate_y
+                    tr_z = translate_z
+                    image_translate_x = translate_x
+                    image_translate_y = translate_y
+                    image_translate_z = translate_z
+                    tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
+                    
+                    sc_x = 1
+                    sc_y = 1
+                    sc_z = 1   
+
+                    # if np.random.random_sample() >= 0.0:
+                    #    sc_x += ((random.random() * 2) - 1.) / 10.
+
+                    # if np.random.random_sample() >= 0.0:
+                    #    sc_y  += ((random.random() * 2) - 1.) / 10.
+                    
+
+                    sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])
+
+                    fliplr = np.random.random_sample() >= 0.5
+
+        else:
+                    image_translate_x = 0
+                    image_translate_y = 0
+                    image_translate_z = 0
+
+                    translate_x = 0
+                    translate_y = 0
+                    translate_z = 0
+                    ang = 0
+
+                    r = R.from_rotvec(np.radians(0) * np.array([0, 0, 1]))
+                    rot = r.as_dcm()
+                    rot = np.append(rot, np.array([[0,0,0]]), axis=0)
+                    rot = np.append(rot, np.array([[0],[0],[0],[1]]), axis=1)
+
+                    tr_x = 0
+                    tr_y = 0
+                    tr_z = 0
+                    tr = np.array([[tr_x], [tr_y], [tr_z], [0]])
+
+                    sc_x = 1
+                    sc_y = 1
+                    sc_z = 1
+                    sc = np.array([[sc_x, 0, 0, 0], [0, sc_y, 0, 0], [0, 0, sc_z, 0], [0, 0, 0, 1]])
+
+                    fliplr = False
+
+        return rot, tr, sc, image_translate_x, image_translate_y, image_translate_z, ang, fliplr
+
+
+
     def __data_generator(self, base_path, image_size, lidar_size, anchors, 
                         list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths, 
                         training=True):
@@ -259,9 +344,9 @@ class DetectionDatasetLoader(DatasetLoader):
 
         for camera_path, lidar_path, label_path, calib_path in zip(list_camera_paths, list_lidar_paths, list_label_paths, list_calib_paths):
                 
-                rot, tr, sc, image_translate_x, image_translate_y, ang, fliplr = self.get_augmentation_parameters()
+                rot, tr, sc, image_translate_x, image_translate_y, image_translate_z, ang, fliplr = self.get_augmentation_parameters_aligned()
                 
-                data_reader_obj = DataReader(camera_path, calib_path, label_path, lidar_path, rot, sc, tr, ang, image_translate_x, image_translate_y, fliplr=fliplr)
+                data_reader_obj = DataReader(camera_path, calib_path, label_path, lidar_path, rot, sc, tr, ang, image_translate_x, image_translate_y, image_translate_z, fliplr=fliplr)
 
                 camera_image = data_reader_obj.read_image()
                 lidar_image = data_reader_obj.lidar_reader.read_lidar()

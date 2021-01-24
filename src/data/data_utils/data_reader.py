@@ -17,7 +17,7 @@ class DataReader:
 
     def __init__(self, image_path, calib_path, label_path, lidar_path, 
                     rot, sc, tr, ang, 
-                    translate_x, translate_y, 
+                    translate_x, translate_y, translate_z=0., 
                     get_actual_dims=False, 
                     from_file=True, fliplr=False):
         self.image_path = image_path
@@ -28,7 +28,7 @@ class DataReader:
         self.sc = sc
         self.tr = tr
         self.lidar_reader = LidarReader(lidar_path, calib_path, image_path, rot, tr, sc, fliplr=fliplr)
-        self.image_reader = ImageReader(image_path, translate_x, translate_y)
+        self.image_reader = ImageReader(image_path, translate_x, translate_y, translate_z=translate_z, ang=ang, fliplr=fliplr)
         self.calib_reader = CalibReader(calib_path)
         self.label_reader = LabelReader(label_path, calib_path, rot, tr, sc, ang, self.calib_reader,
                                         get_actual_dims=get_actual_dims, 
