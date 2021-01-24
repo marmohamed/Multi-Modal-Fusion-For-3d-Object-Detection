@@ -138,7 +138,6 @@ def AttentionFusionLayerFunc3(original_rgb_features, fv_lidar_features, train_fu
         original_rgb_features2 = batch_norm(original_rgb_features2, is_training=is_training, scope='final_bn_between_modalities_rgb')
         original_rgb_features2 = relu(original_rgb_features2)
         # original_rgb_features2 = dropout(original_rgb_features2, rate=0.5, scope='dropout_rgb')
-        
 
     return original_lidar_feats2, original_rgb_features2
 
