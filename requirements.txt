@@ -5,4 +5,4 @@ matplotlib==2.2.3
 # ~umpy==1.16.4
 torchvision==0.2.1
 opencv_python==4.1.1.26
-numpy==1.18.1
+numpy==1.22.0
